@@ -288,9 +288,7 @@
         <option value="8">Setembro</option><option value="9">Outubro</option>
         <option value="10">Novembro</option><option value="11">Dezembro</option>
       </select>
-      <select id="sel-ano">
-        <option>2025</option><option>2026</option>
-      </select>
+      <select id="sel-ano"></select>
     </div>
     <button class="btn-icon" id="btn-refresh" title="Atualizar">↻</button>
     <button class="btn-icon" id="dark-toggle" title="Tema">🌙</button>
@@ -651,9 +649,14 @@ let dadosDespesas = [];   // [{data,dataParts,categoria,descricao,fornecedor,val
 let mesSel = new Date().getMonth();
 let anoSel = new Date().getFullYear();
 
-// Inicializa selects com mês/ano atual
+// Preenche seletor de ano: 2025 até ano atual + 2
+const selAno = document.getElementById('sel-ano');
+for (let y = 2025; y <= anoSel + 2; y++) {
+  const o = new Option(y, y);
+  if (y === anoSel) o.selected = true;
+  selAno.add(o);
+}
 document.getElementById('sel-mes').value = mesSel;
-document.getElementById('sel-ano').value = anoSel;
 
 // ── Utilitários ───────────────────────────────────────────────
 function moeda(v) {

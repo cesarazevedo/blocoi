@@ -704,7 +704,7 @@ let anoSel = new Date().getFullYear();
 
 // Preenche seletor de ano: 2025 até ano atual + 2
 const selAno = document.getElementById('sel-ano');
-for (let y = 2025; y <= anoSel + 2; y++) {
+for (let y = 2025; y <= anoSel; y++) {
   const o = new Option(y, y);
   if (y === anoSel) o.selected = true;
   selAno.add(o);

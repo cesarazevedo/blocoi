@@ -243,6 +243,36 @@
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 50px; }
 
+    /* ── Saldo em Caixa ── */
+    #caixa-card {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      border-radius: var(--radius);
+      padding: 20px 28px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      box-shadow: 0 4px 20px rgba(102,126,234,0.35);
+    }
+    .caixa-left { flex-shrink: 0; }
+    .caixa-label {
+      font-size: 0.72rem; font-weight: 700; color: rgba(255,255,255,0.7);
+      text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;
+    }
+    .caixa-value {
+      font-size: 2.2rem; font-weight: 800; color: #fff; line-height: 1;
+    }
+    .caixa-sub { font-size: 0.78rem; color: rgba(255,255,255,0.7); margin-top: 6px; }
+    .caixa-right {
+      display: flex; gap: 32px;
+      border-left: 1px solid rgba(255,255,255,0.2);
+      padding-left: 28px;
+    }
+    .caixa-item { display: flex; flex-direction: column; gap: 4px; }
+    .caixa-item-label { font-size: 0.72rem; color: rgba(255,255,255,0.65); }
+    .caixa-item-value { font-size: 1rem; font-weight: 700; color: #fff; }
+
     @media (max-width: 900px) {
       .sidebar { width: 180px; }
       .kpi-row { grid-template-columns: repeat(2,1fr); }
@@ -323,24 +353,47 @@
         <h2>Dashboard</h2>
         <p id="dash-subtitle">Resumo financeiro</p>
       </div>
+      <!-- Card de caixa acumulado -->
+      <div id="caixa-card">
+        <div class="caixa-left">
+          <div class="caixa-label">Saldo em Caixa</div>
+          <div class="caixa-value" id="kpi-caixa">—</div>
+          <div class="caixa-sub" id="kpi-caixa-sub">—</div>
+        </div>
+        <div class="caixa-right">
+          <div class="caixa-item">
+            <span class="caixa-item-label">↑ Receitas acumuladas</span>
+            <span class="caixa-item-value" id="kpi-caixa-rec">—</span>
+          </div>
+          <div class="caixa-item">
+            <span class="caixa-item-label">↓ Despesas acumuladas</span>
+            <span class="caixa-item-value" id="kpi-caixa-desp">—</span>
+          </div>
+          <div class="caixa-item">
+            <span class="caixa-item-label">📅 Saldo do mês</span>
+            <span class="caixa-item-value" id="kpi-caixa-mes">—</span>
+          </div>
+        </div>
+      </div>
+
       <div class="kpi-row">
-        <div class="kpi-card" style="--accent:var(--primary)">
-          <div class="kpi-icon">💰</div>
-          <div class="kpi-label">Saldo do Mês</div>
+        <div class="kpi-card" style="--accent:var(--c-receitas)">
+          <div class="kpi-icon">⬆️</div>
+          <div class="kpi-label">Receitas do Mês</div>
           <div class="kpi-value" id="kpi-saldo">—</div>
           <div class="kpi-sub" id="kpi-saldo-sub">—</div>
         </div>
-        <div class="kpi-card" style="--accent:var(--c-receitas)">
-          <div class="kpi-icon">⬆️</div>
-          <div class="kpi-label">Total Receitas</div>
-          <div class="kpi-value" id="kpi-receitas">—</div>
-          <div class="kpi-sub" id="kpi-receitas-sub">—</div>
-        </div>
         <div class="kpi-card" style="--accent:var(--c-despesas)">
           <div class="kpi-icon">⬇️</div>
-          <div class="kpi-label">Total Despesas</div>
+          <div class="kpi-label">Despesas do Mês</div>
           <div class="kpi-value" id="kpi-despesas">—</div>
           <div class="kpi-sub" id="kpi-despesas-sub">—</div>
+        </div>
+        <div class="kpi-card" style="--accent:var(--primary)">
+          <div class="kpi-icon">💰</div>
+          <div class="kpi-label">Saldo do Mês</div>
+          <div class="kpi-value" id="kpi-receitas">—</div>
+          <div class="kpi-sub" id="kpi-receitas-sub">—</div>
         </div>
         <div class="kpi-card" style="--accent:var(--c-inadimplencia)">
           <div class="kpi-icon">⚠️</div>
@@ -751,17 +804,30 @@ function renderDashboard() {
   const despMes = despMesAtual(dadosDespesas, mesSel, anoSel);
   const totalDesp = despMes.reduce((s, d) => s + d.valor, 0);
 
-  const saldo = recMes - totalDesp;
+  const saldoMes = recMes - totalDesp;
   const inadimpl = total > 0 ? ((total - pagas) / total * 100) : 0;
 
-  set('kpi-saldo', moeda(saldo));
-  set('kpi-saldo-sub', saldo >= 0 ? '✓ Saldo positivo' : '⚠ Saldo negativo');
-  set('kpi-receitas', moeda(recMes));
-  set('kpi-receitas-sub', `${pagas} de ${total} unidades`);
-  set('kpi-despesas', moeda(totalDesp));
-  set('kpi-despesas-sub', `${despMes.length} lançamento(s)`);
-  set('kpi-inad', inadimpl.toFixed(1) + '%');
-  set('kpi-inad-sub', `${total - pagas} unidade(s) em aberto`);
+  // ── Saldo em caixa acumulado (Jan até mês selecionado) ──
+  const recAcum  = dadosReceitas.reduce((s, r) => s + r.valores.slice(0, mesSel + 1).reduce((a,b) => a+b, 0), 0);
+  const despAcum = dadosDespesas
+    .filter(d => d.dataParts && parseInt(d.dataParts[2]) === anoSel && parseInt(d.dataParts[1]) - 1 <= mesSel)
+    .reduce((s, d) => s + d.valor, 0);
+  const saldoCaixa = recAcum - despAcum;
+
+  set('kpi-caixa', moeda(saldoCaixa));
+  set('kpi-caixa-sub', `Jan a ${MESES[mesSel]}/${anoSel} · ${saldoCaixa >= 0 ? '✓ positivo' : '⚠ negativo'}`);
+  set('kpi-caixa-rec',  moeda(recAcum));
+  set('kpi-caixa-desp', moeda(despAcum));
+  set('kpi-caixa-mes',  moeda(saldoMes));
+
+  set('kpi-saldo',       moeda(recMes));
+  set('kpi-saldo-sub',   `${pagas} de ${total} unidades pagas`);
+  set('kpi-despesas',    moeda(totalDesp));
+  set('kpi-despesas-sub',`${despMes.length} lançamento(s)`);
+  set('kpi-receitas',    moeda(saldoMes));
+  set('kpi-receitas-sub', saldoMes >= 0 ? '✓ Positivo' : '⚠ Negativo');
+  set('kpi-inad',        inadimpl.toFixed(1) + '%');
+  set('kpi-inad-sub',    `${total - pagas} unidade(s) em aberto`);
   set('badge-inad', total - pagas);
 
   // Últimos lançamentos: mistura receitas pagas + despesas do mês

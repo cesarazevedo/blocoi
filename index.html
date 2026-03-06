@@ -13,7 +13,6 @@
       --c-despesas:      #f7971e;
       --c-inadimplencia: #ff758c;
       --c-fundo:         #4facfe;
-      --c-comunicados:   #a78bfa;
       --bg:        #f0f4f8;
       --surface:   #ffffff;
       --border:    #e2e8f0;
@@ -137,7 +136,6 @@
     .nav-btn.active[data-tab="despesas"]      { color: var(--c-despesas);     background: rgba(247,151,30,.09);   border-left-color: var(--c-despesas); }
     .nav-btn.active[data-tab="inadimplencia"] { color: var(--c-inadimplencia);background: rgba(255,117,140,.09);  border-left-color: var(--c-inadimplencia); }
     .nav-btn.active[data-tab="fundo"]         { color: var(--c-fundo);        background: rgba(79,172,254,.09);   border-left-color: var(--c-fundo); }
-    .nav-btn.active[data-tab="comunicados"]   { color: var(--c-comunicados);  background: rgba(167,139,250,.09);  border-left-color: var(--c-comunicados); }
     .nav-badge {
       margin-left: auto; background: var(--c-inadimplencia); color: #fff;
       font-size: 0.65rem; font-weight: 700; border-radius: 50px; padding: 1px 6px;
@@ -203,7 +201,7 @@
     .comm-card { border-radius: 8px; padding: 12px 14px; border-left: 3px solid var(--border); background: var(--bg); }
     .comm-card.urgente { border-left-color: var(--c-inadimplencia); }
     .comm-card.info    { border-left-color: var(--c-fundo); }
-    .comm-card.geral   { border-left-color: var(--c-comunicados); }
+    .comm-card.geral   { border-left-color: #a78bfa; }
     .comm-card-title { font-size: 0.82rem; font-weight: 700; margin-bottom: 3px; }
     .comm-card-meta  { font-size: 0.72rem; color: var(--text-muted); }
 
@@ -219,17 +217,6 @@
     .progress-track { height: 6px; background: var(--border); border-radius: 50px; margin-top: 6px; overflow: hidden; }
     .progress-fill  { height: 100%; border-radius: 50px; }
 
-    /* ── Comunicados full ── */
-    .comm-full-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px,1fr)); gap: 16px; }
-    .comm-full-card {
-      background: var(--surface); border-radius: var(--radius);
-      padding: 18px 20px; box-shadow: var(--shadow); border: 1px solid var(--border);
-      border-top: 3px solid var(--accent, var(--primary));
-    }
-    .comm-full-tag   { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 8px; }
-    .comm-full-title { font-size: 0.95rem; font-weight: 700; margin-bottom: 8px; }
-    .comm-full-body  { font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 10px; }
-    .comm-full-footer { font-size: 0.72rem; color: var(--text-muted); border-top: 1px solid var(--border); padding-top: 8px; }
 
     /* ── Fundo bars ── */
     .fundo-bars { display: flex; flex-direction: column; gap: 12px; }
@@ -339,9 +326,6 @@
     <button class="nav-btn" data-tab="despesas"><span>💸</span> Despesas</button>
     <button class="nav-btn" data-tab="inadimplencia"><span>⚠️</span> Inadimplência <span class="nav-badge" id="badge-inad">—</span></button>
     <button class="nav-btn" data-tab="fundo"><span>🏦</span> Fundo de Reserva</button>
-    <div class="sidebar-sep"></div>
-    <span class="sidebar-label">Gestão</span>
-    <button class="nav-btn" data-tab="comunicados"><span>📢</span> Comunicados</button>
   </nav>
 
   <!-- Content -->
@@ -653,40 +637,6 @@
               <tr><td>01/01/25</td><td>Arrecadação mensal — cotas do fundo</td><td><span class="pill pill-green">Entrada</span></td><td>+ R$ 1.040</td><td>R$ 39.040</td></tr>
             </tbody>
           </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- ════ COMUNICADOS ════ -->
-    <div class="tab-pane" id="tab-comunicados">
-      <div class="page-title">
-        <h2 style="color:var(--c-comunicados)">Comunicados</h2>
-        <p>Avisos, informes e assembleias</p>
-      </div>
-      <div class="comm-full-grid">
-        <div class="comm-full-card" style="--accent:var(--c-inadimplencia)">
-          <div class="comm-full-tag">⚠️ URGENTE · 04/03/2025</div>
-          <div class="comm-full-title">Manutenção da bomba d'água — Interrupção temporária</div>
-          <div class="comm-full-body">Haverá interrupção no abastecimento de água nos dias 06 e 07/03 das 9h às 17h para manutenção preventiva na bomba hidráulica do térreo.</div>
-          <div class="comm-full-footer">Síndico João Mendes</div>
-        </div>
-        <div class="comm-full-card" style="--accent:var(--c-fundo)">
-          <div class="comm-full-tag">📋 INFORMATIVO · 01/03/2025</div>
-          <div class="comm-full-title">Prestação de contas — Fevereiro 2025</div>
-          <div class="comm-full-body">O extrato completo está disponível na administradora e no mural do condomínio.</div>
-          <div class="comm-full-footer">Administradora CondoAdmin</div>
-        </div>
-        <div class="comm-full-card" style="--accent:var(--c-comunicados)">
-          <div class="comm-full-tag">📅 ASSEMBLEIA · 28/02/2025</div>
-          <div class="comm-full-title">Assembleia Geral Ordinária — Abril 2025</div>
-          <div class="comm-full-body">AGO em 10/04/2025 às 19h no salão de festas. Pauta: eleição de síndico, aprovação do orçamento anual e obras previstas.</div>
-          <div class="comm-full-footer">Síndico João Mendes</div>
-        </div>
-        <div class="comm-full-card" style="--accent:#48bb78">
-          <div class="comm-full-tag">🅿️ GERAL · 20/02/2025</div>
-          <div class="comm-full-title">Novo regulamento de uso de garagens</div>
-          <div class="comm-full-body">A partir de 01/03/2025 entra em vigor o novo regulamento. Veículos de visitantes devem ser cadastrados na portaria e podem permanecer por até 4 horas.</div>
-          <div class="comm-full-footer">Administradora CondoAdmin</div>
         </div>
       </div>
     </div>

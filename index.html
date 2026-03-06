@@ -325,7 +325,6 @@
     <button class="nav-btn" data-tab="receitas"><span>💰</span> Receitas</button>
     <button class="nav-btn" data-tab="despesas"><span>💸</span> Despesas</button>
     <button class="nav-btn" data-tab="inadimplencia"><span>⚠️</span> Inadimplência <span class="nav-badge" id="badge-inad">—</span></button>
-    <button class="nav-btn" data-tab="fundo"><span>🏦</span> Fundo de Reserva</button>
   </nav>
 
   <!-- Content -->
@@ -567,75 +566,6 @@
           <table>
             <thead><tr><th>Unidade</th><th>Meses em Aberto</th><th>Nº Meses</th><th>Situação</th></tr></thead>
             <tbody id="tbody-inad"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- ════ FUNDO DE RESERVA ════ -->
-    <div class="tab-pane" id="tab-fundo">
-      <div class="page-title">
-        <h2 style="color:var(--c-fundo)">Fundo de Reserva</h2>
-        <p>Poupança coletiva para emergências e obras</p>
-      </div>
-      <div class="kpi-row">
-        <div class="kpi-card" style="--accent:var(--c-fundo)">
-          <div class="kpi-label">Saldo Atual</div>
-          <div class="kpi-value">R$ 38.720</div>
-          <div class="kpi-sub trend-up">▲ R$ 1.040 este mês</div>
-        </div>
-        <div class="kpi-card" style="--accent:var(--c-receitas)">
-          <div class="kpi-label">Entradas 2025</div>
-          <div class="kpi-value">R$ 7.280</div>
-          <div class="kpi-sub">cotas mensais</div>
-        </div>
-        <div class="kpi-card" style="--accent:var(--c-despesas)">
-          <div class="kpi-label">Saídas 2025</div>
-          <div class="kpi-value">R$ 2.400</div>
-          <div class="kpi-sub">uso para manutenção</div>
-        </div>
-        <div class="kpi-card" style="--accent:var(--primary)">
-          <div class="kpi-label">Meta do Ano</div>
-          <div class="kpi-value">61%</div>
-          <div class="kpi-sub">Meta: R$ 50.000</div>
-          <div class="progress-track"><div class="progress-fill" style="width:61%;background:var(--c-fundo)"></div></div>
-        </div>
-      </div>
-      <div class="charts-row">
-        <div class="card">
-          <div class="card-title">Evolução do Saldo — 2025 <span>acumulado</span></div>
-          <canvas id="chart-fundo" height="90"></canvas>
-        </div>
-        <div class="card">
-          <div class="card-title">Uso do Fundo <span>quando utilizado</span></div>
-          <div class="fundo-bars" style="margin-top:8px">
-            <div class="fundo-bar-row">
-              <div class="fundo-bar-label"><span>Manutenção estrutural</span><span>R$ 1.200</span></div>
-              <div class="fundo-bar-track"><div class="fundo-bar-fill" style="width:50%;background:var(--c-despesas)"></div></div>
-            </div>
-            <div class="fundo-bar-row">
-              <div class="fundo-bar-label"><span>Equipamentos</span><span>R$ 800</span></div>
-              <div class="fundo-bar-track"><div class="fundo-bar-fill" style="width:33%;background:var(--c-fundo)"></div></div>
-            </div>
-            <div class="fundo-bar-row">
-              <div class="fundo-bar-label"><span>Reformas</span><span>R$ 400</span></div>
-              <div class="fundo-bar-track"><div class="fundo-bar-fill" style="width:17%;background:var(--c-inadimplencia)"></div></div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-title">Histórico de Movimentações</div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Data</th><th>Descrição</th><th>Tipo</th><th>Valor</th><th>Saldo após</th></tr></thead>
-            <tbody>
-              <tr><td>01/03/25</td><td>Arrecadação mensal — cotas do fundo</td><td><span class="pill pill-green">Entrada</span></td><td>+ R$ 1.040</td><td>R$ 38.720</td></tr>
-              <tr><td>14/02/25</td><td>Reparo bomba hidráulica</td><td><span class="pill pill-red">Saída</span></td><td>– R$ 1.200</td><td>R$ 37.680</td></tr>
-              <tr><td>01/02/25</td><td>Arrecadação mensal — cotas do fundo</td><td><span class="pill pill-green">Entrada</span></td><td>+ R$ 1.040</td><td>R$ 38.880</td></tr>
-              <tr><td>05/01/25</td><td>Compra de equipamento para academia</td><td><span class="pill pill-red">Saída</span></td><td>– R$ 1.200</td><td>R$ 37.840</td></tr>
-              <tr><td>01/01/25</td><td>Arrecadação mensal — cotas do fundo</td><td><span class="pill pill-green">Entrada</span></td><td>+ R$ 1.040</td><td>R$ 39.040</td></tr>
-            </tbody>
           </table>
         </div>
       </div>

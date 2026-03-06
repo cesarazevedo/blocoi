@@ -702,13 +702,31 @@ let dadosDespesas = [];   // [{data,dataParts,categoria,descricao,fornecedor,val
 let mesSel = new Date().getMonth();
 let anoSel = new Date().getFullYear();
 
-// Preenche seletor de ano: 2025 até ano atual + 2
+// Seletor de ano — preenchido dinamicamente após detectar abas disponíveis
 const selAno = document.getElementById('sel-ano');
-for (let y = 2025; y <= anoSel; y++) {
-  const o = new Option(y, y);
-  if (y === anoSel) o.selected = true;
-  selAno.add(o);
+
+async function probeYear(year) {
+  try {
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(`Receitas ${year}`)}`;
+    const res = await fetch(url);
+    if (!res.ok) return false;
+    const firstLine = (await res.text()).split(/\r?\n/)[0].toUpperCase();
+    return firstLine.includes('RECEITAS') && firstLine.includes(String(year));
+  } catch { return false; }
 }
+
+async function inicializarAnos() {
+  const anoAtual = new Date().getFullYear();
+  const candidatos = Array.from({ length: anoAtual - 2014 }, (_, i) => 2015 + i);
+  const resultados = await Promise.all(candidatos.map(probeYear));
+  const anosValidos = candidatos.filter((_, i) => resultados[i]);
+  if (anosValidos.length === 0) anosValidos.push(anoAtual);
+  selAno.innerHTML = '';
+  anosValidos.forEach(y => selAno.add(new Option(y, y)));
+  anoSel = anosValidos[anosValidos.length - 1];
+  selAno.value = anoSel;
+}
+
 document.getElementById('sel-mes').value = mesSel;
 
 // ── Utilitários ───────────────────────────────────────────────
@@ -1148,7 +1166,7 @@ document.getElementById('sel-mes').addEventListener('change', function() {
 document.getElementById('sel-ano').addEventListener('change', async function() {
   anoSel = parseInt(this.value); await carregar();
 });
-document.getElementById('btn-refresh').addEventListener('click', carregar);
+document.getElementById('btn-refresh').addEventListener('click', () => inicializarAnos().then(() => carregar()));
 document.getElementById('fil-rec-mes').addEventListener('change', renderReceitas);
 document.getElementById('fil-rec-status').addEventListener('change', renderReceitas);
 document.getElementById('fil-desp-cat').addEventListener('change', renderDespesas);
@@ -1172,7 +1190,7 @@ document.getElementById('search-input').addEventListener('input', function() {
 });
 
 // ── Init ──────────────────────────────────────────────────────
-carregar();
+inicializarAnos().then(() => carregar());
 </script>
 </body>
 </html>

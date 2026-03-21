@@ -273,7 +273,39 @@
     }
     @media (max-width: 640px) {
       .sidebar { display: none; }
-      .search-input { width: 150px; }
+      .search-wrap { display: none; }
+      .top-header { padding: 0 14px; height: 56px; gap: 10px; }
+      .brand-text { font-size: 0.88rem; }
+      .brand-sub { display: none; }
+      .header-right { gap: 8px; }
+      .month-selector { font-size: 0.78rem; }
+      .avatar { display: none; }
+      .content { padding: 16px 14px; }
+
+      /* Caixa card empilhado */
+      #caixa-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+        padding: 16px 18px;
+      }
+      .caixa-right {
+        border-left: none;
+        border-top: 1px solid rgba(255,255,255,0.2);
+        padding-left: 0;
+        padding-top: 12px;
+        width: 100%;
+        gap: 20px;
+      }
+      .caixa-value { font-size: 1.8rem; }
+
+      /* KPIs em 1 coluna */
+      .kpi-row { grid-template-columns: 1fr 1fr; gap: 10px; }
+      .kpi-value { font-size: 1.2rem; }
+      .kpi-card { padding: 14px 16px; }
+    }
+    @media (max-width: 380px) {
+      .kpi-row { grid-template-columns: 1fr; }
     }
   </style>
 </head>

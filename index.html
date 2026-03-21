@@ -609,7 +609,7 @@ async function probeYear(year) {
 
 async function inicializarAnos() {
   const anoAtual = new Date().getFullYear();
-  const candidatos = Array.from({ length: anoAtual - 2014 }, (_, i) => 2015 + i);
+  const candidatos = Array.from({ length: anoAtual - 2014 + 2 }, (_, i) => 2015 + i);
   const resultados = await Promise.all(candidatos.map(probeYear));
   const anosValidos = candidatos.filter((_, i) => resultados[i]);
   if (anosValidos.length === 0) anosValidos.push(anoAtual);

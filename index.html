@@ -806,14 +806,25 @@ function renderReceitas() {
   th.textContent = filMes === -1 ? 'Meses Pagos' : MESES_FULL[filMes];
 
   const rows = [];
-  dadosReceitas.forEach(r => {
-    mesesMostrar.forEach(mi => {
-      const v = r.valores[mi];
-      const status = v > 0 ? 'pago' : 'aberto';
+  if (filMes === -1) {
+    // Todos os meses: uma linha por apartamento com meses pagos resumidos
+    dadosReceitas.forEach(r => {
+      const mesesPagos = MESES.filter((_, mi) => r.valores[mi] > 0);
+      const totalPago  = r.valores.reduce((s, v) => s + v, 0);
+      const status     = mesesPagos.length > 0 ? 'pago' : 'aberto';
       if (filStatus && filStatus !== status) return;
-      rows.push({ unidade: r.unidade, mes: MESES[mi], valor: v, status });
+      rows.push({ unidade: r.unidade, mes: mesesPagos.length > 0 ? mesesPagos.join(', ') : '—', valor: totalPago, status });
     });
-  });
+  } else {
+    mesesMostrar.forEach(mi => {
+      dadosReceitas.forEach(r => {
+        const v = r.valores[mi];
+        const status = v > 0 ? 'pago' : 'aberto';
+        if (filStatus && filStatus !== status) return;
+        rows.push({ unidade: r.unidade, mes: MESES[mi], valor: v, status });
+      });
+    });
+  }
 
   const tb = document.getElementById('tbody-receitas');
   if (rows.length === 0) {

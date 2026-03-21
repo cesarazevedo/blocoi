@@ -591,6 +591,7 @@ const MESES_FULL = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho
 // ── Estado ────────────────────────────────────────────────────
 let dadosReceitas = [];   // [{unidade, valores:[12]}]
 let dadosDespesas = [];   // [{data,dataParts,categoria,descricao,fornecedor,valor,status}]
+let saldoAnterior = 0;
 let mesSel = new Date().getMonth();
 let anoSel = new Date().getFullYear();
 
@@ -722,10 +723,13 @@ function renderDashboard() {
   const despAcum = dadosDespesas
     .filter(d => d.dataParts && parseInt(d.dataParts[2]) === anoSel && parseInt(d.dataParts[1]) - 1 <= mesSel)
     .reduce((s, d) => s + d.valor, 0);
-  const saldoCaixa = recAcum - despAcum;
+  const saldoCaixa = recAcum - despAcum + saldoAnterior;
 
   set('kpi-caixa', moeda(saldoCaixa));
-  set('kpi-caixa-sub', `Jan a ${MESES[mesSel]}/${anoSel} · ${saldoCaixa >= 0 ? '✓ positivo' : '⚠ negativo'}`);
+  const subSaldo = saldoAnterior !== 0
+    ? `Jan a ${MESES[mesSel]}/${anoSel} · Inclui saldo de ${anoSel - 1} · ${saldoCaixa >= 0 ? '✓ positivo' : '⚠ negativo'}`
+    : `Jan a ${MESES[mesSel]}/${anoSel} · ${saldoCaixa >= 0 ? '✓ positivo' : '⚠ negativo'}`;
+  set('kpi-caixa-sub', subSaldo);
   set('kpi-caixa-rec',  moeda(recAcum));
   set('kpi-caixa-desp', moeda(despAcum));
   set('kpi-caixa-mes',  moeda(saldoMes));
@@ -1016,6 +1020,24 @@ function renderTudo() {
   renderInadimplencia();
 }
 
+// ── Saldo anterior (ano precedente completo) ──────────────────
+async function calcularSaldoAnterior(ano) {
+  try {
+    const anoAnt = ano - 1;
+    const opts = [...document.getElementById('sel-ano').options];
+    if (!opts.some(o => parseInt(o.value) === anoAnt)) { saldoAnterior = 0; return; }
+    const rowsR = await fetchSheet(`Receitas ${anoAnt}`);
+    const recAnterior = parseReceitas(rowsR);
+    const recTotal = recAnterior.reduce((s, r) => s + r.valores.reduce((a, b) => a + b, 0), 0);
+    const despTotal = dadosDespesas
+      .filter(d => d.dataParts && parseInt(d.dataParts[2]) === anoAnt)
+      .reduce((s, d) => s + d.valor, 0);
+    saldoAnterior = recTotal - despTotal;
+  } catch(e) {
+    saldoAnterior = 0;
+  }
+}
+
 // ── Carregar dados ────────────────────────────────────────────
 async function carregar() {
   document.getElementById('loading').classList.remove('hidden');
@@ -1026,6 +1048,7 @@ async function carregar() {
     ]);
     dadosReceitas = parseReceitas(rowsR);
     dadosDespesas = parseDespesas(rowsD);
+    await calcularSaldoAnterior(anoSel);
     renderTudo();
   } catch(e) {
     alert('Erro ao carregar dados: ' + e.message);

@@ -630,18 +630,18 @@ let mesSel = new Date().getMonth();
 let anoSel = new Date().getFullYear();
 
 // ── Modo Privado (LGPD) ───────────────────────────────────────
-let modoPrivado = false;
+let modoPrivado = false; // false = exibe AP N (padrão); true = exibe número real
 let mapaUnidades = {};
 
 function buildMapaUnidades() {
   mapaUnidades = {};
   dadosReceitas.forEach((r, i) => {
-    mapaUnidades[r.unidade] = `Ap. ${String(i + 1).padStart(2, '0')}`;
+    mapaUnidades[r.unidade] = `AP ${i + 1}`;
   });
 }
 
 function nomUnidade(u) {
-  return modoPrivado ? (mapaUnidades[u] || '—') : u;
+  return modoPrivado ? u : (mapaUnidades[u] || u);
 }
 
 // Seletor de ano — preenchido dinamicamente após detectar abas disponíveis
@@ -1153,7 +1153,7 @@ document.getElementById('btn-privado').addEventListener('click', () => {
   modoPrivado = !modoPrivado;
   const btn = document.getElementById('btn-privado');
   btn.textContent = modoPrivado ? '🔓' : '🔒';
-  btn.title = modoPrivado ? 'Modo Privado ativo — clique para desativar' : 'Modo Privado: ocultar unidades';
+  btn.title = modoPrivado ? 'Exibindo números reais — clique para ocultar' : 'Mostrar números reais das unidades';
   btn.style.color = modoPrivado ? 'var(--c-inadimplencia)' : '';
   renderTudo();
 });

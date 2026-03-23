@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Controle de Contas — Parque dos Rios, Bloco I</title>
+  <title>Controle de Contas do Condomínio</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
   <style>
     :root {
@@ -318,7 +318,7 @@
     <div class="brand-icon">🏢</div>
     <div>
       <span class="brand-text">Controle de Contas do Condomínio</span>
-      <span class="brand-sub">Parque dos Rios, Bloco I · R. Alice Azevedo, 133 — Capim Macio, Natal-RN · CEP 59.080-015</span>
+      <span class="brand-sub">Parque dos Rios</span>
     </div>
   </a>
   <div>
@@ -342,7 +342,8 @@
     </div>
     <button class="btn-icon" id="btn-refresh" title="Atualizar">↻</button>
     <button class="btn-icon" id="dark-toggle" title="Tema">🌙</button>
-    <div class="avatar">BI</div>
+    <button class="btn-icon" id="btn-privado" title="Modo Privado: ocultar unidades">🔒</button>
+    <div class="avatar">🏢</div>
   </div>
 </header>
 
@@ -628,6 +629,21 @@ let saldoAnterior = 0;
 let mesSel = new Date().getMonth();
 let anoSel = new Date().getFullYear();
 
+// ── Modo Privado (LGPD) ───────────────────────────────────────
+let modoPrivado = false;
+let mapaUnidades = {};
+
+function buildMapaUnidades() {
+  mapaUnidades = {};
+  dadosReceitas.forEach((r, i) => {
+    mapaUnidades[r.unidade] = `Ap. ${String(i + 1).padStart(2, '0')}`;
+  });
+}
+
+function nomUnidade(u) {
+  return modoPrivado ? (mapaUnidades[u] || '—') : u;
+}
+
 // Seletor de ano — preenchido dinamicamente após detectar abas disponíveis
 const selAno = document.getElementById('sel-ano');
 
@@ -780,7 +796,7 @@ function renderDashboard() {
   // Últimos lançamentos: mistura receitas pagas + despesas do mês
   const lancamentos = [];
   dadosReceitas.filter(r => r.valores[mesSel] > 0).forEach(r => {
-    lancamentos.push({ data: `${String(mesSel+1).padStart(2,'0')}/${anoSel}`, descricao: 'Taxa de condomínio', unid: r.unidade, valor: r.valores[mesSel], tipo: 'rec' });
+    lancamentos.push({ data: `${String(mesSel+1).padStart(2,'0')}/${anoSel}`, descricao: 'Taxa de condomínio', unid: nomUnidade(r.unidade), valor: r.valores[mesSel], tipo: 'rec' });
   });
   despMes.forEach(d => {
     lancamentos.push({ data: d.data, descricao: d.descricao, unid: '—', valor: d.valor, tipo: 'desp' });
@@ -860,7 +876,7 @@ function renderReceitas() {
   }
   tb.innerHTML = rows.map(r => `
     <tr>
-      <td><strong>${r.unidade}</strong></td>
+      <td><strong>${nomUnidade(r.unidade)}</strong></td>
       <td>${r.mes}</td>
       <td>${r.valor > 0 ? moeda(r.valor) : '—'}</td>
       <td><span class="pill ${r.status==='pago'?'pill-green':'pill-red'}">${r.status==='pago'?'Pago':'Em aberto'}</span></td>
@@ -954,7 +970,7 @@ function renderInadimplencia() {
     const n = r.mesesAbertos.length;
     const sit = n >= 3 ? ['pill-red','Crítico'] : n >= 2 ? ['pill-orange','Atenção'] : ['pill-gray','Recente'];
     return `<tr>
-      <td><strong>${r.unidade}</strong></td>
+      <td><strong>${nomUnidade(r.unidade)}</strong></td>
       <td>${r.mesesAbertos.map(m=>m.mes).join(', ')}</td>
       <td>${n}</td>
       <td><span class="pill ${sit[0]}">${sit[1]}</span></td>
@@ -1093,6 +1109,7 @@ async function carregar() {
     dadosReceitas = parseReceitas(rowsR);
     dadosDespesas = parseDespesas(rowsD);
     await calcularSaldoAnterior(anoSel);
+    buildMapaUnidades();
     renderTudo();
   } catch(e) {
     alert('Erro ao carregar dados: ' + e.message);
@@ -1130,6 +1147,16 @@ document.getElementById('fil-rec-mes').addEventListener('change', renderReceitas
 document.getElementById('fil-rec-status').addEventListener('change', renderReceitas);
 document.getElementById('fil-desp-cat').addEventListener('change', renderDespesas);
 document.getElementById('fil-desp-status').addEventListener('change', renderDespesas);
+
+// ── Modo Privado (LGPD) ───────────────────────────────────────
+document.getElementById('btn-privado').addEventListener('click', () => {
+  modoPrivado = !modoPrivado;
+  const btn = document.getElementById('btn-privado');
+  btn.textContent = modoPrivado ? '🔓' : '🔒';
+  btn.title = modoPrivado ? 'Modo Privado ativo — clique para desativar' : 'Modo Privado: ocultar unidades';
+  btn.style.color = modoPrivado ? 'var(--c-inadimplencia)' : '';
+  renderTudo();
+});
 
 // ── Dark mode ─────────────────────────────────────────────────
 document.getElementById('dark-toggle').addEventListener('click', () => {

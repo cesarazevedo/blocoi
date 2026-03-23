@@ -636,7 +636,7 @@ let mapaUnidades = {};
 function buildMapaUnidades() {
   mapaUnidades = {};
   dadosReceitas.forEach((r, i) => {
-    mapaUnidades[r.unidade] = `Ap. ${String(i + 1).padStart(2, '0')}`;
+    mapaUnidades[r.unidade] = `ap${i + 1}`;
   });
 }
 

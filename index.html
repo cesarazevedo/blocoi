@@ -342,7 +342,6 @@
     </div>
     <button class="btn-icon" id="btn-refresh" title="Atualizar">↻</button>
     <button class="btn-icon" id="dark-toggle" title="Tema">🌙</button>
-    <button class="btn-icon" id="btn-privado" title="Modo Privado: ocultar unidades">🔒</button>
     <div class="avatar">🏢</div>
   </div>
 </header>
@@ -629,8 +628,7 @@ let saldoAnterior = 0;
 let mesSel = new Date().getMonth();
 let anoSel = new Date().getFullYear();
 
-// ── Modo Privado (LGPD) ───────────────────────────────────────
-let modoPrivado = false; // false = exibe AP N (padrão); true = exibe número real
+// ── Nomes de unidade (LGPD) ───────────────────────────────────
 let mapaUnidades = {};
 
 function buildMapaUnidades() {
@@ -641,7 +639,7 @@ function buildMapaUnidades() {
 }
 
 function nomUnidade(u) {
-  return modoPrivado ? u : (mapaUnidades[u] || u);
+  return mapaUnidades[u] || u;
 }
 
 // Seletor de ano — preenchido dinamicamente após detectar abas disponíveis
@@ -1148,15 +1146,6 @@ document.getElementById('fil-rec-status').addEventListener('change', renderRecei
 document.getElementById('fil-desp-cat').addEventListener('change', renderDespesas);
 document.getElementById('fil-desp-status').addEventListener('change', renderDespesas);
 
-// ── Modo Privado (LGPD) ───────────────────────────────────────
-document.getElementById('btn-privado').addEventListener('click', () => {
-  modoPrivado = !modoPrivado;
-  const btn = document.getElementById('btn-privado');
-  btn.textContent = modoPrivado ? '🔓' : '🔒';
-  btn.title = modoPrivado ? 'Exibindo números reais — clique para ocultar' : 'Mostrar números reais das unidades';
-  btn.style.color = modoPrivado ? 'var(--c-inadimplencia)' : '';
-  renderTudo();
-});
 
 // ── Dark mode ─────────────────────────────────────────────────
 document.getElementById('dark-toggle').addEventListener('click', () => {

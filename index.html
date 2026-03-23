@@ -342,7 +342,7 @@
     </div>
     <button class="btn-icon" id="btn-refresh" title="Atualizar">↻</button>
     <button class="btn-icon" id="dark-toggle" title="Tema">🌙</button>
-    <button class="btn-icon" id="btn-privado" title="Modo Privado: ocultar unidades">🔒</button>
+
     <div class="avatar">🏢</div>
   </div>
 </header>
@@ -1146,15 +1146,6 @@ document.getElementById('fil-rec-status').addEventListener('change', renderRecei
 document.getElementById('fil-desp-cat').addEventListener('change', renderDespesas);
 document.getElementById('fil-desp-status').addEventListener('change', renderDespesas);
 
-// ── Modo Privado (LGPD) ───────────────────────────────────────
-document.getElementById('btn-privado').addEventListener('click', () => {
-  modoPrivado = !modoPrivado;
-  const btn = document.getElementById('btn-privado');
-  btn.textContent = modoPrivado ? '🔓' : '🔒';
-  btn.title = modoPrivado ? 'Modo Privado ativo — clique para desativar' : 'Modo Privado: ocultar unidades';
-  btn.style.color = modoPrivado ? 'var(--c-inadimplencia)' : '';
-  renderTudo();
-});
 
 // ── Dark mode ─────────────────────────────────────────────────
 document.getElementById('dark-toggle').addEventListener('click', () => {

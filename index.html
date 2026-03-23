@@ -606,7 +606,7 @@
         <div class="card-title">Unidades com Pagamentos em Aberto <span id="inad-mes-label">—</span></div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Unidade</th><th>Meses em Aberto</th><th>Nº Meses</th><th>Situação</th></tr></thead>
+            <thead><tr><th>Unidade</th><th>Meses em Aberto</th><th>Nº Meses</th></tr></thead>
             <tbody id="tbody-inad"></tbody>
           </table>
         </div>
@@ -963,17 +963,15 @@ function renderInadimplencia() {
 
   const tb = document.getElementById('tbody-inad');
   if (inadimpl.length === 0) {
-    tb.innerHTML = `<tr class="empty-row"><td colspan="4">Nenhuma unidade inadimplente neste período 🎉</td></tr>`;
+    tb.innerHTML = `<tr class="empty-row"><td colspan="3">Nenhuma unidade inadimplente neste período 🎉</td></tr>`;
     return;
   }
   tb.innerHTML = inadimpl.map(r => {
     const n = r.mesesAbertos.length;
-    const sit = n >= 3 ? ['pill-red','Crítico'] : n >= 2 ? ['pill-orange','Atenção'] : ['pill-gray','Recente'];
     return `<tr>
       <td><strong>${nomUnidade(r.unidade)}</strong></td>
       <td>${r.mesesAbertos.map(m=>m.mes).join(', ')}</td>
       <td>${n}</td>
-      <td><span class="pill ${sit[0]}">${sit[1]}</span></td>
     </tr>`;
   }).join('');
 }

@@ -770,7 +770,10 @@ function renderDashboard() {
   const totalDesp = despMes.reduce((s, d) => s + d.valor, 0);
 
   const saldoMes = recMes - totalDesp;
-  const inadimpl = total > 0 ? ((total - pagas) / total * 100) : 0;
+  // Só conta inadimplência para o mês selecionado se já venceu (dia 10 do mês seguinte)
+  const mesJaVenceu = mesVencido(mesSel, anoSel);
+  const inadimplCount = mesJaVenceu ? (total - pagas) : 0;
+  const inadimpl = total > 0 ? (inadimplCount / total * 100) : 0;
 
   // ── Saldo em caixa acumulado (Jan até mês selecionado) ──
   const recAcum  = dadosReceitas.reduce((s, r) => s + r.valores.slice(0, mesSel + 1).reduce((a,b) => a+b, 0), 0);
@@ -795,9 +798,9 @@ function renderDashboard() {
   set('kpi-despesas-sub',`${despMes.length} lançamento(s)`);
   set('kpi-receitas',    moeda(saldoMes));
   set('kpi-receitas-sub', saldoMes >= 0 ? '✓ Positivo' : '⚠ Negativo');
-  set('kpi-inad',        inadimpl.toFixed(1) + '%');
-  set('kpi-inad-sub',    `${total - pagas} unidade(s) em aberto`);
-  set('badge-inad', total - pagas);
+  set('kpi-inad',        mesJaVenceu ? inadimpl.toFixed(1) + '%' : '—');
+  set('kpi-inad-sub',    mesJaVenceu ? `${inadimplCount} unidade(s) em aberto` : `vence dia 10/${MESES[mesSel + 1] || 'Jan'}`);
+  set('badge-inad', inadimplCount);
 
   // Últimos lançamentos: mistura receitas pagas + despesas do mês
   const lancamentos = [];
@@ -847,8 +850,9 @@ function renderReceitas() {
   set('kpi-rec-pagas', pagas.length);
   set('kpi-rec-pagas-sub', `de ${dadosReceitas.length} unidades`);
   set('kpi-rec-ticket', pagas.length ? moeda(recMes / pagas.length) : '—');
-  set('kpi-rec-aberto', aberto.length);
-  set('kpi-rec-aberto-sub', `unidade(s) sem pagamento`);
+  const recMesVenceu = mesVencido(mesSel, anoSel);
+  set('kpi-rec-aberto', recMesVenceu ? aberto.length : '—');
+  set('kpi-rec-aberto-sub', recMesVenceu ? `unidade(s) inadimplentes` : `vence dia 10/${MESES[(mesSel + 1) % 12]}`);
 
   // Tabela
   const th = document.getElementById('rec-th-mes');
@@ -961,11 +965,11 @@ function renderInadimplencia() {
   set('inad-subtitle', `Unidades com pagamentos em aberto · ${mesLabel}`);
   set('inad-mes-label', mesLabel);
 
-  // Inadimplentes = unidades onde algum mês até mesSel do anoSel está sem pagamento
+  // Inadimplentes = unidades onde algum mês até mesSel já venceu (dia 10 do mês seguinte) e não foi pago
   const inadimpl = dadosReceitas.map(r => {
     const mesesAbertos = MESES.slice(0, mesSel + 1)
       .map((m, i) => ({ mes: m, idx: i, valor: r.valores[i] }))
-      .filter(m => m.valor === 0);
+      .filter(m => m.valor === 0 && mesVencido(m.idx, anoSel));
     return { unidade: r.unidade, mesesAbertos };
   }).filter(r => r.mesesAbertos.length > 0);
 
@@ -996,6 +1000,12 @@ function renderInadimplencia() {
       <td>${n}</td>
     </tr>`;
   }).join('');
+}
+
+// ── Regra de vencimento: dia 10 do mês seguinte ───────────────
+function mesVencido(mesIdx, ano) {
+  // mesIdx=0 (Jan) vence dia 10/Fev, mesIdx=11 (Dez) vence 10/Jan do ano seguinte
+  return new Date() >= new Date(ano, mesIdx + 1, 10);
 }
 
 // ── Charts ────────────────────────────────────────────────────

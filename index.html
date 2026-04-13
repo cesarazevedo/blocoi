@@ -340,6 +340,7 @@
       <select id="sel-ano"></select>
     </div>
     <button class="btn-icon" id="btn-refresh" title="Atualizar">↻</button>
+    <span id="cache-indicator" style="display:none;font-size:0.7rem;color:var(--text-muted);opacity:0.7;"></span>
     <button class="btn-icon" id="dark-toggle" title="Tema">🌙</button>
 
     <div class="avatar">🏢</div>
@@ -1095,19 +1096,75 @@ async function calcularSaldoAnterior(ano) {
   }
 }
 
+// ── Cache localStorage ────────────────────────────────────────
+const CACHE_TTL = 30 * 60 * 1000; // 30 minutos
+
+function cacheKey(sheet) { return `condo_cache_${SHEET_ID}_${sheet}`; }
+
+function cacheSet(sheet, rows) {
+  try {
+    localStorage.setItem(cacheKey(sheet), JSON.stringify({ ts: Date.now(), rows }));
+  } catch(e) {}
+}
+
+function cacheGet(sheet) {
+  try {
+    const item = localStorage.getItem(cacheKey(sheet));
+    if (!item) return null;
+    const { ts, rows } = JSON.parse(item);
+    if (Date.now() - ts > CACHE_TTL) return null;
+    return rows;
+  } catch(e) { return null; }
+}
+
+function cacheTimestamp(sheet) {
+  try {
+    const item = localStorage.getItem(cacheKey(sheet));
+    if (!item) return null;
+    return JSON.parse(item).ts;
+  } catch(e) { return null; }
+}
+
+async function fetchSheetCached(sheetName) {
+  const cached = cacheGet(sheetName);
+  if (cached) return cached;
+  const rows = await fetchSheet(sheetName);
+  cacheSet(sheetName, rows);
+  return rows;
+}
+
+function mostrarIndicadorCache(sheets) {
+  const tsList = sheets.map(s => cacheTimestamp(s)).filter(Boolean);
+  const el = document.getElementById('cache-indicator');
+  if (!el) return;
+  if (tsList.length === sheets.length) {
+    const ts = Math.min(...tsList);
+    const hhmm = new Date(ts).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    el.textContent = `dados de ${hhmm}`;
+    el.title = 'Dados em cache. Clique em Atualizar para recarregar.';
+    el.style.display = 'inline';
+  } else {
+    el.style.display = 'none';
+  }
+}
+
 // ── Carregar dados ────────────────────────────────────────────
-async function carregar() {
+async function carregar(forcarAtualizacao = false) {
+  const sheets = [`Receitas ${anoSel}`, 'Despesas'];
+  if (forcarAtualizacao) sheets.forEach(s => localStorage.removeItem(cacheKey(s)));
+
   document.getElementById('loading').classList.remove('hidden');
   try {
     const [rowsR, rowsD] = await Promise.all([
-      fetchSheet(`Receitas ${anoSel}`),
-      fetchSheet('Despesas')
+      fetchSheetCached(`Receitas ${anoSel}`),
+      fetchSheetCached('Despesas')
     ]);
     dadosReceitas = parseReceitas(rowsR);
     dadosDespesas = parseDespesas(rowsD);
     await calcularSaldoAnterior(anoSel);
     buildMapaUnidades();
     renderTudo();
+    mostrarIndicadorCache(sheets);
   } catch(e) {
     alert('Erro ao carregar dados: ' + e.message);
     console.error(e);
@@ -1139,7 +1196,7 @@ document.getElementById('sel-mes').addEventListener('change', function() {
 document.getElementById('sel-ano').addEventListener('change', async function() {
   anoSel = parseInt(this.value); await carregar();
 });
-document.getElementById('btn-refresh').addEventListener('click', () => inicializarAnos().then(() => carregar()));
+document.getElementById('btn-refresh').addEventListener('click', () => inicializarAnos().then(() => carregar(true)));
 document.getElementById('fil-rec-mes').addEventListener('change', renderReceitas);
 document.getElementById('fil-rec-status').addEventListener('change', renderReceitas);
 document.getElementById('fil-desp-cat').addEventListener('change', renderDespesas);

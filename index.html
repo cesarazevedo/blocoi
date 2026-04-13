@@ -188,13 +188,11 @@
     .pill { display: inline-flex; align-items: center; gap: 4px; font-size: 0.7rem; font-weight: 600; border-radius: 50px; padding: 2px 8px; }
     .pill-green  { background: rgba(72,187,120,.15);  color: #276749; }
     .pill-red    { background: rgba(252,129,129,.15); color: #c53030; }
-    .pill-blue   { background: rgba(99,179,237,.15);  color: #2b6cb0; }
     .pill-orange { background: rgba(247,151,30,.15);  color: #974a0a; }
     .pill-blue   { background: rgba(102,126,234,.15); color: #434190; }
     .pill-gray   { background: rgba(160,174,192,.15); color: #4a5568; }
     [data-theme="dark"] .pill-green  { color: #9ae6b4; }
     [data-theme="dark"] .pill-red    { color: #feb2b2; }
-    [data-theme="dark"] .pill-blue   { color: #90cdf4; }
     [data-theme="dark"] .pill-orange { color: #fbd38d; }
     [data-theme="dark"] .pill-blue   { color: #a3bffa; }
     [data-theme="dark"] .pill-gray   { color: #cbd5e0; }
@@ -517,7 +515,6 @@
           <option value="">Todos os status</option>
           <option value="pago">Pago</option>
           <option value="aberto">Em aberto</option>
-          <option value="adiantado">Adiantado</option>
         </select>
       </div>
       <div class="card">
@@ -858,31 +855,22 @@ function renderReceitas() {
   const th = document.getElementById('rec-th-mes');
   th.textContent = 'Mês(es)';
 
-  // Detecta meses futuros pagos (adiantamentos) por unidade
-  function mesesAdiantados(r) {
-    return MESES.filter((_, mi) => mi > mesSel && r.valores[mi] > 0);
-  }
-
   const rows = [];
   if (filMes === -1) {
     dadosReceitas.forEach(r => {
       const mesesPagos = MESES.filter((_, mi) => r.valores[mi] > 0);
       const totalPago  = r.valores.reduce((s, v) => s + v, 0);
-      const adiant     = mesesAdiantados(r);
       const status     = mesesPagos.length > 0 ? 'pago' : 'aberto';
-      if (filStatus === 'adiantado' && adiant.length === 0) return;
-      if (filStatus && filStatus !== 'adiantado' && filStatus !== status) return;
-      rows.push({ unidade: r.unidade, mes: mesesPagos.length > 0 ? mesesPagos.join(', ') : '—', valor: totalPago, status, adiant });
+      if (filStatus && filStatus !== status) return;
+      rows.push({ unidade: r.unidade, mes: mesesPagos.length > 0 ? mesesPagos.join(', ') : '—', valor: totalPago, status });
     });
   } else {
     mesesMostrar.forEach(mi => {
       dadosReceitas.forEach(r => {
-        const v      = r.valores[mi];
-        const adiant = mesesAdiantados(r);
+        const v = r.valores[mi];
         const status = v > 0 ? 'pago' : 'aberto';
-        if (filStatus === 'adiantado' && adiant.length === 0) return;
-        if (filStatus && filStatus !== 'adiantado' && filStatus !== status) return;
-        rows.push({ unidade: r.unidade, mes: MESES[mi], valor: v, status, adiant });
+        if (filStatus && filStatus !== status) return;
+        rows.push({ unidade: r.unidade, mes: MESES[mi], valor: v, status });
       });
     });
   }
@@ -892,21 +880,13 @@ function renderReceitas() {
     tb.innerHTML = `<tr class="empty-row"><td colspan="4">Nenhum registro encontrado</td></tr>`;
     return;
   }
-  tb.innerHTML = rows.map(r => {
-    const pillStatus = r.status === 'pago'
-      ? `<span class="pill pill-green">Pago</span>`
-      : `<span class="pill pill-red">Em aberto</span>`;
-    const pillAdiant = r.adiant.length > 0
-      ? ` <span class="pill pill-blue" title="Meses adiantados: ${r.adiant.join(', ')}">+${r.adiant.length} adiantado${r.adiant.length > 1 ? 's' : ''}</span>`
-      : '';
-    return `
+  tb.innerHTML = rows.map(r => `
     <tr>
       <td><strong>${nomUnidade(r.unidade)}</strong></td>
       <td>${r.mes}</td>
       <td>${r.valor > 0 ? moeda(r.valor) : '—'}</td>
-      <td>${pillStatus}${pillAdiant}</td>
-    </tr>`;
-  }).join('');
+      <td><span class="pill ${r.status==='pago'?'pill-green':'pill-red'}">${r.status==='pago'?'Pago':'Em aberto'}</span></td>
+    </tr>`).join('');
 }
 
 function renderDespesas() {

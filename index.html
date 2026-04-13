@@ -252,6 +252,7 @@
       font-size: 2.2rem; font-weight: 800; color: #fff; line-height: 1;
     }
     .caixa-sub { font-size: 0.78rem; color: rgba(255,255,255,0.7); margin-top: 6px; }
+    #sparkline-caixa { margin-top: 10px; width: 100%; opacity: 0.85; }
     .caixa-right {
       display: flex; gap: 32px;
       border-left: 1px solid rgba(255,255,255,0.2);
@@ -376,6 +377,7 @@
           <div class="caixa-label">Saldo em Caixa</div>
           <div class="caixa-value" id="kpi-caixa">—</div>
           <div class="caixa-sub" id="kpi-caixa-sub">—</div>
+          <canvas id="sparkline-caixa" height="50"></canvas>
         </div>
         <div class="caixa-right">
           <div class="caixa-item">
@@ -782,6 +784,7 @@ function renderDashboard() {
   set('kpi-caixa-rec',  moeda(recAcum));
   set('kpi-caixa-desp', moeda(despAcum));
   set('kpi-caixa-mes',  moeda(saldoMes));
+  renderSparkline();
 
   set('kpi-saldo',       moeda(recMes));
   set('kpi-saldo-sub',   `${pagas} de ${total} unidades pagas`);
@@ -977,11 +980,60 @@ function renderInadimplencia() {
 }
 
 // ── Charts ────────────────────────────────────────────────────
-let barChart, doughnutChart, fundoChart;
+let barChart, doughnutChart, fundoChart, sparklineChart;
 
 function isDark() { return document.documentElement.dataset.theme === 'dark'; }
 function tColor() { return isDark() ? '#a0aec0' : '#718096'; }
 function gColor() { return isDark() ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)'; }
+
+function renderSparkline() {
+  const ctx = document.getElementById('sparkline-caixa');
+  if (!ctx) return;
+  if (sparklineChart) { sparklineChart.destroy(); sparklineChart = null; }
+
+  const labels = [];
+  const data = [];
+  for (let m = 0; m <= mesSel; m++) {
+    const recAcum = dadosReceitas.reduce((s, r) => s + r.valores.slice(0, m + 1).reduce((a, b) => a + b, 0), 0);
+    const despAcum = dadosDespesas
+      .filter(d => d.dataParts && parseInt(d.dataParts[2]) === anoSel && parseInt(d.dataParts[1]) - 1 <= m)
+      .reduce((s, d) => s + d.valor, 0);
+    labels.push(MESES[m]);
+    data.push(recAcum - despAcum + saldoAnterior);
+  }
+
+  const positivo = data[data.length - 1] >= 0;
+  const cor = positivo ? 'rgba(100,255,180,0.9)' : 'rgba(255,100,100,0.9)';
+  const corFill = positivo ? 'rgba(100,255,180,0.15)' : 'rgba(255,100,100,0.15)';
+
+  sparklineChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        data,
+        borderColor: cor,
+        backgroundColor: corFill,
+        borderWidth: 2,
+        tension: 0.4,
+        fill: true,
+        pointRadius: data.map((_, i) => i === data.length - 1 ? 4 : 0),
+        pointBackgroundColor: cor
+      }]
+    },
+    options: {
+      responsive: true,
+      animation: false,
+      plugins: { legend: { display: false }, tooltip: {
+        callbacks: { label: ctx => moeda(ctx.parsed.y) }
+      }},
+      scales: {
+        x: { display: false },
+        y: { display: false }
+      }
+    }
+  });
+}
 
 function renderBarChart() {
   const ctx = document.getElementById('chart-bar');

@@ -267,8 +267,30 @@
       .kpi-row { grid-template-columns: repeat(2,1fr); }
       .charts-row, .bottom-row { grid-template-columns: 1fr; }
     }
+    /* ── Hamburger button ── */
+    .btn-menu {
+      display: none; background: transparent; border: none; cursor: pointer;
+      color: var(--text); font-size: 1.4rem; padding: 6px 8px; border-radius: 8px;
+      line-height: 1;
+    }
+    .btn-menu:hover { background: rgba(102,126,234,0.1); }
+
+    /* ── Mobile overlay ── */
+    .sidebar-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+      z-index: 200; backdrop-filter: blur(2px);
+    }
+    .sidebar-overlay.open { display: block; }
+
     @media (max-width: 640px) {
-      .sidebar { display: none; }
+      .btn-menu { display: block; }
+      .sidebar {
+        display: flex; position: fixed; top: 0; left: 0; height: 100dvh;
+        width: 230px; z-index: 201;
+        transform: translateX(-100%); transition: transform 0.25s ease;
+        padding-top: 60px;
+      }
+      .sidebar.open { transform: translateX(0); }
       .search-wrap { display: none; }
       .top-header { padding: 0 14px; height: 56px; gap: 10px; }
       .brand-text { font-size: 0.88rem; }
@@ -314,7 +336,9 @@
 </div>
 
 <!-- ── Header ── -->
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
 <header class="top-header">
+  <button class="btn-menu" id="btn-menu" title="Menu">☰</button>
   <a class="brand" href="#">
     <div class="brand-icon">🏢</div>
     <div>
@@ -1256,6 +1280,16 @@ document.getElementById('fil-rec-status').addEventListener('change', renderRecei
 document.getElementById('fil-desp-cat').addEventListener('change', renderDespesas);
 document.getElementById('fil-desp-status').addEventListener('change', renderDespesas);
 
+
+// ── Mobile sidebar toggle ──────────────────────────────────────
+const sidebar = document.querySelector('.sidebar');
+const overlay = document.getElementById('sidebar-overlay');
+function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('open'); }
+document.getElementById('btn-menu').addEventListener('click', () => {
+  sidebar.classList.toggle('open'); overlay.classList.toggle('open');
+});
+overlay.addEventListener('click', closeSidebar);
+sidebar.querySelectorAll('.nav-btn').forEach(btn => btn.addEventListener('click', closeSidebar));
 
 // ── Dark mode ─────────────────────────────────────────────────
 document.getElementById('dark-toggle').addEventListener('click', () => {

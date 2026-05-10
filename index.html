@@ -262,10 +262,23 @@
     .caixa-item-label { font-size: 0.72rem; color: rgba(255,255,255,0.65); }
     .caixa-item-value { font-size: 1rem; font-weight: 700; color: #fff; }
 
+    /* ── Insights row ── */
+    .insights-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; margin-bottom: 20px; }
+    .gauge-wrap { max-width: 220px; margin: 0 auto 4px; }
+    .gauge-center { text-align: center; margin-top: 2px; }
+    .gauge-pct { font-size: 1.8rem; font-weight: 800; color: var(--text); line-height: 1.1; }
+    .gauge-sub-label { text-align: center; font-size: 0.75rem; color: var(--text-muted); }
+    .top-desp-item { margin-bottom: 10px; }
+    .top-desp-item:last-child { margin-bottom: 0; }
+    .top-desp-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; font-size: 0.78rem; }
+    .top-desp-name { color: var(--text); font-weight: 600; }
+    .top-desp-val { color: var(--text-muted); font-size: 0.75rem; }
+    .top-desp-pct { font-size: 0.68rem; color: var(--text-muted); margin-top: 2px; text-align: right; }
+
     @media (max-width: 900px) {
       .sidebar { width: 180px; }
       .kpi-row { grid-template-columns: repeat(2,1fr); }
-      .charts-row, .bottom-row { grid-template-columns: 1fr; }
+      .charts-row, .bottom-row, .insights-row { grid-template-columns: 1fr; }
     }
     /* ── Hamburger button ── */
     .btn-menu {
@@ -445,6 +458,28 @@
           <div class="kpi-sub" id="kpi-inad-sub">—</div>
         </div>
       </div>
+      <div class="insights-row">
+        <div class="card">
+          <div class="card-title">Adimplência <span id="gauge-status-label">—</span></div>
+          <div class="gauge-wrap">
+            <canvas id="gauge-adimplencia"></canvas>
+          </div>
+          <div class="gauge-center">
+            <div class="gauge-pct" id="gauge-pct-label">—</div>
+          </div>
+          <div class="gauge-sub-label" id="gauge-units-label">—</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Tendência de Inadimplência <span id="inad-trend-badge">—</span></div>
+          <div id="inad-trend-empty" style="display:none;text-align:center;color:var(--text-muted);font-style:italic;font-size:0.8rem;padding:28px 0">Aguardando vencimento</div>
+          <canvas id="chart-inad-trend" height="110"></canvas>
+        </div>
+        <div class="card">
+          <div class="card-title">Maiores Despesas <span id="top-desp-mes">—</span></div>
+          <div id="top-despesas-list"></div>
+        </div>
+      </div>
+
       <div class="charts-row">
         <div class="card">
           <div class="card-title">Receitas vs Despesas <span id="chart-bar-label">por mês</span></div>
@@ -840,6 +875,9 @@ function renderDashboard() {
       </tr>`).join('');
   }
 
+  renderGaugeAdimplencia();
+  renderTendenciaInad();
+  renderTopDespesas(despMes);
   renderBarChart();
   renderDoughnut(despMes);
 }
@@ -1006,7 +1044,7 @@ function mesVencido(mesIdx, ano) {
 }
 
 // ── Charts ────────────────────────────────────────────────────
-let barChart, doughnutChart, fundoChart, sparklineChart;
+let barChart, doughnutChart, fundoChart, sparklineChart, gaugeChart, inadTendChart;
 
 function isDark() { return document.documentElement.dataset.theme === 'dark'; }
 function tColor() { return isDark() ? '#a0aec0' : '#718096'; }
@@ -1127,6 +1165,131 @@ function renderDoughnut(despMes) {
       plugins: { legend: { position: 'bottom', labels: { color: tColor(), font: { size: 10 }, padding: 10 } } }
     }
   });
+}
+
+function renderGaugeAdimplencia() {
+  const ctx = document.getElementById('gauge-adimplencia');
+  if (!ctx) return;
+  if (gaugeChart) { gaugeChart.destroy(); gaugeChart = null; }
+
+  const pagas = dadosReceitas.filter(r => r.valores[mesSel] > 0).length;
+  const total  = dadosReceitas.length;
+  const pct    = total > 0 ? (pagas / total * 100) : 0;
+  const cor    = pct >= 80 ? '#48bb78' : pct >= 60 ? '#f6ad55' : '#fc8181';
+  const label  = pct >= 80 ? 'Boa' : pct >= 60 ? 'Regular' : 'Baixa';
+
+  set('gauge-pct-label', pct.toFixed(0) + '%');
+  set('gauge-units-label', `${pagas} de ${total} unidades pagas`);
+  const sl = document.getElementById('gauge-status-label');
+  if (sl) { sl.textContent = label; sl.style.color = cor; }
+
+  gaugeChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      datasets: [{
+        data: [pct, 100 - pct],
+        backgroundColor: [cor, isDark() ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.07)'],
+        borderWidth: 0
+      }]
+    },
+    options: {
+      rotation: -90,
+      circumference: 180,
+      cutout: '72%',
+      animation: false,
+      responsive: true,
+      plugins: { legend: { display: false }, tooltip: { enabled: false } }
+    }
+  });
+}
+
+function renderTendenciaInad() {
+  const ctx = document.getElementById('chart-inad-trend');
+  if (!ctx) return;
+  if (inadTendChart) { inadTendChart.destroy(); inadTendChart = null; }
+
+  const labels = [], data = [];
+  const total = dadosReceitas.length;
+  for (let m = 0; m <= mesSel; m++) {
+    if (!mesVencido(m, anoSel)) break;
+    const pagas = dadosReceitas.filter(r => r.valores[m] > 0).length;
+    labels.push(MESES[m]);
+    data.push(total > 0 ? parseFloat(((total - pagas) / total * 100).toFixed(1)) : 0);
+  }
+
+  const emptyEl = document.getElementById('inad-trend-empty');
+  if (data.length === 0) {
+    emptyEl.style.display = 'block'; ctx.style.display = 'none';
+    set('inad-trend-badge', '—');
+    return;
+  }
+  emptyEl.style.display = 'none'; ctx.style.display = '';
+
+  const ultimo = data[data.length - 1];
+  const penult = data.length > 1 ? data[data.length - 2] : null;
+  let badge = '—', badgeColor = tColor();
+  if (penult !== null) {
+    if (ultimo < penult)      { badge = '↓ Melhorou'; badgeColor = '#48bb78'; }
+    else if (ultimo > penult) { badge = '↑ Piorou';   badgeColor = '#fc8181'; }
+    else                      { badge = '→ Estável';  badgeColor = tColor();  }
+  }
+  const badgeEl = document.getElementById('inad-trend-badge');
+  if (badgeEl) { badgeEl.textContent = badge; badgeEl.style.color = badgeColor; }
+
+  inadTendChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        data,
+        borderColor: '#ff758c',
+        backgroundColor: 'rgba(255,117,140,0.1)',
+        borderWidth: 2, tension: 0.4, fill: true,
+        pointRadius: data.map((_, i) => i === data.length - 1 ? 4 : 2),
+        pointBackgroundColor: '#ff758c'
+      }]
+    },
+    options: {
+      responsive: true, animation: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => c.parsed.y.toFixed(1) + '%' } } },
+      scales: {
+        x: { ticks: { color: tColor(), font: { size: 10 } }, grid: { display: false } },
+        y: { ticks: { color: tColor(), font: { size: 10 }, callback: v => v + '%' }, grid: { color: gColor() }, min: 0 }
+      }
+    }
+  });
+}
+
+function renderTopDespesas(despMes) {
+  const dados = despMes || despMesAtual(dadosDespesas, mesSel, anoSel);
+  const cats  = {};
+  dados.forEach(d => { cats[d.categoria] = (cats[d.categoria] || 0) + d.valor; });
+  const totalDesp = Object.values(cats).reduce((s, v) => s + v, 0);
+  const sorted    = Object.entries(cats).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  const cores     = ['#667eea', '#11998e', '#f7971e', '#ff758c', '#4facfe'];
+
+  set('top-desp-mes', `${MESES[mesSel]}/${anoSel}`);
+
+  const el = document.getElementById('top-despesas-list');
+  if (!el) return;
+  if (sorted.length === 0) {
+    el.innerHTML = `<div style="text-align:center;color:var(--text-muted);font-style:italic;font-size:0.8rem;padding:28px 0">Sem despesas neste mês</div>`;
+    return;
+  }
+  el.innerHTML = sorted.map(([cat, val], i) => {
+    const pct = totalDesp > 0 ? (val / totalDesp * 100) : 0;
+    return `
+      <div class="top-desp-item">
+        <div class="top-desp-header">
+          <span class="top-desp-name">${cat}</span>
+          <span class="top-desp-val">${moeda(val)}</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" style="width:${pct.toFixed(1)}%;background:${cores[i]};transition:width 0.4s ease"></div>
+        </div>
+        <div class="top-desp-pct">${pct.toFixed(1)}% do total</div>
+      </div>`;
+  }).join('');
 }
 
 function renderFundo() {
@@ -1297,6 +1460,7 @@ document.getElementById('dark-toggle').addEventListener('click', () => {
   const dark = html.dataset.theme === 'dark';
   html.dataset.theme = dark ? 'light' : 'dark';
   document.getElementById('dark-toggle').textContent = dark ? '🌙' : '☀️';
+  renderGaugeAdimplencia(); renderTendenciaInad();
   renderBarChart(); renderDoughnut(); if (fundoChart) { fundoChart.destroy(); fundoChart=null; renderFundo(); }
 });
 

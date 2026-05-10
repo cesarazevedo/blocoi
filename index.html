@@ -680,7 +680,16 @@ const MESES_FULL = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho
 let dadosReceitas = [];   // [{unidade, valores:[12]}]
 let dadosDespesas = [];   // [{data,dataParts,categoria,descricao,fornecedor,valor,status}]
 let saldoAnterior = 0;
-let mesSel = new Date().getMonth();
+// Abre no último mês fechado (vencido dia 10 do mês seguinte); se nenhum venceu ainda, usa o atual
+function ultimoMesFechado() {
+  const hoje = new Date();
+  const ano = hoje.getFullYear();
+  for (let m = hoje.getMonth(); m >= 0; m--) {
+    if (new Date() >= new Date(ano, m + 1, 10)) return m;
+  }
+  return hoje.getMonth();
+}
+let mesSel = ultimoMesFechado();
 let anoSel = new Date().getFullYear();
 
 // ── Modo Privado (LGPD) ───────────────────────────────────────

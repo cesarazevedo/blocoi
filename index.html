@@ -1586,12 +1586,15 @@ function gerarPDF() {
   const saldoCaixa  = recAcum - despAcum + saldoAnterior;
   const pctAdim     = totalUnits > 0 ? (pagasUnits.length / totalUnits * 100) : 0;
   const mesJaVenceu = mesVencido(mesSel, anoSel);
+  // inadimplência do mês selecionado (consistente com adimplência do resumo)
+  const inadMesCount = mesJaVenceu ? (totalUnits - pagasUnits.length) : 0;
+  const taxaInad     = totalUnits > 0 ? (inadMesCount / totalUnits * 100) : 0;
+  // lista acumulada usada na página 4 (todos os meses em aberto até mesSel)
   const inadList    = dadosReceitas.map(r => {
     const mb = MESES.slice(0, mesSel + 1).map((m, i) => ({ mes: m, idx: i }))
       .filter(({ idx }) => r.valores[idx] === 0 && mesVencido(idx, anoSel));
     return { unidade: r.unidade, mesesAbertos: mb };
   }).filter(r => r.mesesAbertos.length > 0);
-  const taxaInad = totalUnits > 0 ? (inadList.length / totalUnits * 100) : 0;
 
   // ══ PAGE 1: RESUMO ══
   let y = pgHeader(`Resumo Financeiro - ${periodo}`);
@@ -1620,9 +1623,9 @@ function gerarPDF() {
   y += 9;
   doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5);
   if (mesJaVenceu) {
-    const ic = inadList.length === 0 ? C.green : taxaInad > 20 ? C.red : C.orange;
+    const ic = inadMesCount === 0 ? C.green : taxaInad > 20 ? C.red : C.orange;
     doc.setTextColor(...ic);
-    doc.text(pdfStr(`Inadimplencia: ${taxaInad.toFixed(1)}% (${inadList.length} unidade(s) em aberto)`), mg, y);
+    doc.text(pdfStr(`Inadimplencia: ${taxaInad.toFixed(1)}% (${inadMesCount} unidade(s) em aberto)`), mg, y);
   } else {
     doc.setTextColor(...C.gray);
     doc.text(pdfStr(`Inadimplencia: vencimento em 10/${MESES[(mesSel + 1) % 12]}`), mg, y);

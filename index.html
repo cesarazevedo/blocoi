@@ -1678,6 +1678,8 @@ function gerarPDF() {
     alternateRowStyles: { fillColor: C.surf },
     columnStyles: { 0: { cellWidth: 90 }, 1: { cellWidth: 55, halign: 'right' }, 2: { halign: 'center' } },
     didParseCell(data) {
+      if (data.column.index === 1) data.cell.styles.halign = 'right';
+      if (data.column.index === 2) data.cell.styles.halign = 'center';
       if (data.column.index === 2 && data.section === 'body') {
         data.cell.styles.fontStyle = 'bold';
         data.cell.styles.textColor = data.cell.raw === 'Pago' ? [39,103,73] : [197,48,48];
@@ -1713,6 +1715,8 @@ function gerarPDF() {
         3: { cellWidth: 28, overflow: 'ellipsize' }, 4: { cellWidth: 26, halign: 'right' }, 5: { cellWidth: 18, halign: 'center' }
       },
       didParseCell(data) {
+        if (data.column.index === 4) data.cell.styles.halign = 'right';
+        if (data.column.index === 5) data.cell.styles.halign = 'center';
         if (data.column.index === 5 && data.section === 'body') {
           data.cell.styles.fontStyle = 'bold';
           data.cell.styles.textColor = (data.cell.raw || '').toLowerCase() === 'pago' ? [39,103,73] : [151,74,10];

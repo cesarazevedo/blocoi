@@ -785,7 +785,7 @@ function parseReceitas(rows) {
   // Linha TOTAL = ignorar
   return rows.slice(1).filter(r => {
     const u = (r[0] || '').trim();
-    return u && u !== 'TOTAL' && !u.startsWith('RECEITAS');
+    return u && u !== 'TOTAL' && !u.startsWith('RECEITAS') && !isNaN(+u);
   }).map(r => {
     // Isento: texto "ISENTO" (caso gviz preserve) OU valor negativo (ex: -1 na planilha)
     const isentos = r.slice(1, 13).map(v => (v || '').trim().toUpperCase() === 'ISENTO' || parseMoeda(v) < 0);

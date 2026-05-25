@@ -772,28 +772,11 @@ function parseCSV(text) {
   return rows;
 }
 
-function parseHtmlTable(html) {
-  const div = document.createElement('div');
-  div.innerHTML = html;
-  const table = div.querySelector('table');
-  if (!table) return [];
-  return Array.from(table.querySelectorAll('tr')).map(tr =>
-    Array.from(tr.querySelectorAll('td, th')).map(td => td.textContent.trim())
-  );
-}
-
 async function fetchSheet(sheetName) {
-  // export?format=csv preserves raw cell text (including "ISENTO") without gviz type inference
-  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&sheet=${encodeURIComponent(sheetName)}`;
-  try {
-    const res = await fetch(url);
-    if (res.ok) return parseCSV(await res.text());
-  } catch(_) {}
-  // fallback: gviz HTML (preserves display values better than csv/json)
-  const fallback = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:html&sheet=${encodeURIComponent(sheetName)}`;
-  const res2 = await fetch(fallback);
-  if (!res2.ok) throw new Error(`Erro ao carregar aba "${sheetName}"`);
-  return parseHtmlTable(await res2.text());
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Erro ao carregar aba "${sheetName}"`);
+  return parseCSV(await res.text());
 }
 
 // ── Parse dados ───────────────────────────────────────────────
@@ -802,14 +785,13 @@ function parseReceitas(rows) {
   // Linha TOTAL = ignorar
   return rows.slice(1).filter(r => {
     const u = (r[0] || '').trim();
-    return u && u !== 'TOTAL' && !u.startsWith('RECEITAS') && !isNaN(+u);
+    return u && u !== 'TOTAL' && !u.startsWith('RECEITAS');
   }).map(r => {
-    const isentos = r.slice(1, 13).map(v => (v || '').trim().toUpperCase() === 'ISENTO');
-    if (isentos.some(Boolean)) console.log('[ISENTO] detectado:', r[0], r.slice(1, 13));
-    else if ((r[0] || '').trim() === '303') console.log('[DEBUG 303] valores brutos:', r.slice(1, 13));
+    // Isento: texto "ISENTO" (caso gviz preserve) OU valor negativo (ex: -1 na planilha)
+    const isentos = r.slice(1, 13).map(v => (v || '').trim().toUpperCase() === 'ISENTO' || parseMoeda(v) < 0);
     return {
       unidade: r[0].trim(),
-      valores: r.slice(1, 13).map(parseMoeda),
+      valores: r.slice(1, 13).map(v => Math.max(0, parseMoeda(v))),
       isentos
     };
   });

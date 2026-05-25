@@ -786,11 +786,16 @@ function parseReceitas(rows) {
   return rows.slice(1).filter(r => {
     const u = (r[0] || '').trim();
     return u && u !== 'TOTAL' && !u.startsWith('RECEITAS');
-  }).map(r => ({
-    unidade: r[0].trim(),
-    valores: r.slice(1, 13).map(parseMoeda),
-    isentos: r.slice(1, 13).map(v => (v || '').trim().toUpperCase() === 'ISENTO')
-  }));
+  }).map(r => {
+    const isentos = r.slice(1, 13).map(v => (v || '').trim().toUpperCase() === 'ISENTO');
+    if (isentos.some(Boolean)) console.log('[ISENTO] detectado:', r[0], r.slice(1, 13));
+    else if ((r[0] || '').trim() === '303') console.log('[DEBUG 303] valores brutos:', r.slice(1, 13));
+    return {
+      unidade: r[0].trim(),
+      valores: r.slice(1, 13).map(parseMoeda),
+      isentos
+    };
+  });
 }
 
 function parseDespesas(rows) {

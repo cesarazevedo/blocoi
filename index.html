@@ -505,25 +505,7 @@
         </div>
         <div class="card">
           <div class="card-title">Comunicados Recentes</div>
-          <div class="comm-list">
-
-            <div class="comm-card geral">
-              <div class="comm-card-title">🐾 Animais devem circular na coleira</div>
-              <div class="comm-card-meta">Regra do condomínio · válido para todas as dependências</div>
-            </div>
-            <div class="comm-card geral">
-              <div class="comm-card-title">🚗 Portões da garagem devem permanecer fechados</div>
-              <div class="comm-card-meta">Fechar o portão após entrada ou saída do veículo</div>
-            </div>
-            <div class="comm-card geral">
-              <div class="comm-card-title">🔇 Proibido ruído acima do permitido por lei</div>
-              <div class="comm-card-meta">Diurno (7h–22h): até 55 dB · Noturno (22h–7h): até 50 dB · NBR 10.151</div>
-            </div>
-            <div class="comm-card geral">
-              <div class="comm-card-title">🚫 Proibido estender roupas nas janelas</div>
-              <div class="comm-card-meta">Não estender roupas, toalhas ou similares nas janelas e sacadas</div>
-            </div>
-          </div>
+          <div class="comm-list" id="comm-list"></div>
         </div>
       </div>
     </div>
@@ -683,6 +665,7 @@ const MESES_FULL = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho
 // ── Estado ────────────────────────────────────────────────────
 let dadosReceitas = [];   // [{unidade, valores:[12]}]
 let dadosDespesas = [];   // [{data,dataParts,categoria,descricao,fornecedor,valor,status}]
+let dadosComunicados = []; // [{titulo,texto,data,ativo,validade}]
 let saldoAnterior = 0;
 // Abre no último mês fechado (vencido dia 10 do mês seguinte); se nenhum venceu ainda, usa o atual
 function ultimoMesFechado() {
@@ -822,6 +805,20 @@ function parseDespesas(rows) {
       status: r[5] || ''
     };
   }).filter(r => r.valor > 0);
+}
+
+function parseComunicados(rows) {
+  return rows.slice(1).filter(r => (r[0] || '').trim()).map(r => {
+    const ativo = (r[3] || '').trim();
+    const valStr = (r[4] || '').trim();
+    let validade = null;
+    if (valStr) {
+      const p = valStr.split('/');
+      validade = p.length === 3 ? new Date(+p[2], +p[1] - 1, +p[0]) : new Date(valStr);
+    }
+    return { titulo: r[0] || '', texto: r[1] || '', data: r[2] || '',
+             ativo: ativo === '' || ativo.toUpperCase() === 'TRUE', validade };
+  }).filter(c => c.ativo && (!c.validade || c.validade >= new Date()));
 }
 
 // ── Filtrar despesas por mês/ano ──────────────────────────────
@@ -1345,11 +1342,26 @@ function renderFundo() {
   });
 }
 
+function renderComunicados() {
+  const el = document.getElementById('comm-list');
+  if (!el) return;
+  if (!dadosComunicados.length) {
+    el.innerHTML = '<p style="color:var(--c-muted);font-size:.85rem">Nenhum comunicado ativo.</p>';
+    return;
+  }
+  el.innerHTML = dadosComunicados.map(c => `
+    <div class="comm-card geral">
+      <div class="comm-card-title">${c.titulo}</div>
+      ${c.texto ? `<div class="comm-card-meta">${c.texto}</div>` : ''}
+    </div>`).join('');
+}
+
 function renderTudo() {
   renderDashboard();
   renderReceitas();
   renderDespesas();
   renderInadimplencia();
+  renderComunicados();
 }
 
 // ── Saldo anterior (ano precedente completo) ──────────────────
@@ -1424,19 +1436,21 @@ function mostrarIndicadorCache(sheets) {
 
 // ── Carregar dados ────────────────────────────────────────────
 async function carregar(forcarAtualizacao = false) {
-  const sheets = [`Receitas ${anoSel}`, 'Despesas', 'Config'];
+  const sheets = [`Receitas ${anoSel}`, 'Despesas', 'Config', 'Comunicados'];
   if (forcarAtualizacao) sheets.forEach(s => localStorage.removeItem(cacheKey(s)));
 
   document.getElementById('loading').classList.remove('hidden');
   try {
-    const [rowsR, rowsD, rowsC] = await Promise.all([
+    const [rowsR, rowsD, rowsC, rowsComm] = await Promise.all([
       fetchSheetCached(`Receitas ${anoSel}`),
       fetchSheetCached('Despesas'),
-      fetchSheetCached('Config').catch(() => [])
+      fetchSheetCached('Config').catch(() => []),
+      fetchSheetCached('Comunicados').catch(() => [])
     ]);
     const isentosMap = parseConfig(rowsC);
     dadosReceitas = parseReceitas(rowsR, isentosMap);
     dadosDespesas = parseDespesas(rowsD);
+    dadosComunicados = parseComunicados(rowsComm);
     await calcularSaldoAnterior(anoSel);
     buildMapaUnidades();
     renderTudo();

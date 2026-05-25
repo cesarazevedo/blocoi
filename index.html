@@ -780,18 +780,30 @@ async function fetchSheet(sheetName) {
 }
 
 // ── Parse dados ───────────────────────────────────────────────
-function parseReceitas(rows) {
+function parseConfig(rows) {
+  const map = {};
+  rows.slice(1).forEach(r => {
+    const u = (r[0] || '').trim();
+    if (!u || isNaN(+u)) return;
+    map[u] = r.slice(1, 13).map(v => !!(v || '').trim());
+  });
+  return map;
+}
+
+function parseReceitas(rows, isentosMap = {}) {
   // Linha 0 = cabeçalho (célula mesclada + meses), ignorar
   // Linha TOTAL = ignorar
   return rows.slice(1).filter(r => {
     const u = (r[0] || '').trim();
     return u && u !== 'TOTAL' && !u.startsWith('RECEITAS') && !isNaN(+u);
   }).map(r => {
-    // Isento: texto "ISENTO" (caso gviz preserve) OU valor negativo (ex: -1 na planilha)
-    const isentos = r.slice(1, 13).map(v => (v || '').trim().toUpperCase() === 'ISENTO' || parseMoeda(v) < 0);
+    const unidade = r[0].trim();
+    // Isentos: vem da aba Config (primário) ou fallback por valor negativo/-texto ISENTO na célula
+    const fromConfig = isentosMap[unidade];
+    const isentos = fromConfig || r.slice(1, 13).map(v => (v || '').trim().toUpperCase() === 'ISENTO' || parseMoeda(v) < 0);
     return {
-      unidade: r[0].trim(),
-      valores: r.slice(1, 13).map(v => Math.max(0, parseMoeda(v))),
+      unidade,
+      valores: r.slice(1, 13).map(parseMoeda),
       isentos
     };
   });
@@ -1412,16 +1424,18 @@ function mostrarIndicadorCache(sheets) {
 
 // ── Carregar dados ────────────────────────────────────────────
 async function carregar(forcarAtualizacao = false) {
-  const sheets = [`Receitas ${anoSel}`, 'Despesas'];
+  const sheets = [`Receitas ${anoSel}`, 'Despesas', 'Config'];
   if (forcarAtualizacao) sheets.forEach(s => localStorage.removeItem(cacheKey(s)));
 
   document.getElementById('loading').classList.remove('hidden');
   try {
-    const [rowsR, rowsD] = await Promise.all([
+    const [rowsR, rowsD, rowsC] = await Promise.all([
       fetchSheetCached(`Receitas ${anoSel}`),
-      fetchSheetCached('Despesas')
+      fetchSheetCached('Despesas'),
+      fetchSheetCached('Config').catch(() => [])
     ]);
-    dadosReceitas = parseReceitas(rowsR);
+    const isentosMap = parseConfig(rowsC);
+    dadosReceitas = parseReceitas(rowsR, isentosMap);
     dadosDespesas = parseDespesas(rowsD);
     await calcularSaldoAnterior(anoSel);
     buildMapaUnidades();

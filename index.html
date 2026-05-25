@@ -1373,7 +1373,7 @@ async function calcularSaldoAnterior(ano) {
 // ── Cache localStorage ────────────────────────────────────────
 const CACHE_TTL = 30 * 60 * 1000; // 30 minutos
 
-function cacheKey(sheet) { return `condo_cache_${SHEET_ID}_${sheet}`; }
+function cacheKey(sheet) { return `condo_cache_v3_${SHEET_ID}_${sheet}`; }
 
 function cacheSet(sheet, rows) {
   try {

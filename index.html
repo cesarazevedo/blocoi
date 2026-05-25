@@ -570,6 +570,7 @@
           <option value="">Todos os status</option>
           <option value="pago">Pago</option>
           <option value="aberto">Em aberto</option>
+          <option value="isento">Isento</option>
         </select>
       </div>
       <div class="card">
@@ -787,7 +788,8 @@ function parseReceitas(rows) {
     return u && u !== 'TOTAL' && !u.startsWith('RECEITAS');
   }).map(r => ({
     unidade: r[0].trim(),
-    valores: r.slice(1, 13).map(parseMoeda)
+    valores: r.slice(1, 13).map(parseMoeda),
+    isentos: r.slice(1, 13).map(v => (v || '').trim().toUpperCase() === 'ISENTO')
   }));
 }
 
@@ -833,7 +835,8 @@ function renderDashboard() {
   const saldoMes = recMes - totalDesp;
   // Só conta inadimplência para o mês selecionado se já venceu (dia 10 do mês seguinte)
   const mesJaVenceu = mesVencido(mesSel, anoSel);
-  const inadimplCount = mesJaVenceu ? (total - pagas) : 0;
+  const isentosCount = dadosReceitas.filter(r => r.isentos && r.isentos[mesSel]).length;
+  const inadimplCount = mesJaVenceu ? (total - pagas - isentosCount) : 0;
   const inadimpl = total > 0 ? (inadimplCount / total * 100) : 0;
 
   // ── Saldo em caixa acumulado (Jan até mês selecionado) ──
@@ -907,7 +910,7 @@ function renderReceitas() {
   // KPIs (sempre baseados no mês do header)
   const recMes = dadosReceitas.reduce((s, r) => s + r.valores[mesSel], 0);
   const pagas  = dadosReceitas.filter(r => r.valores[mesSel] > 0);
-  const aberto = dadosReceitas.filter(r => r.valores[mesSel] === 0);
+  const aberto = dadosReceitas.filter(r => r.valores[mesSel] === 0 && !(r.isentos && r.isentos[mesSel]));
 
   set('kpi-rec-total', moeda(recMes));
   set('kpi-rec-total-sub', mesLabel);
@@ -927,7 +930,8 @@ function renderReceitas() {
     dadosReceitas.forEach(r => {
       const mesesPagos = MESES.filter((_, mi) => r.valores[mi] > 0);
       const totalPago  = r.valores.reduce((s, v) => s + v, 0);
-      const status     = mesesPagos.length > 0 ? 'pago' : 'aberto';
+      const hasAberto  = MESES.some((_, mi) => r.valores[mi] === 0 && !(r.isentos && r.isentos[mi]) && mesVencido(mi, anoSel));
+      const status     = mesesPagos.length > 0 ? 'pago' : hasAberto ? 'aberto' : 'isento';
       if (filStatus && filStatus !== status) return;
       rows.push({ unidade: r.unidade, mes: mesesPagos.length > 0 ? mesesPagos.join(', ') : '—', valor: totalPago, status });
     });
@@ -935,7 +939,8 @@ function renderReceitas() {
     mesesMostrar.forEach(mi => {
       dadosReceitas.forEach(r => {
         const v = r.valores[mi];
-        const status = v > 0 ? 'pago' : 'aberto';
+        const isento = r.isentos && r.isentos[mi];
+        const status = v > 0 ? 'pago' : isento ? 'isento' : 'aberto';
         if (filStatus && filStatus !== status) return;
         rows.push({ unidade: r.unidade, mes: MESES[mi], valor: v, status });
       });
@@ -952,7 +957,7 @@ function renderReceitas() {
       <td><strong>${nomUnidade(r.unidade)}</strong></td>
       <td>${r.mes}</td>
       <td>${r.valor > 0 ? moeda(r.valor) : '—'}</td>
-      <td><span class="pill ${r.status==='pago'?'pill-green':'pill-red'}">${r.status==='pago'?'Pago':'Em aberto'}</span></td>
+      <td><span class="pill ${r.status==='pago'?'pill-green':r.status==='isento'?'pill-gray':'pill-red'}">${r.status==='pago'?'Pago':r.status==='isento'?'Isento':'Em aberto'}</span></td>
     </tr>`).join('');
 }
 
@@ -1016,7 +1021,7 @@ function renderInadimplencia() {
   const inadimpl = dadosReceitas.map(r => {
     const mesesAbertos = MESES.slice(0, mesSel + 1)
       .map((m, i) => ({ mes: m, idx: i, valor: r.valores[i] }))
-      .filter(m => m.valor === 0 && mesVencido(m.idx, anoSel));
+      .filter(m => m.valor === 0 && !(r.isentos && r.isentos[m.idx]) && mesVencido(m.idx, anoSel));
     return { unidade: r.unidade, mesesAbertos };
   }).filter(r => r.mesesAbertos.length > 0);
 
@@ -1520,19 +1525,20 @@ function gerarPDF() {
 
   function pgHeader(title) {
     pageNum++;
+    const PW = doc.internal.pageSize.getWidth();
     doc.setFillColor(...C.primary);
-    doc.rect(0, 0, W, 25, 'F');
+    doc.rect(0, 0, PW, 25, 'F');
     doc.setTextColor(...C.white);
     doc.setFont('helvetica', 'bold');   doc.setFontSize(13);
     doc.text('Controle Condominial', mg, 10);
     doc.setFont('helvetica', 'normal'); doc.setFontSize(8);
     doc.text(pdfStr(`Prestacao de Contas  -  ${periodo}`), mg, 17.5);
-    doc.text(`Gerado: ${dataGer}  |  Pag. ${pageNum}`, W - mg, 17.5, { align: 'right' });
+    doc.text(`Gerado: ${dataGer}  |  Pag. ${pageNum}`, PW - mg, 17.5, { align: 'right' });
     doc.setTextColor(...C.dark);
     doc.setFont('helvetica', 'bold'); doc.setFontSize(12);
     doc.text(pdfStr(title), mg, 35);
     doc.setDrawColor(...C.primary); doc.setLineWidth(0.6);
-    doc.line(mg, 37, W - mg, 37);
+    doc.line(mg, 37, PW - mg, 37);
     return 45;
   }
 
@@ -1562,7 +1568,7 @@ function gerarPDF() {
 
   function sep(y) {
     doc.setDrawColor(...C.lgray); doc.setLineWidth(0.2);
-    doc.line(mg, y, W - mg, y);
+    doc.line(mg, y, doc.internal.pageSize.getWidth() - mg, y);
     return y + 8;
   }
 
@@ -1574,7 +1580,7 @@ function gerarPDF() {
 
   // ── Dados ──
   const recMes     = dadosReceitas.reduce((s, r) => s + r.valores[mesSel], 0);
-  const pagasUnits = dadosReceitas.filter(r => r.valores[mesSel] > 0);
+  const pagasUnits = dadosReceitas.filter(r => r.valores[mesSel] > 0 || (r.isentos && r.isentos[mesSel]));
   const totalUnits = dadosReceitas.length;
   const despData   = despMesAtual(dadosDespesas, mesSel, anoSel);
   const totalDesp  = despData.reduce((s, d) => s + d.valor, 0);
@@ -1592,7 +1598,7 @@ function gerarPDF() {
   // lista acumulada usada na página 4 (todos os meses em aberto até mesSel)
   const inadList    = dadosReceitas.map(r => {
     const mb = MESES.slice(0, mesSel + 1).map((m, i) => ({ mes: m, idx: i }))
-      .filter(({ idx }) => r.valores[idx] === 0 && mesVencido(idx, anoSel));
+      .filter(({ idx }) => r.valores[idx] === 0 && !(r.isentos && r.isentos[idx]) && mesVencido(idx, anoSel));
     return { unidade: r.unidade, mesesAbertos: mb };
   }).filter(r => r.mesesAbertos.length > 0);
 
@@ -1670,7 +1676,8 @@ function gerarPDF() {
     head: [['Unidade', 'Valor', 'Status']],
     body: dadosReceitas.map(r => {
       const v = r.valores[mesSel];
-      return [pdfStr(nomUnidade(r.unidade)), v > 0 ? moeda(v) : '—', v > 0 ? 'Pago' : 'Em aberto'];
+      const isento = r.isentos && r.isentos[mesSel];
+      return [pdfStr(nomUnidade(r.unidade)), v > 0 ? moeda(v) : '—', v > 0 ? 'Pago' : isento ? 'Isento' : 'Em aberto'];
     }),
     margin: { left: mg, right: mg },
     styles: { fontSize: 9, cellPadding: { top: 4, bottom: 4, left: 5, right: 5 }, textColor: C.dark },
@@ -1682,13 +1689,13 @@ function gerarPDF() {
       if (data.column.index === 2) data.cell.styles.halign = 'center';
       if (data.column.index === 2 && data.section === 'body') {
         data.cell.styles.fontStyle = 'bold';
-        data.cell.styles.textColor = data.cell.raw === 'Pago' ? [39,103,73] : [197,48,48];
+        data.cell.styles.textColor = data.cell.raw === 'Pago' ? [39,103,73] : data.cell.raw === 'Isento' ? [74,85,104] : [197,48,48];
       }
     }
   });
 
   // ══ PAGE 3: DESPESAS ══
-  doc.addPage();
+  doc.addPage('a4', 'landscape');
   y = pgHeader(`Despesas - ${periodo}`);
   const pagasTot  = despData.filter(d => d.status === 'Pago').reduce((s, d) => s + d.valor, 0);
   const aPagarTot = despData.filter(d => d.status !== 'Pago').reduce((s, d) => s + d.valor, 0);
@@ -1711,8 +1718,8 @@ function gerarPDF() {
       headStyles: { fillColor: C.orange, textColor: [255,255,255], fontStyle: 'bold', fontSize: 8 },
       alternateRowStyles: { fillColor: C.surf },
       columnStyles: {
-        0: { cellWidth: 18 }, 1: { cellWidth: 28 }, 2: { cellWidth: 'auto' },
-        3: { cellWidth: 28, overflow: 'ellipsize' }, 4: { cellWidth: 26, halign: 'right' }, 5: { cellWidth: 18, halign: 'center' }
+        0: { cellWidth: 26 }, 1: { cellWidth: 38 }, 2: { cellWidth: 'auto' },
+        3: { cellWidth: 55, overflow: 'ellipsize' }, 4: { cellWidth: 30, halign: 'right' }, 5: { cellWidth: 25, halign: 'center' }
       },
       didParseCell(data) {
         if (data.column.index === 4) data.cell.styles.halign = 'right';
@@ -1726,7 +1733,7 @@ function gerarPDF() {
   }
 
   // ══ PAGE 4: INADIMPLÊNCIA ══
-  doc.addPage();
+  doc.addPage('a4', 'portrait');
   y = pgHeader(`Inadimplencia - ${periodo}`);
   doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(...C.gray);
   doc.text(

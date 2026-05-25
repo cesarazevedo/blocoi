@@ -1736,8 +1736,8 @@ function gerarPDF() {
       headStyles: { fillColor: C.orange, textColor: [255,255,255], fontStyle: 'bold', fontSize: 8 },
       alternateRowStyles: { fillColor: C.surf },
       columnStyles: {
-        0: { cellWidth: 26 }, 1: { cellWidth: 38 }, 2: { cellWidth: 'auto' },
-        3: { cellWidth: 55, overflow: 'ellipsize' }, 4: { cellWidth: 30, halign: 'right' }, 5: { cellWidth: 25, halign: 'center' }
+        0: { cellWidth: 26 }, 1: { cellWidth: 28 }, 2: { cellWidth: 'auto' },
+        3: { cellWidth: 42, overflow: 'ellipsize' }, 4: { cellWidth: 30, halign: 'right' }, 5: { cellWidth: 25, halign: 'center' }
       },
       didParseCell(data) {
         if (data.column.index === 4) data.cell.styles.halign = 'right';

@@ -340,6 +340,39 @@
     @media (max-width: 380px) {
       .kpi-row { grid-template-columns: 1fr; }
     }
+
+    /* ── Ticker ── */
+    .ticker-bar {
+      height: 32px; flex-shrink: 0;
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; overflow: hidden;
+      font-size: 0.72rem;
+    }
+    .ticker-label {
+      flex-shrink: 0; padding: 0 14px;
+      font-weight: 700; font-size: 0.68rem; letter-spacing: 0.8px;
+      text-transform: uppercase; color: #fff;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      height: 100%; display: flex; align-items: center; white-space: nowrap;
+    }
+    .ticker-track { flex: 1; overflow: hidden; position: relative; }
+    .ticker-inner {
+      display: inline-flex; gap: 0; white-space: nowrap;
+      animation: ticker-scroll 40s linear infinite;
+    }
+    .ticker-bar:hover .ticker-inner { animation-play-state: paused; }
+    @keyframes ticker-scroll {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    .ticker-item {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 0 20px; color: var(--text); border-right: 1px solid var(--border);
+    }
+    .ticker-item-icon { font-size: 0.9rem; }
+    .ticker-item-cat  { color: var(--text-muted); }
+    .ticker-item-val  { font-weight: 700; color: var(--text); }
+    .ticker-item-sub  { color: var(--text-muted); font-size: 0.65rem; }
   </style>
 </head>
 <body>
@@ -387,6 +420,16 @@
     <div class="avatar">🏢</div>
   </div>
 </header>
+
+<!-- ── Ticker ── -->
+<div class="ticker-bar">
+  <div class="ticker-label">📊 Médias 6m</div>
+  <div class="ticker-track">
+    <div class="ticker-inner" id="ticker-inner">
+      <span class="ticker-item"><span class="ticker-item-icon">⏳</span><span class="ticker-item-cat">Carregando...</span></span>
+    </div>
+  </div>
+</div>
 
 <!-- ── Main ── -->
 <div class="main-wrap">
@@ -1357,12 +1400,87 @@ function renderComunicados() {
     </div>`).join('');
 }
 
+const TICKER_ICONS = {
+  'limpeza': '🧹', 'conservação': '🧹', 'conservacao': '🧹',
+  'cosern': '⚡', 'energia': '⚡', 'luz': '⚡',
+  'manutenção': '🔧', 'manutencao': '🔧', 'reparo': '🔧',
+  'água': '💧', 'agua': '💧', 'caern': '💧',
+  'segurança': '🔒', 'seguranca': '🔒', 'portaria': '🔒',
+  'administração': '📋', 'administracao': '📋', 'taxa': '📋',
+  'jardim': '🌿', 'jardinagem': '🌿',
+  'elevador': '🛗',
+  'internet': '📡', 'telecom': '📡',
+};
+
+function tickerIcon(cat) {
+  const k = cat.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+  for (const [key, icon] of Object.entries(TICKER_ICONS)) {
+    if (k.includes(key)) return icon;
+  }
+  return '📌';
+}
+
+function renderTicker() {
+  const inner = document.getElementById('ticker-inner');
+  if (!inner || dadosDespesas.length === 0) return;
+
+  // Últimos 6 meses a partir de mesSel/anoSel
+  const janelas = [];
+  let m = mesSel, a = anoSel;
+  for (let i = 0; i < 6; i++) {
+    janelas.push({ mes: m, ano: a });
+    m--; if (m < 0) { m = 11; a--; }
+  }
+
+  // Soma por categoria em cada mês da janela
+  const totaisPorCat = {};
+  const mesesComDados = new Set();
+
+  dadosDespesas.forEach(d => {
+    if (!d.dataParts) return;
+    const dm = parseInt(d.dataParts[1]) - 1;
+    const da = parseInt(d.dataParts[2]);
+    const pertence = janelas.some(j => j.mes === dm && j.ano === da);
+    if (!pertence) return;
+    const key = `${da}-${dm}`;
+    mesesComDados.add(key);
+    const cat = d.categoria || 'Outros';
+    totaisPorCat[cat] = (totaisPorCat[cat] || {});
+    totaisPorCat[cat][key] = (totaisPorCat[cat][key] || 0) + d.valor;
+  });
+
+  const numMeses = Math.max(mesesComDados.size, 1);
+
+  const itens = Object.entries(totaisPorCat)
+    .map(([cat, porMes]) => {
+      const total = Object.values(porMes).reduce((s, v) => s + v, 0);
+      return { cat, media: total / numMeses };
+    })
+    .filter(x => x.media > 0)
+    .sort((a, b) => b.media - a.media);
+
+  if (itens.length === 0) return;
+
+  const html = itens.map(({ cat, media }) =>
+    `<span class="ticker-item">
+      <span class="ticker-item-icon">${tickerIcon(cat)}</span>
+      <span class="ticker-item-cat">${cat}</span>
+      <span class="ticker-item-val">${moeda(media)}</span>
+      <span class="ticker-item-sub">/mês</span>
+    </span>`
+  ).join('');
+
+  // Duplica para o loop contínuo
+  inner.innerHTML = html + html;
+}
+
 function renderTudo() {
   renderDashboard();
   renderReceitas();
   renderDespesas();
   renderInadimplencia();
   renderComunicados();
+  renderTicker();
 }
 
 // ── Saldo anterior (ano precedente completo) ──────────────────

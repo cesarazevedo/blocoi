@@ -1253,12 +1253,32 @@ function renderBarChart() {
     },
     options: {
       responsive: true,
-      plugins: { legend: { labels: { color: tColor(), font: { size: 11 } } } },
+      plugins: {
+        legend: { labels: { color: tColor(), font: { size: 11 } } },
+        zeroLine: {}
+      },
       scales: {
         x: { ticks: { color: tColor() }, grid: { color: gColor() } },
-        y: { ticks: { color: tColor(), callback: v => 'R$' + (v/1000).toFixed(1).replace('.',',') + 'k' }, grid: { color: ctx => ctx.tick.value === 0 ? '#aaa' : gColor(), lineWidth: ctx => ctx.tick.value === 0 ? 2 : 1 } }
+        y: { ticks: { color: tColor(), callback: v => 'R$' + (v/1000).toFixed(1).replace('.',',') + 'k' }, grid: { color: gColor() } }
       }
-    }
+    },
+    plugins: [{
+      id: 'zeroLine',
+      afterDraw(chart) {
+        const yAxis = chart.scales.y;
+        if (yAxis.min >= 0) return;
+        const y = yAxis.getPixelForValue(0);
+        const ctx2 = chart.ctx;
+        ctx2.save();
+        ctx2.beginPath();
+        ctx2.moveTo(chart.chartArea.left, y);
+        ctx2.lineTo(chart.chartArea.right, y);
+        ctx2.strokeStyle = '#aaa';
+        ctx2.lineWidth = 1.5;
+        ctx2.stroke();
+        ctx2.restore();
+      }
+    }]
   });
 }
 

@@ -1259,7 +1259,7 @@ function renderBarChart() {
       },
       scales: {
         x: { ticks: { color: tColor() }, grid: { color: gColor() } },
-        y: { ticks: { color: tColor(), callback: v => 'R$' + (v/1000).toFixed(1).replace('.',',') + 'k' }, grid: { color: ctx => ctx.tick.value === 0 ? '#aaa' : gColor(), lineWidth: ctx => ctx.tick.value === 0 ? 2 : 1 } }
+        y: { ticks: { color: tColor(), callback: v => 'R$' + (v/1000).toFixed(1).replace('.',',') + 'k' }, grid: { color: gColor() } }
       }
     },
     plugins: [{

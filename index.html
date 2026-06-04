@@ -1183,6 +1183,7 @@ function renderBarChart() {
     const mes = i, ano = anoSel;
     return despMesAtual(dadosDespesas, mes, ano).reduce((s,d)=>s+d.valor,0);
   });
+  const labelsS = labelsR.map((r,i) => r - labelsD[i]);
 
   barChart = new Chart(ctx, {
     type: 'bar',
@@ -1190,7 +1191,8 @@ function renderBarChart() {
       labels: MESES,
       datasets: [
         { label: 'Receitas', data: labelsR, backgroundColor: 'rgba(17,153,142,0.7)', borderRadius: 5 },
-        { label: 'Despesas', data: labelsD, backgroundColor: 'rgba(247,151,30,0.7)',  borderRadius: 5 }
+        { label: 'Despesas', data: labelsD, backgroundColor: 'rgba(247,151,30,0.7)',  borderRadius: 5 },
+        { label: 'Saldo',    data: labelsS, backgroundColor: labelsS.map(v => v >= 0 ? 'rgba(102,126,234,0.7)' : 'rgba(255,100,100,0.7)'), borderRadius: 5 }
       ]
     },
     options: {

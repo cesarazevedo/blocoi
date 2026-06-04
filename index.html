@@ -184,6 +184,9 @@
     tbody td { padding: 10px; border-bottom: 1px solid var(--border); color: var(--text); }
     tbody tr:last-child td { border-bottom: none; }
     tbody tr:hover td { background: rgba(102,126,234,0.03); }
+    tfoot td { padding: 8px 10px; font-size: 0.78rem; font-weight: 700; border-top: 2px solid var(--border); color: var(--text); }
+    #dre-table tbody td { padding: 8px 10px; font-size: 0.8rem; border-bottom: 1px solid var(--border); color: var(--text); }
+    #dre-table tbody tr.dre-cur td { background: rgba(102,126,234,0.07); font-weight: 600; }
     .empty-row td { text-align: center; color: var(--text-muted); font-style: italic; padding: 24px; }
 
     /* ── Pills ── */
@@ -443,6 +446,7 @@
     <button class="nav-btn" data-tab="receitas"><span>💰</span> Receitas</button>
     <button class="nav-btn" data-tab="despesas"><span>💸</span> Despesas</button>
     <button class="nav-btn" data-tab="inadimplencia"><span>⚠️</span> Inadimplência <span class="nav-badge" id="badge-inad">—</span></button>
+    <button class="nav-btn" data-tab="dre"><span>📋</span> DRE</button>
   </nav>
 
   <!-- Content -->
@@ -692,6 +696,58 @@
           <table>
             <thead><tr><th>Unidade</th><th>Meses em Aberto</th><th>Nº Meses</th></tr></thead>
             <tbody id="tbody-inad"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ DRE ════ -->
+    <div class="tab-pane" id="tab-dre">
+      <div class="page-title">
+        <h2>DRE — Demonstrativo de Resultado</h2>
+        <p id="dre-subtitle">—</p>
+      </div>
+      <div class="kpi-row">
+        <div class="kpi-card" style="--accent:var(--c-receitas)">
+          <div class="kpi-label">Total de Receitas</div>
+          <div class="kpi-value" id="dre-kpi-rec">—</div>
+          <div class="kpi-sub" id="dre-kpi-rec-sub">—</div>
+        </div>
+        <div class="kpi-card" style="--accent:var(--c-despesas)">
+          <div class="kpi-label">Total de Despesas</div>
+          <div class="kpi-value" id="dre-kpi-desp">—</div>
+          <div class="kpi-sub" id="dre-kpi-desp-sub">—</div>
+        </div>
+        <div class="kpi-card" style="--accent:var(--primary)">
+          <div class="kpi-label">Resultado do Ano</div>
+          <div class="kpi-value" id="dre-kpi-saldo">—</div>
+          <div class="kpi-sub" id="dre-kpi-saldo-sub">—</div>
+        </div>
+        <div class="kpi-card" style="--accent:#667eea">
+          <div class="kpi-label">Saldo em Caixa</div>
+          <div class="kpi-value" id="dre-kpi-caixa">—</div>
+          <div class="kpi-sub" id="dre-kpi-caixa-sub">—</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Evolução do Saldo Acumulado <span id="dre-chart-label">—</span></div>
+        <canvas id="chart-dre" height="70"></canvas>
+      </div>
+      <div class="card">
+        <div class="card-title">Resumo Mensal <span id="dre-ano-label">—</span></div>
+        <div class="table-wrap">
+          <table id="dre-table">
+            <thead>
+              <tr>
+                <th>Mês</th>
+                <th style="text-align:right">Receitas</th>
+                <th style="text-align:right">Despesas</th>
+                <th style="text-align:right">Resultado</th>
+                <th style="text-align:right">Acumulado</th>
+              </tr>
+            </thead>
+            <tbody id="tbody-dre"></tbody>
+            <tfoot id="tfoot-dre"></tfoot>
           </table>
         </div>
       </div>
@@ -1476,6 +1532,110 @@ function renderTicker() {
   inner.innerHTML = html + html;
 }
 
+let dreChart;
+
+function renderDRE() {
+  const ano = anoSel;
+  set('dre-subtitle', `Demonstrativo de Resultado do Exercício · ${ano}`);
+  set('dre-ano-label', `${ano}`);
+  set('dre-chart-label', `${ano}`);
+
+  const recMeses  = MESES.map((_,i) => dadosReceitas.reduce((s,r) => s + r.valores[i], 0));
+  const despMeses = MESES.map((_,i) => despMesAtual(dadosDespesas, i, ano).reduce((s,d) => s + d.valor, 0));
+  const saldoMeses = recMeses.map((r,i) => r - despMeses[i]);
+
+  let acum = saldoAnterior;
+  const acumMeses = saldoMeses.map(s => { acum += s; return acum; });
+
+  const totalRec  = recMeses.reduce((a,b) => a+b, 0);
+  const totalDesp = despMeses.reduce((a,b) => a+b, 0);
+  const totalSaldo = totalRec - totalDesp;
+  const caixaFinal = acumMeses[mesSel];
+
+  set('dre-kpi-rec',  moeda(totalRec));
+  set('dre-kpi-rec-sub', `Jan a ${MESES[mesSel]}/${ano}`);
+  set('dre-kpi-desp', moeda(totalDesp));
+  set('dre-kpi-desp-sub', `${despMeses.filter(v=>v>0).length} mese(s) com despesas`);
+  set('dre-kpi-saldo', moeda(totalSaldo));
+  set('dre-kpi-saldo-sub', totalSaldo >= 0 ? '✓ Positivo' : '⚠ Negativo');
+  set('dre-kpi-caixa', moeda(caixaFinal));
+  set('dre-kpi-caixa-sub', `Acumulado até ${MESES[mesSel]}`);
+
+  // Tabela
+  const tbody = document.getElementById('tbody-dre');
+  tbody.innerHTML = MESES.map((m, i) => {
+    const temDados = recMeses[i] > 0 || despMeses[i] > 0;
+    const isCur = i === mesSel;
+    const sClass = saldoMeses[i] >= 0 ? 'trend-up' : 'trend-down';
+    const aClass = acumMeses[i]  >= 0 ? 'trend-up' : 'trend-down';
+    return `<tr class="${isCur ? 'dre-cur' : ''}">
+      <td>${m}/${ano}</td>
+      <td style="text-align:right" class="trend-up">${temDados ? moeda(recMeses[i]) : '—'}</td>
+      <td style="text-align:right" class="${despMeses[i]>0?'trend-down':''}">${temDados ? moeda(despMeses[i]) : '—'}</td>
+      <td style="text-align:right" class="${sClass}">${temDados ? moeda(saldoMeses[i]) : '—'}</td>
+      <td style="text-align:right" class="${aClass}">${temDados ? moeda(acumMeses[i]) : '—'}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('tfoot-dre').innerHTML = `<tr>
+    <td>Total</td>
+    <td style="text-align:right;color:var(--c-receitas)">${moeda(totalRec)}</td>
+    <td style="text-align:right;color:var(--c-despesas)">${moeda(totalDesp)}</td>
+    <td style="text-align:right" class="${totalSaldo>=0?'trend-up':'trend-down'}">${moeda(totalSaldo)}</td>
+    <td style="text-align:right" class="${caixaFinal>=0?'trend-up':'trend-down'}">${moeda(caixaFinal)}</td>
+  </tr>`;
+
+  // Gráfico de linha
+  const ctx = document.getElementById('chart-dre');
+  if (!ctx) return;
+  if (dreChart) dreChart.destroy();
+
+  const mesesComDados = MESES.filter((_,i) => recMeses[i] > 0 || despMeses[i] > 0 || i === 0);
+  const idxs = MESES.map((_,i) => i).filter(i => recMeses[i] > 0 || despMeses[i] > 0 || i === 0);
+
+  dreChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: idxs.map(i => MESES[i]),
+      datasets: [
+        {
+          label: 'Saldo Acumulado',
+          data: idxs.map(i => acumMeses[i]),
+          borderColor: 'rgba(102,126,234,0.9)',
+          backgroundColor: 'rgba(102,126,234,0.1)',
+          borderWidth: 2, tension: 0.4, fill: true, pointRadius: 4,
+          pointBackgroundColor: idxs.map(i => acumMeses[i] >= 0 ? 'rgba(102,126,234,0.9)' : 'rgba(255,100,100,0.9)')
+        },
+        {
+          label: 'Receitas',
+          data: idxs.map(i => recMeses[i]),
+          borderColor: 'rgba(17,153,142,0.8)',
+          backgroundColor: 'transparent',
+          borderWidth: 1.5, tension: 0.4, pointRadius: 3, borderDash: [4,3]
+        },
+        {
+          label: 'Despesas',
+          data: idxs.map(i => despMeses[i]),
+          borderColor: 'rgba(247,151,30,0.8)',
+          backgroundColor: 'transparent',
+          borderWidth: 1.5, tension: 0.4, pointRadius: 3, borderDash: [4,3]
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { labels: { color: tColor(), font: { size: 11 } } },
+        tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${moeda(ctx.parsed.y)}` } }
+      },
+      scales: {
+        x: { ticks: { color: tColor() }, grid: { color: gColor() } },
+        y: { ticks: { color: tColor(), callback: v => 'R$' + (v/1000).toFixed(0) + 'k' }, grid: { color: gColor() } }
+      }
+    }
+  });
+}
+
 function renderTudo() {
   renderDashboard();
   renderReceitas();
@@ -1483,6 +1643,7 @@ function renderTudo() {
   renderInadimplencia();
   renderComunicados();
   renderTicker();
+  renderDRE();
 }
 
 // ── Saldo anterior (ano precedente completo) ──────────────────
@@ -1631,7 +1792,7 @@ document.getElementById('dark-toggle').addEventListener('click', () => {
   html.dataset.theme = dark ? 'light' : 'dark';
   document.getElementById('dark-toggle').textContent = dark ? '🌙' : '☀️';
   renderGaugeAdimplencia(); renderTendenciaInad();
-  renderBarChart(); renderDoughnut(); if (fundoChart) { fundoChart.destroy(); fundoChart=null; renderFundo(); }
+  renderBarChart(); renderDoughnut(); renderDRE(); if (fundoChart) { fundoChart.destroy(); fundoChart=null; renderFundo(); }
 });
 
 // ── Busca ─────────────────────────────────────────────────────

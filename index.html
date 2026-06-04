@@ -1261,13 +1261,7 @@ function renderBarChart() {
         x: { ticks: { color: tColor() }, grid: { color: gColor() } },
         y: {
           ticks: { color: tColor(), callback: v => 'R$' + (v/1000).toFixed(1).replace('.',',') + 'k' },
-          grid: { color: gColor() },
-          afterBuildTicks(axis) {
-            if (!axis.ticks.find(t => t.value === 0)) {
-              axis.ticks.push({ value: 0 });
-              axis.ticks.sort((a, b) => b.value - a.value);
-            }
-          }
+          grid: { color: gColor() }
         }
       }
     },
@@ -1285,6 +1279,12 @@ function renderBarChart() {
         ctx2.strokeStyle = '#aaa';
         ctx2.lineWidth = 1.5;
         ctx2.stroke();
+        // label R$0,0k
+        ctx2.fillStyle = tColor();
+        ctx2.font = '11px sans-serif';
+        ctx2.textAlign = 'right';
+        ctx2.textBaseline = 'middle';
+        ctx2.fillText('R$0,0k', chart.chartArea.left - 6, y);
         ctx2.restore();
       }
     }]

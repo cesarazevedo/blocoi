@@ -2100,7 +2100,7 @@ function gerarPDF() {
       styles: { fontSize: 9, cellPadding: { top: 4, bottom: 4, left: 5, right: 5 }, textColor: C.dark },
       headStyles: { fillColor: C.pink, textColor: [255,255,255], fontStyle: 'bold' },
       alternateRowStyles: { fillColor: C.surf },
-      columnStyles: { 0: { cellWidth: 70 }, 1: { cellWidth: 'auto' }, 2: { cellWidth: 30, halign: 'center' } },
+      columnStyles: { 0: { cellWidth: 40 }, 1: { cellWidth: 'auto' }, 2: { cellWidth: 30, halign: 'center' } },
       didParseCell(data) {
         if (data.column.index === 2 && data.section === 'body') {
           const n = parseInt(data.cell.raw || '0');

@@ -1832,19 +1832,12 @@ document.getElementById('search-input').addEventListener('input', function() {
 
 // ── PDF ───────────────────────────────────────────────────────
 function pdfStr(s) {
-  return String(s || '')
-    .replace(/[ãâáàä]/g, 'a').replace(/[ÃÂÁÀÄ]/g, 'A')
-    .replace(/[çć]/g, 'c').replace(/[ÇĆ]/g, 'C')
-    .replace(/[éêèë]/g, 'e').replace(/[ÉÊÈË]/g, 'E')
-    .replace(/[íîìï]/g, 'i').replace(/[ÍÎÌÏ]/g, 'I')
-    .replace(/[óôòõö]/g, 'o').replace(/[ÓÔÒÕÖ]/g, 'O')
-    .replace(/[úûùü]/g, 'u').replace(/[ÚÛÙÜ]/g, 'U')
-    .replace(/[ñ]/g, 'n').replace(/[Ñ]/g, 'N');
+  return String(s || '');
 }
 
 function gerarPDF() {
   if (!window.jspdf) {
-    alert('Biblioteca PDF nao carregada. Recarregue a pagina e tente novamente.');
+    alert('Biblioteca PDF não carregada. Recarregue a página e tente novamente.');
     return;
   }
   const { jsPDF } = window.jspdf;
@@ -1873,8 +1866,8 @@ function gerarPDF() {
     doc.setFont('helvetica', 'bold');   doc.setFontSize(13);
     doc.text('Controle Condominial', mg, 10);
     doc.setFont('helvetica', 'normal'); doc.setFontSize(8);
-    doc.text(pdfStr(`Prestacao de Contas  -  ${periodo}`), mg, 17.5);
-    doc.text(`Gerado: ${dataGer}  |  Pag. ${pageNum}`, PW - mg, 17.5, { align: 'right' });
+    doc.text(`Prestação de Contas  -  ${periodo}`, mg, 17.5);
+    doc.text(`Gerado: ${dataGer}  |  Pág. ${pageNum}`, PW - mg, 17.5, { align: 'right' });
     doc.setTextColor(...C.dark);
     doc.setFont('helvetica', 'bold'); doc.setFontSize(12);
     doc.text(pdfStr(title), mg, 35);
@@ -1955,11 +1948,11 @@ function gerarPDF() {
   kpiBox(mg,          y, kw, kh, `Receitas de ${periodo}`, moeda(recMes),
     `${pagasUnits.length} de ${totalUnits} unidades pagas`, C.teal);
   kpiBox(mg + kw + 6, y, kw, kh, `Despesas de ${periodo}`, moeda(totalDesp),
-    `${despData.length} lancamento(s)`, C.orange);
+    `${despData.length} lançamento(s)`, C.orange);
   y += kh + 10;
 
   y = sep(y);
-  y = blockTitle('Adimplencia', y);
+  y = blockTitle('Adimplência', y);
   const adimColor = pctAdim >= 80 ? C.green : pctAdim >= 60 ? C.orange : C.red;
   doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(...C.gray);
   doc.text(pdfStr(`${pagasUnits.length} de ${totalUnits} unidades pagas em ${periodo}`), mg, y);
@@ -1972,10 +1965,10 @@ function gerarPDF() {
   if (mesJaVenceu) {
     const ic = inadMesCount === 0 ? C.green : taxaInad > 20 ? C.red : C.orange;
     doc.setTextColor(...ic);
-    doc.text(pdfStr(`Inadimplencia: ${taxaInad.toFixed(1)}% (${inadMesCount} unidade(s) em aberto)`), mg, y);
+    doc.text(`Inadimplência: ${taxaInad.toFixed(1)}% (${inadMesCount} unidade(s) em aberto)`, mg, y);
   } else {
     doc.setTextColor(...C.gray);
-    doc.text(pdfStr(`Inadimplencia: vencimento em 10/${MESES[(mesSel + 1) % 12]}`), mg, y);
+    doc.text(`Inadimplência: vencimento em 10/${MESES[(mesSel + 1) % 12]}`, mg, y);
   }
   y += 12;
 
@@ -1986,7 +1979,7 @@ function gerarPDF() {
   const catsSorted = Object.entries(cats).sort((a, b) => b[1] - a[1]).slice(0, 5);
   if (catsSorted.length === 0) {
     doc.setFont('helvetica', 'italic'); doc.setFontSize(9); doc.setTextColor(...C.gray);
-    doc.text(pdfStr('Sem despesas registradas neste mes.'), mg, y);
+    doc.text('Sem despesas registradas neste mês.', mg, y);
   } else {
     catsSorted.forEach(([cat, val], i) => {
       const pct = totalDesp > 0 ? (val / totalDesp * 100) : 0;
@@ -2045,11 +2038,11 @@ function gerarPDF() {
   y += 8;
   if (despData.length === 0) {
     doc.setFont('helvetica', 'italic'); doc.setFontSize(9); doc.setTextColor(...C.gray);
-    doc.text(pdfStr('Nenhuma despesa registrada neste mes.'), mg, y + 6);
+    doc.text('Nenhuma despesa registrada neste mês.', mg, y + 6);
   } else {
     doc.autoTable({
       startY: y,
-      head: [['Data', 'Categoria', 'Descricao', 'Fornecedor', 'Valor', 'Status']],
+      head: [['Data', 'Categoria', 'Descrição', 'Fornecedor', 'Valor', 'Status']],
       body: despData.map(d => [
         pdfStr(d.data), pdfStr(d.categoria), pdfStr(d.descricao),
         pdfStr(d.fornecedor || '—'), moeda(d.valor), pdfStr(d.status || '—')
@@ -2075,22 +2068,22 @@ function gerarPDF() {
 
   // ══ PAGE 4: INADIMPLÊNCIA ══
   doc.addPage('a4', 'portrait');
-  y = pgHeader(`Inadimplencia - ${periodo}`);
+  y = pgHeader(`Inadimplência - ${periodo}`);
   doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(...C.gray);
   doc.text(
     inadList.length === 0
-      ? pdfStr('Nenhuma unidade inadimplente neste periodo.')
-      : pdfStr(`${inadList.length} unidade(s) com pendencias   |   Taxa: ${taxaInad.toFixed(1)}%`),
+      ? 'Nenhuma unidade inadimplente neste período.'
+      : `${inadList.length} unidade(s) com pendências   |   Taxa: ${taxaInad.toFixed(1)}%`,
     mg, y
   );
   y += 8;
   if (inadList.length === 0) {
     doc.setFont('helvetica', 'bold'); doc.setFontSize(12); doc.setTextColor(...C.green);
-    doc.text(pdfStr('Todas as unidades estao em dia!'), mg, y + 6);
+    doc.text('Todas as unidades estão em dia!', mg, y + 6);
   } else {
     doc.autoTable({
       startY: y,
-      head: [['Unidade', 'Meses em Aberto', 'Nr de Meses']],
+      head: [['Unidade', 'Meses em Aberto', 'Nº de Meses']],
       body: inadList.map(r => [
         pdfStr(nomUnidade(r.unidade)),
         r.mesesAbertos.map(m => m.mes).join(', '),

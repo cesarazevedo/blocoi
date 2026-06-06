@@ -2053,7 +2053,7 @@ function gerarPDF() {
       alternateRowStyles: { fillColor: C.surf },
       columnStyles: {
         0: { cellWidth: 22 }, 1: { cellWidth: 28 }, 2: { cellWidth: 'auto' },
-        3: { cellWidth: 57, overflow: 'ellipsize' }, 4: { cellWidth: 25, halign: 'right' }, 5: { cellWidth: 19, halign: 'center' }
+        3: { cellWidth: 45, overflow: 'ellipsize' }, 4: { cellWidth: 25, halign: 'right' }, 5: { cellWidth: 19, halign: 'center' }
       },
       didParseCell(data) {
         if (data.column.index === 4) data.cell.styles.halign = 'right';

@@ -1933,7 +1933,8 @@ function gerarPDF() {
   const inadList    = dadosReceitas.map(r => {
     const mb = MESES.slice(0, mesSel + 1).map((m, i) => ({ mes: m, idx: i }))
       .filter(({ idx }) => r.valores[idx] === 0 && !(r.isentos && r.isentos[idx]) && mesVencido(idx, anoSel));
-    return { unidade: r.unidade, mesesAbertos: mb };
+    const taxaMensal = r.valores.filter(v => v > 0).slice(-1)[0] || 0;
+    return { unidade: r.unidade, mesesAbertos: mb, valorAberto: taxaMensal * mb.length };
   }).filter(r => r.mesesAbertos.length > 0);
 
   // ══ PAGE 1: RESUMO ══
@@ -2070,10 +2071,11 @@ function gerarPDF() {
   doc.addPage('a4', 'portrait');
   y = pgHeader(`Inadimplência - ${periodo}`);
   doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(...C.gray);
+  const totalValorAberto = inadList.reduce((s, r) => s + r.valorAberto, 0);
   doc.text(
     inadList.length === 0
       ? 'Nenhuma unidade inadimplente neste período.'
-      : `${inadList.length} unidade(s) com pendências   |   Taxa: ${taxaInad.toFixed(1)}%`,
+      : `${inadList.length} unidade(s) com pendências   |   Taxa: ${taxaInad.toFixed(1)}%   |   Total em aberto: ${moeda(totalValorAberto)}`,
     mg, y
   );
   y += 8;
@@ -2083,22 +2085,30 @@ function gerarPDF() {
   } else {
     doc.autoTable({
       startY: y,
-      head: [['Unidade', 'Meses em Aberto', 'Nº de Meses']],
+      head: [['Unidade', 'Meses em Aberto', 'Nº de Meses', 'Valor em Aberto']],
       body: inadList.map(r => [
         pdfStr(nomUnidade(r.unidade)),
         r.mesesAbertos.map(m => m.mes).join(', '),
-        String(r.mesesAbertos.length)
+        String(r.mesesAbertos.length),
+        r.valorAberto > 0 ? moeda(r.valorAberto) : '—'
       ]),
+      foot: [['Total', '', String(inadList.reduce((s, r) => s + r.mesesAbertos.length, 0)), moeda(totalValorAberto)]],
+      showFoot: 'lastPage',
       margin: { left: mg, right: mg },
       styles: { fontSize: 9, cellPadding: { top: 4, bottom: 4, left: 5, right: 5 }, textColor: C.dark },
       headStyles: { fillColor: C.pink, textColor: [255,255,255], fontStyle: 'bold' },
+      footStyles: { fillColor: C.lgray, textColor: C.dark, fontStyle: 'bold' },
       alternateRowStyles: { fillColor: C.surf },
-      columnStyles: { 0: { cellWidth: 35 }, 1: { cellWidth: 'auto' }, 2: { cellWidth: 35, halign: 'center' } },
+      columnStyles: { 0: { cellWidth: 35 }, 1: { cellWidth: 'auto' }, 2: { cellWidth: 30, halign: 'center' }, 3: { cellWidth: 42, halign: 'right' } },
       didParseCell(data) {
         if (data.column.index === 2 && data.section === 'body') {
           const n = parseInt(data.cell.raw || '0');
           data.cell.styles.fontStyle = 'bold';
           data.cell.styles.textColor = n >= 3 ? [197,48,48] : n >= 2 ? [151,74,10] : C.dark;
+        }
+        if (data.column.index === 3 && data.section === 'body' && data.cell.raw !== '—') {
+          data.cell.styles.fontStyle = 'bold';
+          data.cell.styles.textColor = [197,48,48];
         }
       }
     });

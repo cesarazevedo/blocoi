@@ -416,6 +416,7 @@
       <select id="sel-ano"></select>
     </div>
     <button class="btn-icon" id="btn-refresh" title="Atualizar">↻</button>
+    <span id="auto-refresh-timer" style="font-size:0.7rem;color:var(--text-muted);white-space:nowrap;opacity:0.75;"></span>
     <span id="cache-indicator" style="display:none;font-size:0.7rem;color:var(--text-muted);opacity:0.7;"></span>
     <button class="btn-icon" id="btn-pdf" title="Gerar PDF da Prestação de Contas">📄</button>
     <button class="btn-icon" id="dark-toggle" title="Tema">🌙</button>
@@ -1795,10 +1796,33 @@ document.getElementById('sel-mes').addEventListener('change', function() {
 document.getElementById('sel-ano').addEventListener('change', async function() {
   anoSel = parseInt(this.value); await carregar();
 });
-document.getElementById('btn-refresh').addEventListener('click', () => inicializarAnos().then(() => carregar(true)));
+document.getElementById('btn-refresh').addEventListener('click', () => { resetRefreshTimer(); inicializarAnos().then(() => carregar(true)); });
 
-// Auto-refresh a cada 3 minutos
-setInterval(() => carregar(true), 3 * 60 * 1000);
+// Auto-refresh a cada 3 minutos com countdown
+const REFRESH_INTERVAL = 3 * 60; // segundos
+let refreshSecsLeft = REFRESH_INTERVAL;
+const timerEl = document.getElementById('auto-refresh-timer');
+
+function formatSecs(s) {
+  const m = Math.floor(s / 60);
+  const ss = String(s % 60).padStart(2, '0');
+  return `↻ ${m}:${ss}`;
+}
+
+function resetRefreshTimer() {
+  refreshSecsLeft = REFRESH_INTERVAL;
+}
+
+setInterval(() => {
+  refreshSecsLeft--;
+  if (refreshSecsLeft <= 0) {
+    resetRefreshTimer();
+    carregar(true);
+  }
+  timerEl.textContent = formatSecs(refreshSecsLeft);
+}, 1000);
+
+timerEl.textContent = formatSecs(refreshSecsLeft);
 
 document.getElementById('fil-rec-mes').addEventListener('change', renderReceitas);
 document.getElementById('fil-rec-status').addEventListener('change', renderReceitas);

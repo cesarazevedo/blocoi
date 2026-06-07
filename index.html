@@ -1798,8 +1798,8 @@ document.getElementById('sel-ano').addEventListener('change', async function() {
 });
 document.getElementById('btn-refresh').addEventListener('click', () => { resetRefreshTimer(); inicializarAnos().then(() => carregar(true)); });
 
-// Auto-refresh a cada 3 minutos com countdown
-const REFRESH_INTERVAL = 3 * 60; // segundos
+// Auto-refresh a cada 5 minutos com countdown
+const REFRESH_INTERVAL = 5 * 60; // segundos
 let refreshSecsLeft = REFRESH_INTERVAL;
 const timerEl = document.getElementById('auto-refresh-timer');
 

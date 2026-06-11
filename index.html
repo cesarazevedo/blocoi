@@ -705,7 +705,10 @@
         <canvas id="chart-dre" height="70"></canvas>
       </div>
       <div class="card">
-        <div class="card-title">Resumo Mensal <span id="dre-ano-label">—</span></div>
+        <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;">
+          <span>Resumo Mensal <span id="dre-ano-label">—</span></span>
+          <button class="btn-icon" id="btn-pdf-dre" title="Gerar PDF da DRE" style="font-size:1rem;padding:4px 8px;">📄 PDF</button>
+        </div>
         <div class="table-wrap">
           <table id="dre-table">
             <thead>
@@ -2187,7 +2190,147 @@ function gerarPDF() {
   doc.save(pdfStr(`prestacao-contas-${mesLabel}-${anoSel}`) + '.pdf');
 }
 
+function gerarPDFDRE() {
+  if (!window.jspdf) {
+    alert('Biblioteca PDF não carregada. Recarregue a página e tente novamente.');
+    return;
+  }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+  const ano      = anoSel;
+  const dataGer  = new Date().toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+
+  const W = 210, mg = 16, cw = W - mg * 2;
+  const C = {
+    primary: [102,126,234], dark:  [26,32,44],   gray:   [113,128,150],
+    lgray:   [226,232,240], surf:  [248,250,252], white:  [255,255,255],
+    green:   [72,187,120],  red:   [252,129,129], orange: [247,151,30],
+    teal:    [17,153,142],  pink:  [255,117,140]
+  };
+  let pageNum = 0;
+
+  function pgHeader(title) {
+    pageNum++;
+    const PW = doc.internal.pageSize.getWidth();
+    doc.setFillColor(...C.primary);
+    doc.rect(0, 0, PW, 25, 'F');
+    doc.setTextColor(...C.white);
+    doc.setFont('helvetica', 'bold');   doc.setFontSize(13);
+    doc.text('Controle Condominial', mg, 10);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(8);
+    doc.text(`DRE  -  ${ano}`, mg, 17.5);
+    doc.text(`Gerado: ${dataGer}  |  Pág. ${pageNum}`, PW - mg, 17.5, { align: 'right' });
+    doc.setTextColor(...C.dark);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(12);
+    doc.text(pdfStr(title), mg, 35);
+    doc.setDrawColor(...C.primary); doc.setLineWidth(0.6);
+    doc.line(mg, 37, PW - mg, 37);
+    return 45;
+  }
+
+  function kpiBox(x, y, w, h, label, value, sub, accent) {
+    doc.setFillColor(...C.surf);
+    doc.roundedRect(x, y, w, h, 2.5, 2.5, 'F');
+    doc.setFillColor(...accent);
+    doc.rect(x, y, 3, h, 'F');
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(7); doc.setTextColor(...C.gray);
+    doc.text(pdfStr(label).toUpperCase(), x + 6, y + 7);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(11.5); doc.setTextColor(...C.dark);
+    doc.text(pdfStr(value), x + 6, y + 15.5);
+    if (sub) {
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(...C.gray);
+      doc.text(pdfStr(sub), x + 6, y + 22);
+    }
+  }
+
+  // ── Dados ──
+  const recMeses   = MESES.map((_,i) => dadosReceitas.reduce((s,r) => s + r.valores[i], 0));
+  const despMeses  = MESES.map((_,i) => despMesAtual(dadosDespesas, i, ano).reduce((s,d) => s + d.valor, 0));
+  const saldoMeses = recMeses.map((r,i) => r - despMeses[i]);
+  let acum = saldoAnterior;
+  const acumMeses  = saldoMeses.map(s => { acum += s; return acum; });
+
+  const totalRec   = recMeses.reduce((a,b) => a+b, 0);
+  const totalDesp  = despMeses.reduce((a,b) => a+b, 0);
+  const totalSaldo = totalRec - totalDesp;
+  const caixaFinal = acumMeses[mesSel];
+
+  // ══ PAGE 1: RESUMO ══
+  let y = pgHeader(`Demonstrativo de Resultado do Exercício — ${ano}`);
+
+  const kw = (cw - 6) / 2, kh = 28;
+  kpiBox(mg,          y, kw, kh, `Total de Receitas (Jan–${MESES[mesSel]})`, moeda(totalRec),
+    `${recMeses.filter(v=>v>0).length} mese(s) com receitas`, C.teal);
+  kpiBox(mg + kw + 6, y, kw, kh, `Total de Despesas (Jan–${MESES[mesSel]})`, moeda(totalDesp),
+    `${despMeses.filter(v=>v>0).length} mese(s) com despesas`, C.orange);
+  y += kh + 5;
+  kpiBox(mg,          y, kw, kh, 'Resultado do Ano', moeda(totalSaldo),
+    totalSaldo >= 0 ? 'Positivo' : 'Negativo', totalSaldo >= 0 ? C.green : C.red);
+  kpiBox(mg + kw + 6, y, kw, kh, `Saldo em Caixa (acum. até ${MESES[mesSel]})`, moeda(caixaFinal),
+    caixaFinal >= 0 ? 'Positivo' : 'Negativo', caixaFinal >= 0 ? C.green : C.red);
+  y += kh + 12;
+
+  // Tabela mensal
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.setTextColor(...C.dark);
+  doc.text('Resumo Mensal', mg, y);
+  y += 6;
+
+  const tableBody = MESES.map((m, i) => {
+    const temDados = recMeses[i] > 0 || despMeses[i] > 0;
+    return [
+      pdfStr(`${m}/${ano}`),
+      temDados ? moeda(recMeses[i]) : '—',
+      temDados ? moeda(despMeses[i]) : '—',
+      temDados ? moeda(saldoMeses[i]) : '—',
+      temDados ? moeda(acumMeses[i]) : '—',
+    ];
+  });
+
+  doc.autoTable({
+    startY: y,
+    head: [['Mês', 'Receitas', 'Despesas', 'Resultado', 'Acumulado']],
+    body: tableBody,
+    foot: [['Total', moeda(totalRec), moeda(totalDesp), moeda(totalSaldo), moeda(caixaFinal)]],
+    showFoot: 'lastPage',
+    margin: { left: mg, right: mg },
+    styles: { fontSize: 9, cellPadding: { top: 4, bottom: 4, left: 5, right: 5 }, textColor: C.dark },
+    headStyles: { fillColor: C.primary, textColor: [255,255,255], fontStyle: 'bold' },
+    footStyles: { fillColor: C.lgray, textColor: C.dark, fontStyle: 'bold' },
+    alternateRowStyles: { fillColor: C.surf },
+    columnStyles: {
+      0: { cellWidth: 28 },
+      1: { cellWidth: 'auto', halign: 'right' },
+      2: { cellWidth: 'auto', halign: 'right' },
+      3: { cellWidth: 'auto', halign: 'right' },
+      4: { cellWidth: 'auto', halign: 'right' },
+    },
+    didParseCell(data) {
+      if (data.section === 'body') {
+        const rowIdx = data.row.index;
+        const col = data.column.index;
+        if (col === 1) data.cell.styles.textColor = [17,153,142];
+        if (col === 2 && recMeses[rowIdx] > 0) data.cell.styles.textColor = [197,90,17];
+        if (col === 3 && data.cell.raw !== '—') {
+          const val = saldoMeses[rowIdx];
+          data.cell.styles.fontStyle = 'bold';
+          data.cell.styles.textColor = val >= 0 ? [39,103,73] : [197,48,48];
+        }
+        if (col === 4 && data.cell.raw !== '—') {
+          const val = acumMeses[rowIdx];
+          data.cell.styles.fontStyle = 'bold';
+          data.cell.styles.textColor = val >= 0 ? [39,103,73] : [197,48,48];
+        }
+        if (rowIdx === mesSel) data.cell.styles.fillColor = [230,235,255];
+      }
+    }
+  });
+
+  doc.save(pdfStr(`dre-${ano}`) + '.pdf');
+}
+
 document.getElementById('btn-pdf').addEventListener('click', gerarPDF);
+document.getElementById('btn-pdf-dre').addEventListener('click', gerarPDFDRE);
 
 // ── Init ──────────────────────────────────────────────────────
 inicializarAnos().then(() => carregar());

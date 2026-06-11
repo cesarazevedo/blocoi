@@ -344,38 +344,7 @@
       .kpi-row { grid-template-columns: 1fr; }
     }
 
-    /* ── Ticker ── */
-    .ticker-bar {
-      height: 32px; flex-shrink: 0;
-      background: var(--surface); border-bottom: 1px solid var(--border);
-      display: flex; align-items: center; overflow: hidden;
-      font-size: 0.72rem;
-    }
-    .ticker-label {
-      flex-shrink: 0; padding: 0 14px;
-      font-weight: 700; font-size: 0.68rem; letter-spacing: 0.8px;
-      text-transform: uppercase; color: #fff;
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      height: 100%; display: flex; align-items: center; white-space: nowrap;
-    }
-    .ticker-track { flex: 1; overflow: hidden; position: relative; }
-    .ticker-inner {
-      display: inline-flex; gap: 0; white-space: nowrap;
-      animation: ticker-scroll 40s linear infinite;
-    }
-    .ticker-bar:hover .ticker-inner { animation-play-state: paused; }
-    @keyframes ticker-scroll {
-      0%   { transform: translateX(0); }
-      100% { transform: translateX(-50%); }
-    }
-    .ticker-item {
-      display: inline-flex; align-items: center; gap: 5px;
-      padding: 0 20px; color: var(--text); border-right: 1px solid var(--border);
-    }
-    .ticker-item-icon { font-size: 0.9rem; }
-    .ticker-item-cat  { color: var(--text-muted); }
-    .ticker-item-val  { font-weight: 700; color: var(--text); }
-    .ticker-item-sub  { color: var(--text-muted); font-size: 0.65rem; }
+
   </style>
 </head>
 <body>
@@ -425,15 +394,7 @@
   </div>
 </header>
 
-<!-- ── Ticker ── -->
-<div class="ticker-bar">
-  <div class="ticker-label">📊 Média semestral</div>
-  <div class="ticker-track">
-    <div class="ticker-inner" id="ticker-inner">
-      <span class="ticker-item"><span class="ticker-item-icon">⏳</span><span class="ticker-item-cat">Carregando...</span></span>
-    </div>
-  </div>
-</div>
+
 
 <!-- ── Main ── -->
 <div class="main-wrap">
@@ -533,6 +494,11 @@
           <div class="card-title">Projeção de Caixa <span id="proj-badge">próx. 3 meses</span></div>
           <div id="proj-caixa-list"></div>
         </div>
+      </div>
+
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">Média Semestral por Categoria <span id="semestral-periodo">—</span></div>
+        <div id="semestral-cards" style="display:flex;flex-wrap:wrap;gap:12px;margin-top:8px"></div>
       </div>
 
       <div class="charts-row">
@@ -1565,8 +1531,8 @@ function tickerIcon(cat) {
 }
 
 function renderTicker() {
-  const inner = document.getElementById('ticker-inner');
-  if (!inner || dadosDespesas.length === 0) return;
+  const container = document.getElementById('semestral-cards');
+  if (!container || dadosDespesas.length === 0) return;
 
   // Últimos 6 meses a partir de mesSel/anoSel
   const janelas = [];
@@ -1575,6 +1541,10 @@ function renderTicker() {
     janelas.push({ mes: m, ano: a });
     m--; if (m < 0) { m = 11; a--; }
   }
+
+  const mesInicio = janelas[janelas.length - 1];
+  const mesFim    = janelas[0];
+  set('semestral-periodo', `${MESES[mesInicio.mes]}/${mesInicio.ano} – ${MESES[mesFim.mes]}/${mesFim.ano}`);
 
   // Soma por categoria em cada mês da janela
   const totaisPorCat = {};
@@ -1598,24 +1568,32 @@ function renderTicker() {
   const itens = Object.entries(totaisPorCat)
     .map(([cat, porMes]) => {
       const total = Object.values(porMes).reduce((s, v) => s + v, 0);
-      return { cat, media: total / numMeses };
+      return { cat, media: total / numMeses, total };
     })
     .filter(x => x.media > 0)
     .sort((a, b) => b.media - a.media);
 
-  if (itens.length === 0) return;
+  if (itens.length === 0) {
+    container.innerHTML = `<div style="color:var(--text-muted);font-style:italic;font-size:0.8rem">Sem dados no período</div>`;
+    return;
+  }
 
-  const html = itens.map(({ cat, media }) =>
-    `<span class="ticker-item">
-      <span class="ticker-item-icon">${tickerIcon(cat)}</span>
-      <span class="ticker-item-cat">${cat}</span>
-      <span class="ticker-item-val">${moeda(media)}</span>
-      <span class="ticker-item-sub">/mês</span>
-    </span>`
-  ).join('');
-
-  // Duplica para o loop contínuo
-  inner.innerHTML = html + html;
+  const cores = ['#667eea','#11998e','#f7971e','#ff758c','#4facfe','#a18cd1','#fddb92','#d4fc79'];
+  container.innerHTML = itens.map(({ cat, media, total }, i) => `
+    <div style="
+      background:var(--surface2,var(--surface));
+      border:1px solid var(--border);
+      border-radius:10px;
+      padding:12px 16px;
+      min-width:140px;
+      flex:1 1 140px;
+      border-top:3px solid ${cores[i % cores.length]};
+    ">
+      <div style="font-size:1.4rem;margin-bottom:4px">${tickerIcon(cat)}</div>
+      <div style="font-size:0.72rem;color:var(--text-muted);margin-bottom:2px">${cat}</div>
+      <div style="font-size:1.05rem;font-weight:700;color:var(--text)">${moeda(media)}<span style="font-size:0.65rem;color:var(--text-muted);font-weight:400">/mês</span></div>
+      <div style="font-size:0.65rem;color:var(--text-muted);margin-top:2px">Total: ${moeda(total)}</div>
+    </div>`).join('');
 }
 
 let dreChart;

@@ -1961,8 +1961,13 @@ function gerarPDF() {
   const inadList    = dadosReceitas.map(r => {
     const mb = MESES.slice(0, mesSel + 1).map((m, i) => ({ mes: m, idx: i }))
       .filter(({ idx }) => r.valores[idx] === 0 && !(r.isentos && r.isentos[idx]) && mesVencido(idx, anoSel));
-    const taxaMensal = r.valores.filter(v => v > 0).slice(-1)[0] || 0;
-    return { unidade: r.unidade, mesesAbertos: mb, valorAberto: taxaMensal * mb.length };
+    const valorAberto = mb.reduce((sum, { idx }) => {
+      const taxaMes = r.valores.filter(v => v > 0).slice(-1)[0]
+        || dadosReceitas.filter(x => x.unidade !== r.unidade).map(x => x.valores[idx]).find(v => v > 0)
+        || 0;
+      return sum + taxaMes;
+    }, 0);
+    return { unidade: r.unidade, mesesAbertos: mb, valorAberto };
   }).filter(r => r.mesesAbertos.length > 0);
 
   // ══ PAGE 1: RESUMO ══

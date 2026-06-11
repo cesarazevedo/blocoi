@@ -2269,9 +2269,26 @@ function gerarPDFDRE() {
     totalSaldo >= 0 ? 'Positivo' : 'Negativo', totalSaldo >= 0 ? C.green : C.red);
   kpiBox(mg + kw + 6, y, kw, kh, `Saldo em Caixa (acum. até ${MESES[mesSel]})`, moeda(caixaFinal),
     caixaFinal >= 0 ? 'Positivo' : 'Negativo', caixaFinal >= 0 ? C.green : C.red);
-  y += kh + 12;
+  y += kh + 8;
 
-  // Tabela mensal
+  // Gráfico
+  const chartCanvas = document.getElementById('chart-dre');
+  if (chartCanvas) {
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.setTextColor(...C.dark);
+    doc.text('Evolução do Saldo Acumulado', mg, y);
+    y += 4;
+    const imgData = chartCanvas.toDataURL('image/png', 1.0);
+    const chartH = 55;
+    doc.addImage(imgData, 'PNG', mg, y, cw, chartH);
+    y += chartH + 4;
+  }
+
+  // Tabela mensal — nova página se não houver espaço suficiente
+  const spaceLeft = doc.internal.pageSize.getHeight() - y;
+  if (spaceLeft < 60) {
+    doc.addPage();
+    y = pgHeader(`Resumo Mensal — ${ano}`);
+  }
   doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.setTextColor(...C.dark);
   doc.text('Resumo Mensal', mg, y);
   y += 6;

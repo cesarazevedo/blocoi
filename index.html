@@ -529,6 +529,10 @@
           <div class="card-title">Maiores Despesas <span id="top-desp-mes">—</span></div>
           <div id="top-despesas-list"></div>
         </div>
+        <div class="card">
+          <div class="card-title">Projeção de Caixa <span id="proj-badge">próx. 3 meses</span></div>
+          <div id="proj-caixa-list"></div>
+        </div>
       </div>
 
       <div class="charts-row">
@@ -1007,6 +1011,7 @@ function renderDashboard() {
   renderGaugeAdimplencia();
   renderTendenciaInad();
   renderTopDespesas(despMes);
+  renderProjecaoCaixa();
   renderBarChart();
   renderDoughnut(despMes);
 }
@@ -1450,6 +1455,59 @@ function renderTopDespesas(despMes) {
         <div class="top-desp-pct">${pct.toFixed(1)}% do total</div>
       </div>`;
   }).join('');
+}
+
+function renderProjecaoCaixa() {
+  const el = document.getElementById('proj-caixa-list');
+  if (!el) return;
+
+  // Últimos 6 meses disponíveis antes do mês selecionado
+  const janela = 6;
+  const mesesRef = [];
+  for (let i = mesSel - 1; i >= 0 && mesesRef.length < janela; i--) mesesRef.push(i);
+
+  if (mesesRef.length === 0) {
+    el.innerHTML = `<div style="text-align:center;color:var(--text-muted);font-style:italic;font-size:0.8rem;padding:28px 0">Dados insuficientes</div>`;
+    return;
+  }
+
+  const mediaRec  = mesesRef.reduce((s, i) => s + dadosReceitas.reduce((a, r) => a + r.valores[i], 0), 0) / mesesRef.length;
+  const mediaDesp = mesesRef.reduce((s, i) => {
+    return s + dadosDespesas.filter(d => d.dataParts && parseInt(d.dataParts[2]) === anoSel && parseInt(d.dataParts[1]) - 1 === i).reduce((a, d) => a + d.valor, 0);
+  }, 0) / mesesRef.length;
+  const mediaSaldo = mediaRec - mediaDesp;
+
+  // Saldo atual em caixa (acumulado até mesSel)
+  const recAcum  = dadosReceitas.reduce((s, r) => s + r.valores.slice(0, mesSel + 1).reduce((a, b) => a + b, 0), 0);
+  const despAcum = dadosDespesas
+    .filter(d => d.dataParts && parseInt(d.dataParts[2]) === anoSel && parseInt(d.dataParts[1]) - 1 <= mesSel)
+    .reduce((s, d) => s + d.valor, 0);
+  let saldoBase = recAcum - despAcum + saldoAnterior;
+
+  const projecoes = [1, 2, 3].map(n => {
+    const mesIdx = mesSel + n;
+    const mesNome = mesIdx < 12 ? MESES[mesIdx] : MESES[mesIdx - 12];
+    saldoBase += mediaSaldo;
+    return { mes: mesNome, saldo: saldoBase };
+  });
+
+  const corSeta = s => s >= 0 ? 'var(--c-receitas)' : 'var(--c-inadimplencia)';
+  const icone   = s => s >= 0 ? '▲' : '▼';
+
+  el.innerHTML = `
+    <div style="font-size:0.72rem;color:var(--text-muted);margin-bottom:8px">
+      Baseado na média de receitas (${moeda(mediaRec)}) e despesas (${moeda(mediaDesp)}) dos últimos ${mesesRef.length} meses
+    </div>
+    ${projecoes.map((p, n) => `
+      <div class="top-desp-item">
+        <div class="top-desp-header">
+          <span class="top-desp-name">${p.mes}/${anoSel + (mesSel + n + 1 >= 12 ? 1 : 0)}</span>
+          <span style="font-weight:700;color:${corSeta(p.saldo)}">${icone(p.saldo)} ${moeda(Math.abs(p.saldo))}</span>
+        </div>
+      </div>`).join('')}
+    <div style="font-size:0.7rem;color:var(--text-muted);margin-top:8px;font-style:italic">
+      Saldo médio mensal projetado: ${mediaSaldo >= 0 ? '+' : ''}${moeda(mediaSaldo)}
+    </div>`;
 }
 
 function renderFundo() {

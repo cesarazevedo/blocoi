@@ -2283,12 +2283,9 @@ function gerarPDFDRE() {
     y += chartH + 4;
   }
 
-  // Tabela mensal — nova página se não houver espaço suficiente
-  const spaceLeft = doc.internal.pageSize.getHeight() - y;
-  if (spaceLeft < 60) {
-    doc.addPage();
-    y = pgHeader(`Resumo Mensal — ${ano}`);
-  }
+  // ══ PAGE 2: TABELA MENSAL ══
+  doc.addPage();
+  y = pgHeader(`Resumo Mensal — ${ano}`);
   doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.setTextColor(...C.dark);
   doc.text('Resumo Mensal', mg, y);
   y += 6;

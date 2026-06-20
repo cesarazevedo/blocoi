@@ -798,14 +798,22 @@
               <label class="obras-sobra-label">Sobra mensal</label>
               <span class="obras-calc-val obras-sobra-val" id="obras-sobra-calc">R$ 0,00</span>
             </div>
+            <hr style="border:none;border-top:1px solid var(--border);margin:4px 0">
+            <div class="obras-form-row">
+              <label>Reserva inicial — saldo em caixa (R$) <span style="font-size:0.68rem;color:var(--c-obras)">sugerido da DRE</span></label>
+              <input type="number" id="obras-reserva" class="obras-num-input" min="0" step="0.01" placeholder="0,00">
+            </div>
           </div>
         </div>
 
         <!-- Lista de obras -->
         <div class="card">
-          <div class="card-title" style="display:flex;align-items:center;justify-content:space-between">
+          <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
             <span>Obras a Simular</span>
-            <button class="obras-add-btn" id="btn-add-obra">+ Adicionar Obra</button>
+            <div style="display:flex;gap:8px">
+              <button class="obras-add-btn" id="btn-limpar-obras" style="border-color:var(--c-inadimplencia);color:var(--c-inadimplencia);background:rgba(255,117,140,0.06)">🗑️ Limpar tudo</button>
+              <button class="obras-add-btn" id="btn-add-obra">+ Adicionar Obra</button>
+            </div>
           </div>
           <div class="table-wrap">
             <table>
@@ -814,6 +822,7 @@
                   <th>Nome</th>
                   <th style="text-align:right">Valor Estimado</th>
                   <th style="text-align:right">Prazo</th>
+                  <th style="text-align:right">Conclusão estimada</th>
                   <th></th>
                 </tr>
               </thead>
@@ -863,7 +872,10 @@
 
       <!-- Gráfico -->
       <div class="card">
-        <div class="card-title">Evolução do Saldo Acumulado · Metas por Obra</div>
+        <div class="card-title" style="display:flex;align-items:center;justify-content:space-between">
+          <span>Evolução do Saldo Acumulado · Metas por Obra</span>
+          <button class="obras-add-btn" id="btn-pdf-obras" style="font-size:0.8rem">📄 Exportar PDF</button>
+        </div>
         <canvas id="chart-obras" height="80"></canvas>
       </div>
     </div>
@@ -1839,7 +1851,7 @@ function renderDRE() {
 
 // ── Simulação de Obras ────────────────────────────────────────
 const OBRAS_LS_KEY = 'condo_obras_v1';
-let obrasConfig = { taxaMensal: 0, numUnidades: 0, despesaMedia: 0, obras: [] };
+let obrasConfig = { taxaMensal: 0, numUnidades: 0, despesaMedia: 0, reservaInicial: 0, obras: [] };
 let obrasChartInst = null;
 let obrasInicializado = false;
 
@@ -1866,30 +1878,61 @@ function formatMeses(m) {
   return [a, me].filter(Boolean).join(' e ');
 }
 
+function obrasDataFutura(n) {
+  const d = new Date();
+  d.setMonth(d.getMonth() + n);
+  return d.toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' }).replace('.','');
+}
+
+function obrasCalcTempos(obras, sobraMensal, reserva) {
+  // Para cada obra, calcula meses até conclusão (sequencial, considerando reserva)
+  let cumVal = 0;
+  const res = Math.max(reserva || 0, 0);
+  return obras.map(o => {
+    cumVal += o.valor;
+    const need  = Math.max(cumVal - res, 0);
+    const meses = sobraMensal > 0 ? (need > 0 ? Math.ceil(need / sobraMensal) : 0) : (need > 0 ? Infinity : 0);
+    return { meses, label: meses === 0 ? 'Já possível ✓' : obrasDataFutura(meses) };
+  });
+}
+
+function obrasGetCaixaAtual() {
+  if (!dadosReceitas.length) return 0;
+  const recM  = MESES.map((_,i) => dadosReceitas.reduce((s,r) => s + r.valores[i], 0));
+  const despM = MESES.map((_,i) => despMesAtual(dadosDespesas, i, anoSel).reduce((s,d) => s + d.valor, 0));
+  let acum = saldoAnterior;
+  return recM.reduce((_, r, i) => { acum += r - despM[i]; return acum; }, 0)[mesSel] ??
+    recM.map((r,i) => { acum += r - despM[i]; return acum; })[mesSel] ?? 0;
+}
+
 function renderObras() {
   // Sugerir valores iniciais a partir dos dados do Sheets se ainda não configurado
   if (!obrasInicializado && dadosReceitas.length > 0) {
     obrasInicializado = true;
     const totalMes = dadosReceitas.reduce((s,r) => s + r.valores[mesSel], 0);
     const nUnid = dadosReceitas.length;
-    obrasConfig.numUnidades = nUnid;
-    obrasConfig.taxaMensal  = nUnid > 0 ? Math.round(totalMes / nUnid) : 0;
+    obrasConfig.numUnidades  = nUnid;
+    obrasConfig.taxaMensal   = nUnid > 0 ? Math.round(totalMes / nUnid) : 0;
     const despVals = MESES.map((_,i) => despMesAtual(dadosDespesas, i, anoSel).reduce((s,d)=>s+d.valor,0));
     const comDesp  = despVals.filter(v=>v>0);
     obrasConfig.despesaMedia = comDesp.length > 0 ? Math.round(comDesp.reduce((a,b)=>a+b,0) / comDesp.length) : 0;
+    // Puxar saldo em caixa atual da DRE como reserva inicial
+    const recM  = MESES.map((_,i) => dadosReceitas.reduce((s,r) => s + r.valores[i], 0));
+    const despM = MESES.map((_,i) => despMesAtual(dadosDespesas, i, anoSel).reduce((s,d)=>s+d.valor,0));
+    let acum = saldoAnterior;
+    const acumMeses = recM.map((r,i) => { acum += r - despM[i]; return acum; });
+    obrasConfig.reservaInicial = Math.max(Math.round(acumMeses[mesSel] || 0), 0);
   }
 
-  const { taxaMensal, numUnidades, despesaMedia, obras } = obrasConfig;
+  const { taxaMensal, numUnidades, despesaMedia, reservaInicial, obras } = obrasConfig;
   const receitaMensal = taxaMensal * numUnidades;
   const sobraMensal   = receitaMensal - despesaMedia;
 
   // Campos de entrada (só atualiza se não estiver em foco)
-  ['obras-taxa','obras-unidades','obras-despesa'].forEach(id => {
+  [['obras-taxa', taxaMensal], ['obras-unidades', numUnidades], ['obras-despesa', despesaMedia], ['obras-reserva', reservaInicial]].forEach(([id, val]) => {
     const el = document.getElementById(id);
     if (!el || document.activeElement === el) return;
-    if (id === 'obras-taxa')      el.value = taxaMensal  > 0 ? taxaMensal  : '';
-    if (id === 'obras-unidades')  el.value = numUnidades > 0 ? numUnidades : '';
-    if (id === 'obras-despesa')   el.value = despesaMedia > 0 ? despesaMedia : '';
+    el.value = val > 0 ? val : '';
   });
 
   set('obras-receita-calc', moeda(receitaMensal));
@@ -1901,26 +1944,31 @@ function renderObras() {
 
   // KPIs
   const totalObrasVal = obras.reduce((s,o)=>s+o.valor, 0);
-  const tempoTotal    = sobraMensal > 0 && totalObrasVal > 0 ? Math.ceil(totalObrasVal / sobraMensal) : 0;
+  const needTotal     = Math.max(totalObrasVal - (reservaInicial || 0), 0);
+  const tempoTotal    = sobraMensal > 0 && needTotal > 0 ? Math.ceil(needTotal / sobraMensal) : (totalObrasVal > 0 && (reservaInicial||0) >= totalObrasVal ? 0 : 0);
   set('obras-kpi-sobra',      moeda(sobraMensal));
   set('obras-kpi-sobra-sub',  sobraMensal >= 0 ? 'disponível por mês' : '⚠ despesa maior que receita');
   set('obras-kpi-total',      String(obras.length));
   set('obras-kpi-valor',      moeda(totalObrasVal));
-  set('obras-kpi-tempo',      tempoTotal > 0 ? formatMeses(tempoTotal) : obras.length === 0 ? '—' : sobraMensal <= 0 ? '∞' : '—');
-  set('obras-kpi-tempo-sub',  tempoTotal > 0 ? `${tempoTotal} meses sequenciais` : 'para todas as obras');
+  const jaOk = totalObrasVal > 0 && (reservaInicial||0) >= totalObrasVal;
+  set('obras-kpi-tempo',      jaOk ? 'Já possível ✓' : tempoTotal > 0 ? formatMeses(tempoTotal) : obras.length === 0 ? '—' : sobraMensal <= 0 ? '∞' : '—');
+  set('obras-kpi-tempo-sub',  jaOk ? 'reserva cobre todas as obras' : tempoTotal > 0 ? `${tempoTotal} meses · ${obrasDataFutura(tempoTotal)}` : 'para todas as obras');
 
   // Tabela de obras
   const tbody = document.getElementById('tbody-obras');
   if (tbody) {
     if (obras.length === 0) {
-      tbody.innerHTML = '<tr class="empty-row"><td colspan="4">Nenhuma obra cadastrada. Clique em "+ Adicionar Obra".</td></tr>';
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="5">Nenhuma obra cadastrada. Clique em "+ Adicionar Obra".</td></tr>';
     } else {
+      const tempos = obrasCalcTempos(obras, sobraMensal, reservaInicial);
       tbody.innerHTML = obras.map((o, i) => {
-        const t = sobraMensal > 0 && o.valor > 0 ? Math.ceil(o.valor / sobraMensal) : 0;
+        const t = tempos[i];
+        const prazoLabel = !isFinite(t.meses) ? '∞' : t.meses === 0 ? '—' : formatMeses(t.meses);
         return `<tr>
           <td><input class="obras-inline-input" data-field="nome" data-idx="${i}" value="${escHtml(o.nome)}" placeholder="Nome da obra"></td>
-          <td style="text-align:right"><input class="obras-inline-input obras-val-input" data-field="valor" data-idx="${i}" value="${o.valor > 0 ? o.valor : ''}" type="number" min="0" step="0.01" placeholder="0,00" style="width:110px;text-align:right"></td>
-          <td style="text-align:right;color:var(--text-muted);font-size:0.75rem;white-space:nowrap">${t > 0 ? formatMeses(t) : '—'}</td>
+          <td style="text-align:right"><input class="obras-inline-input" data-field="valor" data-idx="${i}" value="${o.valor > 0 ? o.valor : ''}" type="number" min="0" step="0.01" placeholder="0,00" style="width:110px;text-align:right"></td>
+          <td style="text-align:right;color:var(--text-muted);font-size:0.75rem;white-space:nowrap">${prazoLabel}</td>
+          <td style="text-align:right;font-size:0.75rem;font-weight:600;color:var(--c-obras);white-space:nowrap">${t.label}</td>
           <td style="text-align:right;padding-right:4px"><button class="btn-icon obras-del-btn" data-idx="${i}" title="Remover" style="width:26px;height:26px;font-size:0.75rem;color:var(--c-inadimplencia);border-color:transparent">✕</button></td>
         </tr>`;
       }).join('');
@@ -1955,11 +2003,13 @@ function obrasRenderProgresso(sobraMensal) {
   const labelEl   = document.getElementById('obras-slider-label');
   if (!tanksEl || !sliderEl || !labelEl) return;
 
+  const reserva       = obrasConfig.reservaInicial || 0;
   const totalObrasVal = obras.reduce((s,o)=>s+o.valor, 0);
-  const tempoMax      = sobraMensal > 0 && totalObrasVal > 0 ? Math.ceil(totalObrasVal / sobraMensal) : 24;
+  const needTotal     = Math.max(totalObrasVal - reserva, 0);
+  const tempoMax      = sobraMensal > 0 && needTotal > 0 ? Math.ceil(needTotal / sobraMensal) : 24;
   sliderEl.max        = Math.max(tempoMax + 6, 12);
   const mes           = parseInt(sliderEl.value);
-  const acumulado     = sobraMensal > 0 ? sobraMensal * mes : 0;
+  const acumulado     = reserva + (sobraMensal > 0 ? sobraMensal * mes : 0);
   labelEl.textContent = `Mês ${mes} · ${moeda(Math.max(acumulado, 0))} acumulado`;
 
   if (obras.length === 0) {
@@ -1968,12 +2018,13 @@ function obrasRenderProgresso(sobraMensal) {
   }
 
   const TANK_COLORS = ['#a29bfe','#fd79a8','#fdcb6e','#00cec9','#6c5ce7','#e17055','#55efc4','#74b9ff'];
+  const temposCalc = obrasCalcTempos(obras, sobraMensal, reserva);
   let resto = acumulado;
   tanksEl.innerHTML = obras.map((o, i) => {
-    const pct   = o.valor > 0 ? Math.min(Math.max(resto / o.valor, 0), 1) : 0;
-    const cor   = pct >= 1 ? '#48bb78' : TANK_COLORS[i % TANK_COLORS.length];
-    const t     = sobraMensal > 0 && o.valor > 0 ? Math.ceil(o.valor / sobraMensal) : 0;
-    const status = pct >= 1 ? '✓ Concluída' : t > 0 ? `faltam ${Math.max(t - mes, 0)} meses` : '—';
+    const pct    = o.valor > 0 ? Math.min(Math.max(resto / o.valor, 0), 1) : 0;
+    const cor    = pct >= 1 ? '#48bb78' : TANK_COLORS[i % TANK_COLORS.length];
+    const tc     = temposCalc[i];
+    const status = pct >= 1 ? `✓ ${tc.label}` : tc.meses > 0 ? tc.label : '—';
     resto = Math.max(resto - o.valor, 0);
     return `<div class="obra-tank">
       <div class="obra-tank-nome" title="${escHtml(o.nome || `Obra ${i+1}`)}">${escHtml(o.nome || `Obra ${i+1}`)}</div>
@@ -1991,12 +2042,14 @@ function obrasRenderChart(sobraMensal) {
   if (!ctx) return;
   if (obrasChartInst) { obrasChartInst.destroy(); obrasChartInst = null; }
 
+  const reserva       = obrasConfig.reservaInicial || 0;
   const totalObrasVal = obras.reduce((s,o)=>s+o.valor, 0);
-  const nMeses = sobraMensal > 0 && totalObrasVal > 0
-    ? Math.min(Math.ceil(totalObrasVal / sobraMensal) + 4, 120)
+  const needTotal     = Math.max(totalObrasVal - reserva, 0);
+  const nMeses = sobraMensal > 0 && needTotal > 0
+    ? Math.min(Math.ceil(needTotal / sobraMensal) + 4, 120)
     : 24;
   const labels    = Array.from({length: nMeses+1}, (_,i) => i === 0 ? 'Início' : `M${i}`);
-  const saldoData = labels.map((_,i) => sobraMensal > 0 ? sobraMensal * i : 0);
+  const saldoData = labels.map((_,i) => reserva + (sobraMensal > 0 ? sobraMensal * i : 0));
 
   const OBRA_COLORS = ['#a29bfe','#fd79a8','#fdcb6e','#00cec9','#6c5ce7','#e17055','#55efc4','#74b9ff'];
   const metaDatasets = [];
@@ -2043,14 +2096,16 @@ function obrasRenderChart(sobraMensal) {
 
 function obrasInicializarEventos() {
   function onParam() {
-    obrasConfig.taxaMensal   = parseFloat(document.getElementById('obras-taxa').value)      || 0;
-    obrasConfig.numUnidades  = parseInt(document.getElementById('obras-unidades').value)     || 0;
-    obrasConfig.despesaMedia = parseFloat(document.getElementById('obras-despesa').value)    || 0;
+    obrasConfig.taxaMensal    = parseFloat(document.getElementById('obras-taxa').value)      || 0;
+    obrasConfig.numUnidades   = parseInt(document.getElementById('obras-unidades').value)    || 0;
+    obrasConfig.despesaMedia  = parseFloat(document.getElementById('obras-despesa').value)   || 0;
+    obrasConfig.reservaInicial = parseFloat(document.getElementById('obras-reserva').value)  || 0;
     obrasSave(); renderObras();
   }
   document.getElementById('obras-taxa')?.addEventListener('input', onParam);
   document.getElementById('obras-unidades')?.addEventListener('input', onParam);
   document.getElementById('obras-despesa')?.addEventListener('input', onParam);
+  document.getElementById('obras-reserva')?.addEventListener('input', onParam);
 
   document.getElementById('btn-add-obra')?.addEventListener('click', () => {
     obrasConfig.obras.push({ nome: '', valor: 0 });
@@ -2061,10 +2116,125 @@ function obrasInicializarEventos() {
     }, 50);
   });
 
+  document.getElementById('btn-limpar-obras')?.addEventListener('click', () => {
+    if (confirm('Remover todas as obras cadastradas? Esta ação não pode ser desfeita.')) {
+      obrasConfig.obras = [];
+      obrasSave(); renderObras();
+    }
+  });
+
   document.getElementById('obras-slider')?.addEventListener('input', () => {
     const sobra = (obrasConfig.taxaMensal * obrasConfig.numUnidades) - obrasConfig.despesaMedia;
     obrasRenderProgresso(sobra);
   });
+
+  document.getElementById('btn-pdf-obras')?.addEventListener('click', gerarPDFObras);
+}
+
+function gerarPDFObras() {
+  if (!window.jspdf) { alert('Biblioteca PDF não carregada. Recarregue a página.'); return; }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+  const { taxaMensal, numUnidades, despesaMedia, reservaInicial, obras } = obrasConfig;
+  const receitaMensal = taxaMensal * numUnidades;
+  const sobraMensal   = receitaMensal - despesaMedia;
+  const totalObrasVal = obras.reduce((s,o)=>s+o.valor, 0);
+  const needTotal     = Math.max(totalObrasVal - (reservaInicial||0), 0);
+  const tempoTotal    = sobraMensal > 0 && needTotal > 0 ? Math.ceil(needTotal / sobraMensal) : 0;
+  const tempos        = obrasCalcTempos(obras, sobraMensal, reservaInicial||0);
+  const dataGer       = new Date().toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+
+  const W = 210, mg = 16, cw = W - mg * 2;
+  const C = {
+    primary: [102,126,234], dark:  [26,32,44],   gray:  [113,128,150],
+    lgray:   [226,232,240], surf:  [248,250,252], white: [255,255,255],
+    green:   [72,187,120],  red:   [252,129,129], obras: [162,155,254]
+  };
+
+  function pgHeader(subtitle) {
+    const PW = doc.internal.pageSize.getWidth();
+    doc.setFillColor(...C.primary);
+    doc.rect(0, 0, PW, 25, 'F');
+    doc.setTextColor(...C.white);
+    doc.setFont('helvetica', 'bold');   doc.setFontSize(13);
+    doc.text('Controle Condominial', mg, 10);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(8);
+    doc.text(`Simulacao de Obras`, mg, 17.5);
+    doc.text(`Gerado: ${dataGer}`, PW - mg, 17.5, { align: 'right' });
+    doc.setTextColor(...C.dark);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(12);
+    doc.text(pdfStr(subtitle), mg, 35);
+    doc.setDrawColor(...C.primary); doc.setLineWidth(0.6);
+    doc.line(mg, 37, PW - mg, 37);
+    return 45;
+  }
+
+  function kpiBox(x, y, w, h, label, value, sub, accent) {
+    doc.setFillColor(...C.surf);
+    doc.roundedRect(x, y, w, h, 2.5, 2.5, 'F');
+    doc.setFillColor(...accent);
+    doc.rect(x, y, 3, h, 'F');
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(7); doc.setTextColor(...C.gray);
+    doc.text(pdfStr(label).toUpperCase(), x + 6, y + 7);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(...C.dark);
+    doc.text(pdfStr(value), x + 6, y + 15);
+    if (sub) { doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(...C.gray); doc.text(pdfStr(sub), x + 6, y + 21); }
+  }
+
+  // ── Página 1: Resumo ──
+  let y = pgHeader('Plano de Obras — Resumo');
+
+  const kw = (cw - 6) / 2, kh = 26;
+  kpiBox(mg,          y, kw, kh, 'Receita Mensal',  moeda(receitaMensal), `${numUnidades} unidades × ${moeda(taxaMensal)}`, C.green);
+  kpiBox(mg + kw + 6, y, kw, kh, 'Despesa Media Mensal', moeda(despesaMedia), 'media informada', [247,151,30]);
+  y += kh + 4;
+  kpiBox(mg,          y, kw, kh, 'Sobra Mensal', moeda(sobraMensal), sobraMensal >= 0 ? 'disponivel por mes' : 'negativo', sobraMensal >= 0 ? C.obras : C.red);
+  kpiBox(mg + kw + 6, y, kw, kh, 'Reserva Inicial (Caixa)', moeda(reservaInicial||0), 'saldo atual em caixa', C.primary);
+  y += kh + 4;
+  kpiBox(mg,          y, kw, kh, 'Total das Obras', moeda(totalObrasVal), `${obras.length} obra(s)`, [247,151,30]);
+  kpiBox(mg + kw + 6, y, kw, kh, 'Prazo Total', tempoTotal > 0 ? formatMeses(tempoTotal) : (totalObrasVal <= (reservaInicial||0) ? 'Ja possivel' : '—'), tempoTotal > 0 ? `${tempoTotal} meses sequenciais` : '', C.obras);
+  y += kh + 10;
+
+  // Gráfico
+  const chartCanvas = document.getElementById('chart-obras');
+  if (chartCanvas) {
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.setTextColor(...C.dark);
+    doc.text('Evolucao do Saldo Acumulado', mg, y); y += 4;
+    const imgData = chartCanvas.toDataURL('image/png', 1.0);
+    doc.addImage(imgData, 'PNG', mg, y, cw, 55); y += 59;
+  }
+
+  // ── Página 2: Lista de obras ──
+  doc.addPage();
+  y = pgHeader('Lista de Obras Simuladas');
+
+  if (obras.length === 0) {
+    doc.setFont('helvetica', 'italic'); doc.setFontSize(10); doc.setTextColor(...C.gray);
+    doc.text('Nenhuma obra cadastrada.', mg, y);
+  } else {
+    doc.autoTable({
+      startY: y,
+      head: [['#', 'Nome da Obra', 'Valor Estimado', 'Prazo', 'Conclusao Estimada']],
+      body: obras.map((o, i) => {
+        const t = tempos[i];
+        return [
+          String(i + 1),
+          pdfStr(o.nome || `Obra ${i+1}`),
+          moeda(o.valor),
+          !isFinite(t.meses) ? '∞' : t.meses === 0 ? '—' : formatMeses(t.meses),
+          pdfStr(t.label)
+        ];
+      }),
+      margin: { left: mg, right: mg },
+      styles: { fontSize: 9, cellPadding: { top: 4, bottom: 4, left: 5, right: 5 }, textColor: C.dark },
+      headStyles: { fillColor: C.obras, textColor: [255,255,255], fontStyle: 'bold' },
+      columnStyles: { 0: { cellWidth: 10 }, 2: { halign: 'right' }, 3: { halign: 'right' }, 4: { halign: 'right' } },
+      alternateRowStyles: { fillColor: C.surf }
+    });
+  }
+
+  doc.save(`simulacao-obras-${new Date().toLocaleDateString('pt-BR').replace(/\//g,'-')}.pdf`);
 }
 
 obrasLoad();

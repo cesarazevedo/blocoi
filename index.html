@@ -15,6 +15,7 @@
       --c-despesas:      #f7971e;
       --c-inadimplencia: #ff758c;
       --c-fundo:         #4facfe;
+      --c-obras:         #a29bfe;
       --bg:        #f0f4f8;
       --surface:   #ffffff;
       --border:    #e2e8f0;
@@ -139,6 +140,40 @@
     .nav-btn.active[data-tab="despesas"]      { color: var(--c-despesas);     background: rgba(247,151,30,.09);   border-left-color: var(--c-despesas); }
     .nav-btn.active[data-tab="inadimplencia"] { color: var(--c-inadimplencia);background: rgba(255,117,140,.09);  border-left-color: var(--c-inadimplencia); }
     .nav-btn.active[data-tab="fundo"]         { color: var(--c-fundo);        background: rgba(79,172,254,.09);   border-left-color: var(--c-fundo); }
+    .nav-btn.active[data-tab="obras"]         { color: var(--c-obras);        background: rgba(162,155,254,.09);  border-left-color: var(--c-obras); }
+
+    /* ── Simulação de Obras ── */
+    .obras-params-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+    .obras-form-rows { display: flex; flex-direction: column; gap: 12px; }
+    .obras-form-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .obras-form-row label { font-size: 0.82rem; color: var(--text-muted); flex: 1; }
+    .obras-num-input {
+      padding: 7px 10px; border: 1px solid var(--border); border-radius: 8px;
+      background: var(--bg); color: var(--text); font-size: 0.9rem; width: 150px;
+      text-align: right; outline: none; transition: border-color 0.18s;
+    }
+    .obras-num-input:focus { border-color: var(--c-obras); box-shadow: 0 0 0 3px rgba(162,155,254,.15); }
+    .obras-calc-val { font-size: 0.95rem; font-weight: 700; width: 150px; text-align: right; }
+    .obras-sobra-label { font-weight: 600; color: var(--text); }
+    .obras-sobra-val { font-size: 1.05rem; font-weight: 700; }
+    .obras-tanks { display: flex; flex-wrap: wrap; gap: 20px; padding: 4px 0; }
+    .obra-tank { display: flex; flex-direction: column; align-items: center; gap: 5px; min-width: 90px; }
+    .obra-tank-nome { font-size: 0.78rem; font-weight: 600; text-align: center; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .obra-tank-meta { font-size: 0.7rem; color: var(--text-muted); }
+    .obra-tank-wrap { width: 56px; height: 110px; border: 2px solid var(--border); border-radius: 8px; background: var(--bg); position: relative; overflow: hidden; }
+    .obra-tank-fill { position: absolute; bottom: 0; width: 100%; transition: height 0.35s ease; border-radius: 4px 4px 0 0; }
+    .obra-tank-pct { font-size: 0.82rem; font-weight: 700; color: var(--c-obras); }
+    .obra-tank-status { font-size: 0.68rem; color: var(--text-muted); text-align: center; max-width: 100px; }
+    .obras-inline-input { border: none; background: transparent; color: var(--text); font-size: 0.82rem; outline: none; padding: 2px 4px; border-radius: 4px; transition: all 0.15s; width: 100%; }
+    .obras-inline-input:focus { background: rgba(162,155,254,0.08); border: 1px solid var(--c-obras) !important; }
+    .obras-add-btn {
+      padding: 6px 14px; border-radius: 8px; border: 1px dashed var(--c-obras);
+      background: rgba(162,155,254,0.06); color: var(--c-obras); cursor: pointer;
+      font-size: 0.82rem; font-weight: 600; transition: all 0.18s;
+    }
+    .obras-add-btn:hover { background: rgba(162,155,254,0.14); }
+    .obras-range { width: 100%; accent-color: var(--c-obras); cursor: pointer; }
+    @media (max-width: 900px) { .obras-params-grid { grid-template-columns: 1fr; } }
     .nav-badge {
       margin-left: auto; background: var(--c-inadimplencia); color: #fff;
       font-size: 0.65rem; font-weight: 700; border-radius: 50px; padding: 1px 6px;
@@ -409,6 +444,7 @@
     <button class="nav-btn" data-tab="despesas"><span>💸</span> Despesas</button>
     <button class="nav-btn" data-tab="inadimplencia"><span>⚠️</span> Inadimplência <span class="nav-badge" id="badge-inad">—</span></button>
     <button class="nav-btn" data-tab="dre"><span>📋</span> DRE</button>
+    <button class="nav-btn" data-tab="obras"><span>🏗️</span> Simulação de Obras</button>
   </nav>
 
   <!-- Content -->
@@ -725,6 +761,110 @@
             <tfoot id="tfoot-dre"></tfoot>
           </table>
         </div>
+      </div>
+    </div>
+
+    <!-- ════ SIMULAÇÃO DE OBRAS ════ -->
+    <div class="tab-pane" id="tab-obras">
+      <div class="page-title">
+        <h2>🏗️ Simulação de Obras</h2>
+        <p>Planeje quanto tempo levará para juntar recursos para suas obras</p>
+      </div>
+
+      <!-- Parâmetros + Lista de obras -->
+      <div class="obras-params-grid">
+        <!-- Parâmetros financeiros -->
+        <div class="card">
+          <div class="card-title">Parâmetros Financeiros</div>
+          <div class="obras-form-rows">
+            <div class="obras-form-row">
+              <label>Taxa mensal por unidade (R$)</label>
+              <input type="number" id="obras-taxa" class="obras-num-input" min="0" step="0.01" placeholder="0,00">
+            </div>
+            <div class="obras-form-row">
+              <label>Nº de unidades pagantes</label>
+              <input type="number" id="obras-unidades" class="obras-num-input" min="0" step="1" placeholder="0">
+            </div>
+            <div class="obras-form-row">
+              <label style="color:var(--text-muted)">Receita mensal total</label>
+              <span class="obras-calc-val trend-up" id="obras-receita-calc">R$ 0,00</span>
+            </div>
+            <hr style="border:none;border-top:1px solid var(--border);margin:4px 0">
+            <div class="obras-form-row">
+              <label>Despesa média mensal (R$)</label>
+              <input type="number" id="obras-despesa" class="obras-num-input" min="0" step="0.01" placeholder="0,00">
+            </div>
+            <div class="obras-form-row">
+              <label class="obras-sobra-label">Sobra mensal</label>
+              <span class="obras-calc-val obras-sobra-val" id="obras-sobra-calc">R$ 0,00</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Lista de obras -->
+        <div class="card">
+          <div class="card-title" style="display:flex;align-items:center;justify-content:space-between">
+            <span>Obras a Simular</span>
+            <button class="obras-add-btn" id="btn-add-obra">+ Adicionar Obra</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nome</th>
+                  <th style="text-align:right">Valor Estimado</th>
+                  <th style="text-align:right">Prazo</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="tbody-obras"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- KPIs -->
+      <div class="kpi-row">
+        <div class="kpi-card" style="--accent:var(--c-obras)">
+          <div class="kpi-label">Sobra Mensal</div>
+          <div class="kpi-value" id="obras-kpi-sobra">—</div>
+          <div class="kpi-sub" id="obras-kpi-sobra-sub">disponível por mês</div>
+        </div>
+        <div class="kpi-card" style="--accent:var(--c-receitas)">
+          <div class="kpi-label">Obras Cadastradas</div>
+          <div class="kpi-value" id="obras-kpi-total">—</div>
+          <div class="kpi-sub">itens na lista</div>
+        </div>
+        <div class="kpi-card" style="--accent:var(--c-despesas)">
+          <div class="kpi-label">Total das Obras</div>
+          <div class="kpi-value" id="obras-kpi-valor">—</div>
+          <div class="kpi-sub">valor estimado somado</div>
+        </div>
+        <div class="kpi-card" style="--accent:#667eea">
+          <div class="kpi-label">Tempo Total</div>
+          <div class="kpi-value" id="obras-kpi-tempo">—</div>
+          <div class="kpi-sub" id="obras-kpi-tempo-sub">para todas as obras</div>
+        </div>
+      </div>
+
+      <!-- Progresso com slider -->
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-title" style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+          <span>Progresso por Obra</span>
+          <span id="obras-slider-label" style="color:var(--c-obras);font-weight:600;font-size:0.82rem">Mês 1</span>
+        </div>
+        <div style="padding:0 4px 14px">
+          <input type="range" id="obras-slider" class="obras-range" min="1" max="120" value="1">
+        </div>
+        <div class="obras-tanks" id="obras-tanks">
+          <span style="color:var(--text-muted);font-size:0.82rem;font-style:italic">Adicione obras para ver o progresso.</span>
+        </div>
+      </div>
+
+      <!-- Gráfico -->
+      <div class="card">
+        <div class="card-title">Evolução do Saldo Acumulado · Metas por Obra</div>
+        <canvas id="chart-obras" height="80"></canvas>
       </div>
     </div>
 
@@ -1697,6 +1837,238 @@ function renderDRE() {
   });
 }
 
+// ── Simulação de Obras ────────────────────────────────────────
+const OBRAS_LS_KEY = 'condo_obras_v1';
+let obrasConfig = { taxaMensal: 0, numUnidades: 0, despesaMedia: 0, obras: [] };
+let obrasChartInst = null;
+let obrasInicializado = false;
+
+function obrasLoad() {
+  try {
+    const s = localStorage.getItem(OBRAS_LS_KEY);
+    if (s) { obrasConfig = JSON.parse(s); obrasInicializado = true; }
+  } catch(e) {}
+}
+
+function obrasSave() {
+  try { localStorage.setItem(OBRAS_LS_KEY, JSON.stringify(obrasConfig)); } catch(e) {}
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function formatMeses(m) {
+  if (!isFinite(m) || m <= 0) return '—';
+  const anos = Math.floor(m / 12), mes = m % 12;
+  const a  = anos > 0 ? `${anos} ano${anos !== 1 ? 's' : ''}` : '';
+  const me = mes  > 0 ? `${mes} mês${mes  !== 1 ? 'es' : ''}` : '';
+  return [a, me].filter(Boolean).join(' e ');
+}
+
+function renderObras() {
+  // Sugerir valores iniciais a partir dos dados do Sheets se ainda não configurado
+  if (!obrasInicializado && dadosReceitas.length > 0) {
+    obrasInicializado = true;
+    const totalMes = dadosReceitas.reduce((s,r) => s + r.valores[mesSel], 0);
+    const nUnid = dadosReceitas.length;
+    obrasConfig.numUnidades = nUnid;
+    obrasConfig.taxaMensal  = nUnid > 0 ? Math.round(totalMes / nUnid) : 0;
+    const despVals = MESES.map((_,i) => despMesAtual(dadosDespesas, i, anoSel).reduce((s,d)=>s+d.valor,0));
+    const comDesp  = despVals.filter(v=>v>0);
+    obrasConfig.despesaMedia = comDesp.length > 0 ? Math.round(comDesp.reduce((a,b)=>a+b,0) / comDesp.length) : 0;
+  }
+
+  const { taxaMensal, numUnidades, despesaMedia, obras } = obrasConfig;
+  const receitaMensal = taxaMensal * numUnidades;
+  const sobraMensal   = receitaMensal - despesaMedia;
+
+  // Campos de entrada (só atualiza se não estiver em foco)
+  ['obras-taxa','obras-unidades','obras-despesa'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el || document.activeElement === el) return;
+    if (id === 'obras-taxa')      el.value = taxaMensal  > 0 ? taxaMensal  : '';
+    if (id === 'obras-unidades')  el.value = numUnidades > 0 ? numUnidades : '';
+    if (id === 'obras-despesa')   el.value = despesaMedia > 0 ? despesaMedia : '';
+  });
+
+  set('obras-receita-calc', moeda(receitaMensal));
+  const sobraEl = document.getElementById('obras-sobra-calc');
+  if (sobraEl) {
+    sobraEl.textContent = moeda(sobraMensal);
+    sobraEl.style.color = sobraMensal >= 0 ? 'var(--c-obras)' : 'var(--c-despesas)';
+  }
+
+  // KPIs
+  const totalObrasVal = obras.reduce((s,o)=>s+o.valor, 0);
+  const tempoTotal    = sobraMensal > 0 && totalObrasVal > 0 ? Math.ceil(totalObrasVal / sobraMensal) : 0;
+  set('obras-kpi-sobra',      moeda(sobraMensal));
+  set('obras-kpi-sobra-sub',  sobraMensal >= 0 ? 'disponível por mês' : '⚠ despesa maior que receita');
+  set('obras-kpi-total',      String(obras.length));
+  set('obras-kpi-valor',      moeda(totalObrasVal));
+  set('obras-kpi-tempo',      tempoTotal > 0 ? formatMeses(tempoTotal) : obras.length === 0 ? '—' : sobraMensal <= 0 ? '∞' : '—');
+  set('obras-kpi-tempo-sub',  tempoTotal > 0 ? `${tempoTotal} meses sequenciais` : 'para todas as obras');
+
+  // Tabela de obras
+  const tbody = document.getElementById('tbody-obras');
+  if (tbody) {
+    if (obras.length === 0) {
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="4">Nenhuma obra cadastrada. Clique em "+ Adicionar Obra".</td></tr>';
+    } else {
+      tbody.innerHTML = obras.map((o, i) => {
+        const t = sobraMensal > 0 && o.valor > 0 ? Math.ceil(o.valor / sobraMensal) : 0;
+        return `<tr>
+          <td><input class="obras-inline-input" data-field="nome" data-idx="${i}" value="${escHtml(o.nome)}" placeholder="Nome da obra"></td>
+          <td style="text-align:right"><input class="obras-inline-input obras-val-input" data-field="valor" data-idx="${i}" value="${o.valor > 0 ? o.valor : ''}" type="number" min="0" step="0.01" placeholder="0,00" style="width:110px;text-align:right"></td>
+          <td style="text-align:right;color:var(--text-muted);font-size:0.75rem;white-space:nowrap">${t > 0 ? formatMeses(t) : '—'}</td>
+          <td style="text-align:right;padding-right:4px"><button class="btn-icon obras-del-btn" data-idx="${i}" title="Remover" style="width:26px;height:26px;font-size:0.75rem;color:var(--c-inadimplencia);border-color:transparent">✕</button></td>
+        </tr>`;
+      }).join('');
+
+      tbody.querySelectorAll('.obras-inline-input').forEach(inp => {
+        inp.addEventListener('blur', () => {
+          const idx = parseInt(inp.dataset.idx);
+          if (inp.dataset.field === 'nome')  obrasConfig.obras[idx].nome  = inp.value.trim();
+          if (inp.dataset.field === 'valor') obrasConfig.obras[idx].valor = parseFloat(inp.value) || 0;
+          obrasSave(); renderObras();
+        });
+        inp.addEventListener('keydown', e => { if (e.key === 'Enter') inp.blur(); });
+      });
+
+      tbody.querySelectorAll('.obras-del-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          obrasConfig.obras.splice(parseInt(btn.dataset.idx), 1);
+          obrasSave(); renderObras();
+        });
+      });
+    }
+  }
+
+  obrasRenderProgresso(sobraMensal);
+  obrasRenderChart(sobraMensal);
+}
+
+function obrasRenderProgresso(sobraMensal) {
+  const { obras } = obrasConfig;
+  const tanksEl   = document.getElementById('obras-tanks');
+  const sliderEl  = document.getElementById('obras-slider');
+  const labelEl   = document.getElementById('obras-slider-label');
+  if (!tanksEl || !sliderEl || !labelEl) return;
+
+  const totalObrasVal = obras.reduce((s,o)=>s+o.valor, 0);
+  const tempoMax      = sobraMensal > 0 && totalObrasVal > 0 ? Math.ceil(totalObrasVal / sobraMensal) : 24;
+  sliderEl.max        = Math.max(tempoMax + 6, 12);
+  const mes           = parseInt(sliderEl.value);
+  const acumulado     = sobraMensal > 0 ? sobraMensal * mes : 0;
+  labelEl.textContent = `Mês ${mes} · ${moeda(Math.max(acumulado, 0))} acumulado`;
+
+  if (obras.length === 0) {
+    tanksEl.innerHTML = '<span style="color:var(--text-muted);font-size:0.82rem;font-style:italic">Adicione obras para ver o progresso.</span>';
+    return;
+  }
+
+  const TANK_COLORS = ['#a29bfe','#fd79a8','#fdcb6e','#00cec9','#6c5ce7','#e17055','#55efc4','#74b9ff'];
+  let resto = acumulado;
+  tanksEl.innerHTML = obras.map((o, i) => {
+    const pct   = o.valor > 0 ? Math.min(Math.max(resto / o.valor, 0), 1) : 0;
+    const cor   = pct >= 1 ? '#48bb78' : TANK_COLORS[i % TANK_COLORS.length];
+    const t     = sobraMensal > 0 && o.valor > 0 ? Math.ceil(o.valor / sobraMensal) : 0;
+    const status = pct >= 1 ? '✓ Concluída' : t > 0 ? `faltam ${Math.max(t - mes, 0)} meses` : '—';
+    resto = Math.max(resto - o.valor, 0);
+    return `<div class="obra-tank">
+      <div class="obra-tank-nome" title="${escHtml(o.nome || `Obra ${i+1}`)}">${escHtml(o.nome || `Obra ${i+1}`)}</div>
+      <div class="obra-tank-meta">${moeda(o.valor)}</div>
+      <div class="obra-tank-wrap"><div class="obra-tank-fill" style="height:${Math.round(pct*100)}%;background:${cor}"></div></div>
+      <div class="obra-tank-pct" style="color:${cor}">${Math.round(pct*100)}%</div>
+      <div class="obra-tank-status">${status}</div>
+    </div>`;
+  }).join('');
+}
+
+function obrasRenderChart(sobraMensal) {
+  const { obras } = obrasConfig;
+  const ctx = document.getElementById('chart-obras');
+  if (!ctx) return;
+  if (obrasChartInst) { obrasChartInst.destroy(); obrasChartInst = null; }
+
+  const totalObrasVal = obras.reduce((s,o)=>s+o.valor, 0);
+  const nMeses = sobraMensal > 0 && totalObrasVal > 0
+    ? Math.min(Math.ceil(totalObrasVal / sobraMensal) + 4, 120)
+    : 24;
+  const labels    = Array.from({length: nMeses+1}, (_,i) => i === 0 ? 'Início' : `M${i}`);
+  const saldoData = labels.map((_,i) => sobraMensal > 0 ? sobraMensal * i : 0);
+
+  const OBRA_COLORS = ['#a29bfe','#fd79a8','#fdcb6e','#00cec9','#6c5ce7','#e17055','#55efc4','#74b9ff'];
+  const metaDatasets = [];
+  let acumMeta = 0;
+  obras.forEach((o, i) => {
+    acumMeta += o.valor;
+    const cor = OBRA_COLORS[i % OBRA_COLORS.length];
+    metaDatasets.push({
+      label: o.nome || `Obra ${i+1}`,
+      data: labels.map(() => acumMeta),
+      borderColor: cor, backgroundColor: 'transparent',
+      borderWidth: 1.5, borderDash: [6,4], pointRadius: 0, tension: 0
+    });
+  });
+
+  obrasChartInst = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Saldo Acumulado',
+          data: saldoData,
+          borderColor: 'rgba(162,155,254,0.9)',
+          backgroundColor: 'rgba(162,155,254,0.1)',
+          borderWidth: 2.5, tension: 0.3, fill: true, pointRadius: 0
+        },
+        ...metaDatasets
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { labels: { color: tColor(), font: { size: 11 } } },
+        tooltip: { callbacks: { label: c => `${c.dataset.label}: ${moeda(c.parsed.y)}` } }
+      },
+      scales: {
+        x: { ticks: { color: tColor(), maxTicksLimit: 13 }, grid: { color: gColor() } },
+        y: { ticks: { color: tColor(), callback: v => 'R$'+(v/1000).toFixed(1).replace('.',',')+' k' }, grid: { color: gColor() } }
+      }
+    }
+  });
+}
+
+function obrasInicializarEventos() {
+  function onParam() {
+    obrasConfig.taxaMensal   = parseFloat(document.getElementById('obras-taxa').value)      || 0;
+    obrasConfig.numUnidades  = parseInt(document.getElementById('obras-unidades').value)     || 0;
+    obrasConfig.despesaMedia = parseFloat(document.getElementById('obras-despesa').value)    || 0;
+    obrasSave(); renderObras();
+  }
+  document.getElementById('obras-taxa')?.addEventListener('input', onParam);
+  document.getElementById('obras-unidades')?.addEventListener('input', onParam);
+  document.getElementById('obras-despesa')?.addEventListener('input', onParam);
+
+  document.getElementById('btn-add-obra')?.addEventListener('click', () => {
+    obrasConfig.obras.push({ nome: '', valor: 0 });
+    obrasSave(); renderObras();
+    setTimeout(() => {
+      const inputs = document.querySelectorAll('#tbody-obras .obras-inline-input[data-field="nome"]');
+      if (inputs.length) inputs[inputs.length-1].focus();
+    }, 50);
+  });
+
+  document.getElementById('obras-slider')?.addEventListener('input', () => {
+    const sobra = (obrasConfig.taxaMensal * obrasConfig.numUnidades) - obrasConfig.despesaMedia;
+    obrasRenderProgresso(sobra);
+  });
+}
+
+obrasLoad();
+
 function renderTudo() {
   renderDashboard();
   renderReceitas();
@@ -1705,6 +2077,7 @@ function renderTudo() {
   renderComunicados();
   renderTicker();
   renderDRE();
+  renderObras();
 }
 
 // ── Saldo anterior (ano precedente completo) ──────────────────
@@ -1815,6 +2188,7 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
     document.getElementById('tab-' + tab).classList.add('active');
     window.location.hash = tab;
     if (tab === 'fundo') renderFundo();
+    if (tab === 'obras') renderObras();
   });
 });
 
@@ -2338,6 +2712,8 @@ function gerarPDFDRE() {
 
 document.getElementById('btn-pdf').addEventListener('click', gerarPDF);
 document.getElementById('btn-pdf-dre').addEventListener('click', gerarPDFDRE);
+
+obrasInicializarEventos();
 
 // ── Init ──────────────────────────────────────────────────────
 inicializarAnos().then(() => carregar());

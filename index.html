@@ -3064,7 +3064,7 @@ function gerarPDFRegimento() {
     if (y > 265) { doc.addPage(); y = 20; }
 
     // Número e título da seção
-    const tituloLimpo = secao.titulo.replace(/^[\p{Emoji}\s]+/u, '').trim();
+    const tituloLimpo = secao.titulo.replace(/[^\x20-\x7EÀ-ɏ]/g, '').trim();
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(11);
     doc.setTextColor(102, 126, 234);
@@ -3077,17 +3077,18 @@ function gerarPDFRegimento() {
     doc.setTextColor(60, 60, 60);
 
     secao.itens.forEach((item, iIdx) => {
-      const linhas = doc.splitTextToSize(`${iIdx + 1}. ${item}`, pw - 14);
+      const linhas = doc.splitTextToSize(`${idx + 1}.${iIdx + 1}. ${item}`, pw - 14);
       if (y + linhas.length * 5 > 280) { doc.addPage(); y = 20; }
       doc.text(linhas, mg + 4, y);
       y += linhas.length * 5 + 2;
     });
 
-    y += 5;
+    y += 3;
     if (y < 275) {
       doc.setDrawColor(220, 220, 220);
-      doc.line(mg, y - 2, mg + pw, y - 2);
+      doc.line(mg, y, mg + pw, y);
     }
+    y += 8;
   });
 
   // Rodapé

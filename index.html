@@ -2230,7 +2230,13 @@ function gerarPDFObras() {
       styles: { fontSize: 9, cellPadding: { top: 4, bottom: 4, left: 5, right: 5 }, textColor: C.dark, valign: 'middle' },
       headStyles: { fillColor: C.obras, textColor: [255,255,255], fontStyle: 'bold', valign: 'middle' },
       columnStyles: { 0: { cellWidth: 12, halign: 'center' }, 2: { halign: 'right' }, 3: { halign: 'right' }, 4: { halign: 'right' } },
-      alternateRowStyles: { fillColor: C.surf }
+      alternateRowStyles: { fillColor: C.surf },
+      didParseCell: (data) => {
+        if (data.section === 'head') {
+          if (data.column.index === 0) data.cell.styles.halign = 'center';
+          if ([2,3,4].includes(data.column.index)) data.cell.styles.halign = 'right';
+        }
+      }
     });
   }
 

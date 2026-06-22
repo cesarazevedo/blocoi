@@ -1874,7 +1874,7 @@ function formatMeses(m) {
   if (!isFinite(m) || m <= 0) return '—';
   const anos = Math.floor(m / 12), mes = m % 12;
   const a  = anos > 0 ? `${anos} ano${anos !== 1 ? 's' : ''}` : '';
-  const me = mes  > 0 ? `${mes} mês${mes  !== 1 ? 'es' : ''}` : '';
+  const me = mes  > 0 ? `${mes} ${mes !== 1 ? 'meses' : 'mês'}` : '';
   return [a, me].filter(Boolean).join(' e ');
 }
 

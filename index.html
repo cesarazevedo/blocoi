@@ -950,18 +950,6 @@
       ]
     },
     {
-      titulo: '🚗 Estacionamento',
-      cor: '#4facfe',
-      itens: [
-        'Cada unidade tem direito à(s) vaga(s) determinada(s) no contrato.',
-        'É proibido estacionar em vagas de outros condôminos sem autorização.',
-        'Veículos de visitantes devem utilizar exclusivamente as vagas de visitantes.',
-        'Não é permitida a lavagem de veículos nas vagas ou áreas comuns do condomínio.',
-        'Motocicletas devem ser estacionadas nas vagas destinadas a esse fim.',
-        'O condomínio não se responsabiliza por danos ou furtos ocorridos no estacionamento.',
-      ]
-    },
-    {
       titulo: '💳 Taxa Condominial',
       cor: '#48bb78',
       itens: [
@@ -3069,7 +3057,7 @@ function gerarPDFRegimento() {
     doc.setTextColor(60, 60, 60);
 
     secao.itens.forEach((item, iIdx) => {
-      const linhas = doc.splitTextToSize(`${iIdx + 1}. ${item}`, pw - 6);
+      const linhas = doc.splitTextToSize(`${iIdx + 1}. ${item}`, pw - 14);
       if (y + linhas.length * 5 > 280) { doc.addPage(); y = 20; }
       doc.text(linhas, mg + 4, y);
       y += linhas.length * 5 + 2;

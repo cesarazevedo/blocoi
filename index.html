@@ -888,11 +888,16 @@
       <div style="max-width:800px;margin:0 auto">
 
         <div class="card" style="margin-bottom:20px">
-          <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px">
-            <span style="font-size:1.5rem">📜</span>
-            <div>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+            <div style="display:flex;align-items:center;gap:12px">
+              <span style="font-size:1.5rem">📜</span>
               <div style="font-size:1.1rem;font-weight:700;color:var(--text)">Regimento Interno</div>
             </div>
+            <button onclick="gerarPDFRegimento()" style="
+              display:flex;align-items:center;gap:6px;padding:8px 14px;
+              background:var(--primary);color:#fff;border:none;border-radius:8px;
+              font-size:0.82rem;font-weight:600;cursor:pointer
+            ">📄 Exportar PDF</button>
           </div>
         </div>
 
@@ -3019,6 +3024,76 @@ function gerarPDFDRE() {
 
 document.getElementById('btn-pdf').addEventListener('click', gerarPDF);
 document.getElementById('btn-pdf-dre').addEventListener('click', gerarPDFDRE);
+
+function gerarPDFRegimento() {
+  if (!window.jspdf) { alert('Biblioteca PDF não carregada. Recarregue a página.'); return; }
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const mg = 15, pw = 180;
+  let y = 20;
+
+  // Cabeçalho
+  doc.setFillColor(102, 126, 234);
+  doc.rect(0, 0, 210, 14, 'F');
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(11);
+  doc.setTextColor(255, 255, 255);
+  doc.text('Regimento Interno', mg, 9.5);
+
+  // Título
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(16);
+  doc.setTextColor(30, 30, 30);
+  doc.text('Regimento Interno', 105, y + 4, { align: 'center' });
+  y += 14;
+
+  doc.setDrawColor(200, 200, 200);
+  doc.line(mg, y, mg + pw, y);
+  y += 8;
+
+  REGIMENTO.forEach((secao, idx) => {
+    // Verifica espaço para cabeçalho da seção
+    if (y > 265) { doc.addPage(); y = 20; }
+
+    // Número e título da seção
+    const tituloLimpo = secao.titulo.replace(/^[\p{Emoji}\s]+/u, '').trim();
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.setTextColor(102, 126, 234);
+    doc.text(`${idx + 1}. ${tituloLimpo}`, mg, y);
+    y += 6;
+
+    // Itens
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9.5);
+    doc.setTextColor(60, 60, 60);
+
+    secao.itens.forEach((item, iIdx) => {
+      const linhas = doc.splitTextToSize(`${iIdx + 1}. ${item}`, pw - 6);
+      if (y + linhas.length * 5 > 280) { doc.addPage(); y = 20; }
+      doc.text(linhas, mg + 4, y);
+      y += linhas.length * 5 + 2;
+    });
+
+    y += 5;
+    if (y < 275) {
+      doc.setDrawColor(220, 220, 220);
+      doc.line(mg, y - 2, mg + pw, y - 2);
+    }
+  });
+
+  // Rodapé
+  const pages = doc.getNumberOfPages();
+  for (let i = 1; i <= pages; i++) {
+    doc.setPage(i);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(160, 160, 160);
+    doc.text(`Página ${i} de ${pages}`, 105, 290, { align: 'center' });
+  }
+
+  doc.save('regimento-interno.pdf');
+}
 
 obrasInicializarEventos();
 

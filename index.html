@@ -2227,9 +2227,9 @@ function gerarPDFObras() {
         ];
       }),
       margin: { left: mg, right: mg },
-      styles: { fontSize: 9, cellPadding: { top: 4, bottom: 4, left: 5, right: 5 }, textColor: C.dark },
-      headStyles: { fillColor: C.obras, textColor: [255,255,255], fontStyle: 'bold' },
-      columnStyles: { 0: { cellWidth: 10 }, 2: { halign: 'right' }, 3: { halign: 'right' }, 4: { halign: 'right' } },
+      styles: { fontSize: 9, cellPadding: { top: 4, bottom: 4, left: 5, right: 5 }, textColor: C.dark, valign: 'middle' },
+      headStyles: { fillColor: C.obras, textColor: [255,255,255], fontStyle: 'bold', valign: 'middle' },
+      columnStyles: { 0: { cellWidth: 12, halign: 'center' }, 2: { halign: 'right' }, 3: { halign: 'right' }, 4: { halign: 'right' } },
       alternateRowStyles: { fillColor: C.surf }
     });
   }

@@ -143,6 +143,7 @@
     .nav-btn.active[data-tab="inadimplencia"] { color: var(--c-inadimplencia);background: rgba(255,117,140,.09);  border-left-color: var(--c-inadimplencia); }
     .nav-btn.active[data-tab="fundo"]         { color: var(--c-fundo);        background: rgba(79,172,254,.09);   border-left-color: var(--c-fundo); }
     .nav-btn.active[data-tab="obras"]         { color: var(--c-obras);        background: rgba(162,155,254,.09);  border-left-color: var(--c-obras); }
+    .nav-btn.active[data-tab="regimento"]     { color: #38b2ac;               background: rgba(56,178,172,.09);   border-left-color: #38b2ac; }
 
     /* ── Simulação de Obras ── */
     .obras-params-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
@@ -447,6 +448,7 @@
     <button class="nav-btn" data-tab="inadimplencia"><span>⚠️</span> Inadimplência <span class="nav-badge" id="badge-inad">—</span></button>
     <button class="nav-btn" data-tab="dre"><span>📋</span> DRE</button>
     <button class="nav-btn" data-tab="obras"><span>🏗️</span> Simulação de Obras</button>
+    <button class="nav-btn" data-tab="regimento"><span>📜</span> Regimento</button>
   </nav>
 
   <!-- Content -->
@@ -882,7 +884,137 @@
       </div>
     </div>
 
+    <div class="tab-pane" id="tab-regimento">
+      <div style="max-width:800px;margin:0 auto">
+
+        <div class="card" style="margin-bottom:20px">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px">
+            <span style="font-size:1.5rem">📜</span>
+            <div>
+              <div style="font-size:1.1rem;font-weight:700;color:var(--text)">Regimento Interno</div>
+              <div style="font-size:0.8rem;color:var(--text-muted)">Condomínio Parque dos Rios</div>
+            </div>
+          </div>
+        </div>
+
+        <div id="regimento-accordion"></div>
+      </div>
+    </div>
+
   </main>
+
+  <script>
+  const REGIMENTO = [
+    {
+      titulo: '🏊 Uso das Áreas Comuns',
+      cor: '#38b2ac',
+      itens: [
+        'O uso da piscina é permitido das 8h às 22h.',
+        'Crianças menores de 12 anos devem estar acompanhadas de um responsável adulto.',
+        'É obrigatório o uso de touca na piscina.',
+        'O salão de festas deve ser reservado com antecedência mínima de 3 dias junto à administração.',
+        'Após o uso do salão de festas, o condômino é responsável pela limpeza e devolução do espaço em perfeitas condições.',
+        'A academia está disponível das 6h às 23h para uso exclusivo dos moradores.',
+        'Não é permitido o uso das áreas comuns para fins comerciais.',
+      ]
+    },
+    {
+      titulo: '🐾 Animais de Estimação',
+      cor: '#ed8936',
+      itens: [
+        'É permitida a permanência de animais domésticos de pequeno e médio porte.',
+        'Os animais devem circular pelas áreas comuns sempre com coleira e acompanhados de seu responsável.',
+        'É obrigatório o recolhimento imediato de dejetos dos animais nas áreas comuns.',
+        'Animais não têm acesso à piscina e ao salão de festas.',
+        'O condômino é responsável por qualquer dano ou acidente causado por seu animal.',
+      ]
+    },
+    {
+      titulo: '🔊 Barulho e Horários',
+      cor: '#e53e3e',
+      itens: [
+        'O horário de silêncio é das 22h às 8h em dias úteis e das 23h às 9h nos finais de semana e feriados.',
+        'Obras e reformas são permitidas de segunda a sexta-feira, das 8h às 17h, e aos sábados das 9h às 13h.',
+        'Festas e eventos nas unidades devem respeitar o horário de silêncio.',
+        'Sons de televisão, instrumentos musicais e aparelhos de som devem ser mantidos em volume que não perturbe os vizinhos.',
+      ]
+    },
+    {
+      titulo: '📦 Mudanças',
+      cor: '#9f7aea',
+      itens: [
+        'Mudanças devem ser agendadas previamente com a administração.',
+        'O horário permitido para mudanças é de segunda a sábado, das 8h às 18h.',
+        'O uso do elevador de serviço é obrigatório durante as mudanças.',
+        'O condômino é responsável por qualquer dano causado às áreas comuns durante a mudança.',
+        'Não é permitido o bloqueio de garagens ou vias de acesso durante a mudança sem aviso prévio.',
+      ]
+    },
+    {
+      titulo: '🚗 Estacionamento',
+      cor: '#4facfe',
+      itens: [
+        'Cada unidade tem direito à(s) vaga(s) determinada(s) no contrato.',
+        'É proibido estacionar em vagas de outros condôminos sem autorização.',
+        'Veículos de visitantes devem utilizar exclusivamente as vagas de visitantes.',
+        'Não é permitida a lavagem de veículos nas vagas ou áreas comuns do condomínio.',
+        'Motocicletas devem ser estacionadas nas vagas destinadas a esse fim.',
+        'O condomínio não se responsabiliza por danos ou furtos ocorridos no estacionamento.',
+      ]
+    },
+    {
+      titulo: '💰 Multas e Penalidades',
+      cor: '#ff758c',
+      itens: [
+        'O não pagamento da taxa condominial até o vencimento acarreta multa de 2% e juros de 1% ao mês.',
+        'O descumprimento das normas do regimento interno sujeita o infrator a advertência e, em caso de reincidência, multa equivalente a uma taxa condominial.',
+        'Danos causados às áreas comuns serão cobrados do responsável, além de possível multa.',
+        'Casos graves ou reiterados serão encaminhados para deliberação em assembleia.',
+      ]
+    },
+    {
+      titulo: '🗳️ Assembleia e Votações',
+      cor: '#667eea',
+      itens: [
+        'A assembleia geral ordinária ocorre uma vez por ano, preferencialmente no primeiro trimestre.',
+        'Assembleias extraordinárias podem ser convocadas pelo síndico ou por condôminos que representem pelo menos 1/4 das frações ideais.',
+        'A convocação deve ser feita com antecedência mínima de 10 dias, por escrito.',
+        'Cada unidade tem direito a um voto, independentemente do número de proprietários.',
+        'Condôminos inadimplentes não têm direito a voto nas assembleias.',
+        'As deliberações são tomadas por maioria simples dos presentes, salvo quando a lei exigir quórum específico.',
+      ]
+    },
+  ];
+
+  (function renderRegimento() {
+    const container = document.getElementById('regimento-accordion');
+    container.innerHTML = REGIMENTO.map((secao, i) => `
+      <div class="card" style="margin-bottom:12px;padding:0;overflow:hidden">
+        <button onclick="toggleRegimento(${i})" style="
+          width:100%;display:flex;align-items:center;justify-content:space-between;
+          padding:14px 18px;background:none;border:none;cursor:pointer;
+          color:var(--text);font-size:0.95rem;font-weight:600;text-align:left;gap:12px
+        ">
+          <span>${secao.titulo}</span>
+          <span id="reg-chevron-${i}" style="color:${secao.cor};font-size:1.1rem;transition:transform 0.2s">▸</span>
+        </button>
+        <div id="reg-body-${i}" style="display:none;border-top:1px solid var(--border);padding:14px 18px 16px">
+          <ul style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px">
+            ${secao.itens.map(item => `<li style="font-size:0.87rem;color:var(--text-muted);line-height:1.5">${item}</li>`).join('')}
+          </ul>
+        </div>
+      </div>
+    `).join('');
+  })();
+
+  function toggleRegimento(i) {
+    const body = document.getElementById(`reg-body-${i}`);
+    const chevron = document.getElementById(`reg-chevron-${i}`);
+    const open = body.style.display !== 'none';
+    body.style.display = open ? 'none' : 'block';
+    chevron.style.transform = open ? '' : 'rotate(90deg)';
+  }
+  </script>
 </div>
 
 <script>

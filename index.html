@@ -144,6 +144,7 @@
     .nav-btn.active[data-tab="fundo"]         { color: var(--c-fundo);        background: rgba(79,172,254,.09);   border-left-color: var(--c-fundo); }
     .nav-btn.active[data-tab="obras"]         { color: var(--c-obras);        background: rgba(162,155,254,.09);  border-left-color: var(--c-obras); }
     .nav-btn.active[data-tab="regimento"]     { color: #38b2ac;               background: rgba(56,178,172,.09);   border-left-color: #38b2ac; }
+    .nav-btn.active[data-tab="contatos"]      { color: #e53e9c;               background: rgba(229,62,156,.09);   border-left-color: #e53e9c; }
 
     /* ── Simulação de Obras ── */
     .obras-params-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
@@ -451,6 +452,7 @@
     <span class="sidebar-label">Gestão</span>
     <button class="nav-btn" data-tab="obras"><span>🏗️</span> Simulação de Obras</button>
     <button class="nav-btn" data-tab="regimento"><span>📜</span> Regimento</button>
+    <button class="nav-btn" data-tab="contatos"><span>📇</span> Contatos</button>
   </nav>
 
   <!-- Content -->
@@ -907,6 +909,50 @@
       </div>
     </div>
 
+    <!-- ════ CONTATOS ════ -->
+    <div class="tab-pane" id="tab-contatos">
+      <div class="page-title">
+        <h2>📇 Contatos</h2>
+        <p>Profissionais e prestadores de serviço</p>
+      </div>
+
+      <div class="card" style="margin-bottom:20px">
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <input id="contatos-busca" type="text" placeholder="Buscar por nome, cargo, empresa..." style="
+            flex:1;min-width:200px;padding:8px 14px;border-radius:8px;
+            border:1px solid var(--border);background:var(--bg);color:var(--text);
+            font-size:0.85rem;outline:none;
+          " oninput="filtrarContatos()">
+          <select id="contatos-cat" onchange="filtrarContatos()" style="
+            padding:8px 12px;border-radius:8px;border:1px solid var(--border);
+            background:var(--bg);color:var(--text);font-size:0.85rem;cursor:pointer;
+          ">
+            <option value="">Todas as categorias</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="card" style="overflow:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:0.85rem" id="contatos-table">
+          <thead>
+            <tr style="border-bottom:2px solid var(--border)">
+              <th style="text-align:left;padding:10px 12px;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:.5px">Nome</th>
+              <th style="text-align:left;padding:10px 12px;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:.5px">Cargo / Especialidade</th>
+              <th style="text-align:left;padding:10px 12px;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:.5px">Categoria</th>
+              <th style="text-align:left;padding:10px 12px;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:.5px">Empresa</th>
+              <th style="text-align:left;padding:10px 12px;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:.5px">Telefone</th>
+              <th style="text-align:left;padding:10px 12px;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:.5px">E-mail</th>
+              <th style="text-align:left;padding:10px 12px;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:.5px">Obs.</th>
+            </tr>
+          </thead>
+          <tbody id="contatos-tbody"></tbody>
+        </table>
+        <div id="contatos-empty" style="display:none;text-align:center;padding:40px;color:var(--text-muted)">
+          Nenhum contato encontrado.
+        </div>
+      </div>
+    </div>
+
   </main>
 
   <script>
@@ -1045,6 +1091,7 @@ const MESES_FULL = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho
 let dadosReceitas = [];   // [{unidade, valores:[12]}]
 let dadosDespesas = [];   // [{data,dataParts,categoria,descricao,fornecedor,valor,status}]
 let dadosComunicados = []; // [{titulo,texto,data,ativo,validade}]
+let dadosContatos = [];   // [{nome,cargo,categoria,telefone,email,empresa,obs}]
 let saldoAnterior = 0;
 let mesSel = new Date().getMonth();
 let anoSel = new Date().getFullYear();
@@ -2400,6 +2447,7 @@ function renderTudo() {
   renderTicker();
   renderDRE();
   renderObras();
+  renderContatos();
 }
 
 // ── Saldo anterior (ano precedente completo) ──────────────────
@@ -2473,22 +2521,86 @@ function mostrarIndicadorCache(sheets) {
 }
 
 // ── Carregar dados ────────────────────────────────────────────
+function parseContatos(rows) {
+  // Expected columns: Nome | Cargo | Categoria | Telefone | Email | Empresa | Observação
+  return rows.slice(1).map(r => ({
+    nome:      (r[0] || '').trim(),
+    cargo:     (r[1] || '').trim(),
+    categoria: (r[2] || '').trim(),
+    telefone:  (r[3] || '').trim(),
+    email:     (r[4] || '').trim(),
+    empresa:   (r[5] || '').trim(),
+    obs:       (r[6] || '').trim(),
+  })).filter(c => c.nome);
+}
+
+function renderContatos() {
+  const tbody = document.getElementById('contatos-tbody');
+  const catSel = document.getElementById('contatos-cat');
+  if (!tbody) return;
+
+  const categorias = [...new Set(dadosContatos.map(c => c.categoria).filter(Boolean))].sort();
+  const catAtual = catSel.value;
+  catSel.innerHTML = '<option value="">Todas as categorias</option>' +
+    categorias.map(c => `<option value="${c}" ${c === catAtual ? 'selected' : ''}>${c}</option>`).join('');
+
+  filtrarContatos();
+}
+
+function filtrarContatos() {
+  const tbody = document.getElementById('contatos-tbody');
+  const empty = document.getElementById('contatos-empty');
+  const busca = (document.getElementById('contatos-busca').value || '').toLowerCase();
+  const cat   = document.getElementById('contatos-cat').value;
+
+  const lista = dadosContatos.filter(c => {
+    const matchCat  = !cat || c.categoria === cat;
+    const matchText = !busca || [c.nome, c.cargo, c.empresa, c.email].some(f => f.toLowerCase().includes(busca));
+    return matchCat && matchText;
+  });
+
+  if (lista.length === 0) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+  } else {
+    empty.style.display = 'none';
+    tbody.innerHTML = lista.map((c, i) => `
+      <tr style="border-bottom:1px solid var(--border);${i % 2 === 0 ? '' : 'background:rgba(0,0,0,0.02)'}">
+        <td style="padding:10px 12px;font-weight:600;color:var(--text)">${c.nome}</td>
+        <td style="padding:10px 12px;color:var(--text-muted)">${c.cargo}</td>
+        <td style="padding:10px 12px">
+          ${c.categoria ? `<span style="padding:2px 8px;border-radius:20px;font-size:0.75rem;font-weight:600;background:rgba(229,62,156,0.1);color:#e53e9c">${c.categoria}</span>` : ''}
+        </td>
+        <td style="padding:10px 12px;color:var(--text)">
+          ${c.telefone ? `<a href="tel:${c.telefone}" style="color:var(--primary);text-decoration:none">${c.telefone}</a>` : '—'}
+        </td>
+        <td style="padding:10px 12px">
+          ${c.email ? `<a href="mailto:${c.email}" style="color:var(--primary);text-decoration:none">${c.email}</a>` : '—'}
+        </td>
+        <td style="padding:10px 12px;color:var(--text-muted)">${c.empresa || '—'}</td>
+        <td style="padding:10px 12px;color:var(--text-muted);font-size:0.8rem">${c.obs || ''}</td>
+      </tr>`).join('');
+  }
+}
+
 async function carregar(forcarAtualizacao = false) {
-  const sheets = [`Receitas ${anoSel}`, 'Despesas', 'Config', 'Comunicados'];
+  const sheets = [`Receitas ${anoSel}`, 'Despesas', 'Config', 'Comunicados', 'Contatos'];
   if (forcarAtualizacao) sheets.forEach(s => localStorage.removeItem(cacheKey(s)));
 
   document.getElementById('loading').classList.remove('hidden');
   try {
-    const [rowsR, rowsD, rowsC, rowsComm] = await Promise.all([
+    const [rowsR, rowsD, rowsC, rowsComm, rowsCont] = await Promise.all([
       fetchSheetCached(`Receitas ${anoSel}`),
       fetchSheetCached('Despesas'),
       fetchSheetCached('Config').catch(() => []),
-      fetchSheetCached('Comunicados').catch(() => [])
+      fetchSheetCached('Comunicados').catch(() => []),
+      fetchSheetCached('Contatos').catch(() => [])
     ]);
     const isentosMap = parseConfig(rowsC);
     dadosReceitas = parseReceitas(rowsR, isentosMap);
     dadosDespesas = parseDespesas(rowsD);
     dadosComunicados = parseComunicados(rowsComm);
+    dadosContatos = parseContatos(rowsCont);
     await calcularSaldoAnterior(anoSel);
     buildMapaUnidades();
     renderTudo();

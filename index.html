@@ -2571,13 +2571,13 @@ function filtrarContatos() {
         <td style="padding:10px 12px">
           ${c.categoria ? `<span style="padding:2px 8px;border-radius:20px;font-size:0.75rem;font-weight:600;background:rgba(229,62,156,0.1);color:#e53e9c">${c.categoria}</span>` : ''}
         </td>
+        <td style="padding:10px 12px;color:var(--text-muted)">${c.empresa || '—'}</td>
         <td style="padding:10px 12px;color:var(--text)">
           ${c.telefone ? `<a href="tel:${c.telefone}" style="color:var(--primary);text-decoration:none">${c.telefone}</a>` : '—'}
         </td>
         <td style="padding:10px 12px">
           ${c.email ? `<a href="mailto:${c.email}" style="color:var(--primary);text-decoration:none">${c.email}</a>` : '—'}
         </td>
-        <td style="padding:10px 12px;color:var(--text-muted)">${c.empresa || '—'}</td>
         <td style="padding:10px 12px;color:var(--text-muted);font-size:0.8rem">${c.obs || ''}</td>
       </tr>`).join('');
   }

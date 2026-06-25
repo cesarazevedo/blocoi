@@ -3006,11 +3006,9 @@ function gerarPDF() {
           data.cell.styles.fontStyle = 'bold';
           data.cell.styles.textColor = [197,48,48];
         }
-        // columnStyles só se aplica ao body; alinha o rodapé (Total) com as colunas
-        if (data.section === 'foot') {
-          if (data.column.index === 2) data.cell.styles.halign = 'center';
-          if (data.column.index === 3) data.cell.styles.halign = 'right';
-        }
+        // columnStyles só se aplica ao body; alinha cabeçalho e rodapé com as colunas
+        if (data.column.index === 2) data.cell.styles.halign = 'center';
+        if (data.column.index === 3) data.cell.styles.halign = 'right';
       }
     });
   }
@@ -3165,8 +3163,8 @@ function gerarPDFDRE() {
         }
         if (rowIdx === mesSel) data.cell.styles.fillColor = [230,235,255];
       }
-      // columnStyles só se aplica ao body; alinha o rodapé (Total) com as colunas
-      if (data.section === 'foot' && data.column.index >= 1) data.cell.styles.halign = 'right';
+      // columnStyles só se aplica ao body; alinha cabeçalho e rodapé com as colunas
+      if (data.column.index >= 1) data.cell.styles.halign = 'right';
     }
   });
 

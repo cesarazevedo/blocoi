@@ -3299,11 +3299,19 @@ inicializarAnos().then(() => carregar());
 
 // ── Notícias ──────────────────────────────────────────────────
 (function() {
-  const CORS_PROXY = 'https://api.allorigins.win/raw?url=';
+  const PROXIES = [
+    url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+    url => `https://thingproxy.freeboard.io/fetch/${url}`,
+    url => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+  ];
   let currentQuery = '';
 
   function googleNewsUrl(query) {
     return `https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=pt-BR&gl=BR&ceid=BR:pt`;
+  }
+
+  function googleNewsSearchUrl(query) {
+    return `https://news.google.com/search?q=${encodeURIComponent(query)}&hl=pt-BR&gl=BR&ceid=BR:pt`;
   }
 
   function relativeDate(dateStr) {
@@ -3319,7 +3327,9 @@ inicializarAnos().then(() => carregar());
   function parseRSS(xmlText) {
     const parser = new DOMParser();
     const doc = parser.parseFromString(xmlText, 'application/xml');
-    return Array.from(doc.querySelectorAll('item')).slice(0, 15).map(item => {
+    const items = Array.from(doc.querySelectorAll('item'));
+    if (items.length === 0) throw new Error('Feed vazio ou inválido');
+    return items.slice(0, 15).map(item => {
       const title = item.querySelector('title')?.textContent || '';
       const link = item.querySelector('link')?.textContent || item.querySelector('guid')?.textContent || '#';
       const pubDate = item.querySelector('pubDate')?.textContent || '';
@@ -3331,10 +3341,6 @@ inicializarAnos().then(() => carregar());
 
   function renderNews(items) {
     const container = document.getElementById('news-container');
-    if (!items || items.length === 0) {
-      container.innerHTML = `<div class="news-error">Nenhuma notícia encontrada.</div>`;
-      return;
-    }
     container.innerHTML = `<div class="news-grid">${items.map(item => {
       let hostname = '';
       try { hostname = new URL(item.link).hostname.replace('www.',''); } catch(e) {}
@@ -3347,24 +3353,36 @@ inicializarAnos().then(() => carregar());
     }).join('')}</div>`;
   }
 
+  function renderFallback(query) {
+    const container = document.getElementById('news-container');
+    const searchUrl = googleNewsSearchUrl(query);
+    container.innerHTML = `<div class="news-error">
+      <p>Não foi possível carregar as notícias automaticamente.</p>
+      <p style="margin-top:14px">
+        <a href="${searchUrl}" target="_blank" rel="noopener"
+           style="display:inline-block;padding:10px 20px;background:#f6ad55;color:#fff;border-radius:8px;text-decoration:none;font-weight:600">
+          Ver notícias no Google News →
+        </a>
+      </p>
+    </div>`;
+  }
+
   async function loadNews(query) {
     currentQuery = query;
     const container = document.getElementById('news-container');
     container.innerHTML = '<div class="news-loading">Buscando notícias...</div>';
-    try {
-      const feedUrl = googleNewsUrl(query);
-      const res = await fetch(CORS_PROXY + encodeURIComponent(feedUrl));
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      const xml = await res.text();
-      const items = parseRSS(xml);
-      renderNews(items);
-    } catch(e) {
-      container.innerHTML = `<div class="news-error">
-        <p>Não foi possível carregar as notícias.</p>
-        <p style="font-size:0.8rem;margin-top:8px">${e.message}</p>
-        <p style="margin-top:12px"><a href="#" onclick="document.querySelector('.news-filter-btn.active').click();return false">Tentar novamente</a></p>
-      </div>`;
+    const feedUrl = googleNewsUrl(query);
+    for (const proxy of PROXIES) {
+      try {
+        const res = await fetch(proxy(feedUrl), { signal: AbortSignal.timeout(8000) });
+        if (!res.ok) continue;
+        const xml = await res.text();
+        const items = parseRSS(xml);
+        renderNews(items);
+        return;
+      } catch(e) { /* tenta próximo proxy */ }
     }
+    renderFallback(query);
   }
 
   document.querySelectorAll('.news-filter-btn').forEach(btn => {

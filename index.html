@@ -3299,11 +3299,10 @@ inicializarAnos().then(() => carregar());
 
 // ── Notícias ──────────────────────────────────────────────────
 (function() {
-  const RSS2JSON = 'https://api.rss2json.com/v1/api.json?rss_url=';
+  const CORS_PROXY = 'https://corsproxy.io/?';
   let currentQuery = '';
 
   function googleNewsUrl(query) {
-    const encoded = encodeURIComponent(query + ' site:br OR language:pt');
     return `https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=pt-BR&gl=BR&ceid=BR:pt`;
   }
 
@@ -3317,25 +3316,32 @@ inicializarAnos().then(() => carregar());
     return d.toLocaleDateString('pt-BR');
   }
 
-  function stripHtml(html) {
-    const d = document.createElement('div');
-    d.innerHTML = html;
-    return d.textContent || d.innerText || '';
+  function parseRSS(xmlText) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(xmlText, 'application/xml');
+    return Array.from(doc.querySelectorAll('item')).slice(0, 15).map(item => {
+      const title = item.querySelector('title')?.textContent || '';
+      const link = item.querySelector('link')?.textContent || item.querySelector('guid')?.textContent || '#';
+      const pubDate = item.querySelector('pubDate')?.textContent || '';
+      const sourceEl = item.querySelector('source');
+      const source = sourceEl?.textContent || '';
+      return { title, link, pubDate, source };
+    });
   }
 
   function renderNews(items) {
     const container = document.getElementById('news-container');
     if (!items || items.length === 0) {
-      container.innerHTML = `<div class="news-error">Nenhuma notícia encontrada. <a href="#" onclick="loadNews(currentQuery);return false">Tentar novamente</a></div>`;
+      container.innerHTML = `<div class="news-error">Nenhuma notícia encontrada.</div>`;
       return;
     }
     container.innerHTML = `<div class="news-grid">${items.map(item => {
-      const source = item.author || (item.source && item.source.name) || new URL(item.link).hostname.replace('www.','');
-      const desc = stripHtml(item.description || '').slice(0, 160).trim();
+      let hostname = '';
+      try { hostname = new URL(item.link).hostname.replace('www.',''); } catch(e) {}
+      const source = item.source || hostname;
       return `<a class="news-card" href="${item.link}" target="_blank" rel="noopener">
         <span class="news-card-source">${source}</span>
         <span class="news-card-title">${item.title}</span>
-        ${desc ? `<span class="news-card-desc">${desc}${desc.length === 160 ? '…' : ''}</span>` : ''}
         <span class="news-card-date">${relativeDate(item.pubDate)}</span>
       </a>`;
     }).join('')}</div>`;
@@ -3347,12 +3353,11 @@ inicializarAnos().then(() => carregar());
     container.innerHTML = '<div class="news-loading">Buscando notícias...</div>';
     try {
       const feedUrl = googleNewsUrl(query);
-      const url = RSS2JSON + encodeURIComponent(feedUrl) + '&count=15&api_key=';
-      const res = await fetch(url);
+      const res = await fetch(CORS_PROXY + encodeURIComponent(feedUrl));
       if (!res.ok) throw new Error('HTTP ' + res.status);
-      const data = await res.json();
-      if (data.status !== 'ok') throw new Error(data.message || 'Erro no feed');
-      renderNews(data.items);
+      const xml = await res.text();
+      const items = parseRSS(xml);
+      renderNews(items);
     } catch(e) {
       container.innerHTML = `<div class="news-error">
         <p>Não foi possível carregar as notícias.</p>

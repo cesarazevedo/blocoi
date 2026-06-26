@@ -145,6 +145,37 @@
     .nav-btn.active[data-tab="obras"]         { color: var(--c-obras);        background: rgba(162,155,254,.09);  border-left-color: var(--c-obras); }
     .nav-btn.active[data-tab="regimento"]     { color: #38b2ac;               background: rgba(56,178,172,.09);   border-left-color: #38b2ac; }
     .nav-btn.active[data-tab="contatos"]      { color: #e53e9c;               background: rgba(229,62,156,.09);   border-left-color: #e53e9c; }
+    .nav-btn.active[data-tab="noticias"]      { color: #f6ad55;               background: rgba(246,173,85,.09);   border-left-color: #f6ad55; }
+
+    /* ── Notícias ── */
+    .news-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+    .news-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 18px 20px;
+      display: flex; flex-direction: column; gap: 8px;
+      transition: box-shadow 0.2s, transform 0.2s;
+      text-decoration: none; color: inherit;
+    }
+    .news-card:hover { box-shadow: 0 4px 18px rgba(0,0,0,0.1); transform: translateY(-2px); }
+    .news-card-source {
+      font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .5px;
+      color: #f6ad55;
+    }
+    .news-card-title { font-size: 0.92rem; font-weight: 600; line-height: 1.4; color: var(--text); }
+    .news-card-desc { font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; flex: 1; }
+    .news-card-date { font-size: 0.75rem; color: var(--text-muted); }
+    .news-filter-bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+    .news-filter-btn {
+      padding: 6px 14px; border-radius: 50px; border: 1px solid var(--border);
+      background: var(--surface); color: var(--text-muted); font-size: 0.8rem;
+      cursor: pointer; transition: all 0.18s;
+    }
+    .news-filter-btn.active, .news-filter-btn:hover {
+      background: #f6ad55; border-color: #f6ad55; color: #fff;
+    }
+    .news-loading { text-align: center; padding: 40px; color: var(--text-muted); font-size: 0.9rem; }
+    .news-error { text-align: center; padding: 40px; color: var(--text-muted); }
+    .news-error a { color: var(--primary); }
 
     /* ── Simulação de Obras ── */
     .obras-params-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
@@ -453,6 +484,7 @@
     <button class="nav-btn" data-tab="obras"><span>🏗️</span> Simulação de Obras</button>
     <button class="nav-btn" data-tab="regimento"><span>📜</span> Regimento</button>
     <button class="nav-btn" data-tab="contatos"><span>📇</span> Contatos</button>
+    <button class="nav-btn" data-tab="noticias"><span>📰</span> Notícias</button>
   </nav>
 
   <!-- Content -->
@@ -950,6 +982,26 @@
         <div id="contatos-empty" style="display:none;text-align:center;padding:40px;color:var(--text-muted)">
           Nenhum contato encontrado.
         </div>
+      </div>
+    </div>
+
+    <!-- ════ NOTÍCIAS ════ -->
+    <div class="tab-pane" id="tab-noticias">
+      <div class="page-title">
+        <h2>📰 Notícias</h2>
+        <p>Últimas notícias sobre condomínios e gestão condominial</p>
+      </div>
+
+      <div class="news-filter-bar">
+        <button class="news-filter-btn active" data-query="condomínio síndico">Geral</button>
+        <button class="news-filter-btn" data-query="legislação condomínio">Legislação</button>
+        <button class="news-filter-btn" data-query="segurança condomínio">Segurança</button>
+        <button class="news-filter-btn" data-query="manutenção condomínio">Manutenção</button>
+        <button class="news-filter-btn" data-query="taxa condominial inadimplência">Finanças</button>
+      </div>
+
+      <div id="news-container">
+        <div class="news-loading">Selecione uma categoria para carregar as notícias...</div>
       </div>
     </div>
 
@@ -3244,6 +3296,90 @@ obrasInicializarEventos();
 
 // ── Init ──────────────────────────────────────────────────────
 inicializarAnos().then(() => carregar());
+
+// ── Notícias ──────────────────────────────────────────────────
+(function() {
+  const RSS2JSON = 'https://api.rss2json.com/v1/api.json?rss_url=';
+  let currentQuery = '';
+
+  function googleNewsUrl(query) {
+    const encoded = encodeURIComponent(query + ' site:br OR language:pt');
+    return `https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=pt-BR&gl=BR&ceid=BR:pt`;
+  }
+
+  function relativeDate(dateStr) {
+    const d = new Date(dateStr);
+    if (isNaN(d)) return dateStr;
+    const diff = Math.floor((Date.now() - d) / 1000);
+    if (diff < 3600) return `${Math.floor(diff/60)} min atrás`;
+    if (diff < 86400) return `${Math.floor(diff/3600)}h atrás`;
+    if (diff < 604800) return `${Math.floor(diff/86400)} dias atrás`;
+    return d.toLocaleDateString('pt-BR');
+  }
+
+  function stripHtml(html) {
+    const d = document.createElement('div');
+    d.innerHTML = html;
+    return d.textContent || d.innerText || '';
+  }
+
+  function renderNews(items) {
+    const container = document.getElementById('news-container');
+    if (!items || items.length === 0) {
+      container.innerHTML = `<div class="news-error">Nenhuma notícia encontrada. <a href="#" onclick="loadNews(currentQuery);return false">Tentar novamente</a></div>`;
+      return;
+    }
+    container.innerHTML = `<div class="news-grid">${items.map(item => {
+      const source = item.author || (item.source && item.source.name) || new URL(item.link).hostname.replace('www.','');
+      const desc = stripHtml(item.description || '').slice(0, 160).trim();
+      return `<a class="news-card" href="${item.link}" target="_blank" rel="noopener">
+        <span class="news-card-source">${source}</span>
+        <span class="news-card-title">${item.title}</span>
+        ${desc ? `<span class="news-card-desc">${desc}${desc.length === 160 ? '…' : ''}</span>` : ''}
+        <span class="news-card-date">${relativeDate(item.pubDate)}</span>
+      </a>`;
+    }).join('')}</div>`;
+  }
+
+  async function loadNews(query) {
+    currentQuery = query;
+    const container = document.getElementById('news-container');
+    container.innerHTML = '<div class="news-loading">Buscando notícias...</div>';
+    try {
+      const feedUrl = googleNewsUrl(query);
+      const url = RSS2JSON + encodeURIComponent(feedUrl) + '&count=15&api_key=';
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+      if (data.status !== 'ok') throw new Error(data.message || 'Erro no feed');
+      renderNews(data.items);
+    } catch(e) {
+      container.innerHTML = `<div class="news-error">
+        <p>Não foi possível carregar as notícias.</p>
+        <p style="font-size:0.8rem;margin-top:8px">${e.message}</p>
+        <p style="margin-top:12px"><a href="#" onclick="document.querySelector('.news-filter-btn.active').click();return false">Tentar novamente</a></p>
+      </div>`;
+    }
+  }
+
+  document.querySelectorAll('.news-filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.news-filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      loadNews(btn.dataset.query);
+    });
+  });
+
+  // Carrega ao entrar na aba
+  document.querySelector('[data-tab="noticias"]').addEventListener('click', () => {
+    const active = document.querySelector('.news-filter-btn.active');
+    if (active && document.getElementById('news-container').querySelector('.news-loading, .news-grid') === null) {
+      active.click();
+    } else if (active && document.getElementById('news-container').innerHTML.includes('Selecione')) {
+      active.click();
+    }
+  });
+})();
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/blocoi/sw.js');

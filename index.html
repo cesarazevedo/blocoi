@@ -109,6 +109,8 @@
       transition: all 0.2s;
     }
     .btn-icon:hover { border-color: var(--primary); color: var(--primary); }
+    .header-actions { display: flex; align-items: center; gap: 12px; }
+    .btn-more { display: none; font-size: 1.2rem; font-weight: 700; }
     .avatar {
       width: 36px; height: 36px;
       background: radial-gradient(circle at 35% 35%, #a78bfa, var(--primary) 50%, var(--secondary));
@@ -356,6 +358,30 @@
       .header-right { gap: 8px; }
       .month-selector { font-size: 0.78rem; }
       .avatar { display: none; }
+      .brand-text { display: none; }
+      .month-selector label { display: none; }
+      .month-selector select { padding: 5px 6px; }
+
+      /* Menu "⋮": agrupa atualizar, PDF e tema */
+      .header-right { position: relative; }
+      .btn-more { display: flex; }
+      .header-actions {
+        display: none; position: absolute; top: calc(100% + 8px); right: 0;
+        flex-direction: column; align-items: stretch; gap: 2px;
+        min-width: 190px; padding: 6px; z-index: 300;
+        background: var(--surface); border: 1px solid var(--border);
+        border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+      }
+      .header-actions.open { display: flex; }
+      .header-actions .btn-icon {
+        width: 100%; height: 42px; justify-content: flex-start; gap: 10px;
+        padding: 0 12px; border: none; color: var(--text); font-size: 1rem;
+      }
+      .header-actions .btn-icon::after { content: attr(data-label); font-size: 0.88rem; }
+      .header-actions .btn-icon:hover { background: rgba(102,126,234,0.1); }
+      .header-actions #auto-refresh-timer { padding: 0 12px 4px; }
+      .header-actions #auto-refresh-timer:empty { display: none; }
+      .header-actions #cache-indicator { padding: 0 12px 4px; }
       .content { padding: 16px 14px; }
 
       /* Caixa card empilhado */
@@ -424,11 +450,14 @@
       </select>
       <select id="sel-ano"></select>
     </div>
-    <button class="btn-icon" id="btn-refresh" title="Atualizar">↻</button>
-    <span id="auto-refresh-timer" style="font-size:0.7rem;color:var(--text-muted);white-space:nowrap;opacity:0.75;"></span>
-    <span id="cache-indicator" style="display:none;font-size:0.7rem;color:var(--text-muted);opacity:0.7;"></span>
-    <button class="btn-icon" id="btn-pdf" title="Gerar PDF da Prestação de Contas">📄</button>
-    <button class="btn-icon" id="dark-toggle" title="Tema">🌙</button>
+    <button class="btn-icon btn-more" id="btn-more" title="Mais opções" aria-haspopup="true" aria-expanded="false">⋮</button>
+    <div class="header-actions" id="header-actions">
+      <button class="btn-icon" id="btn-refresh" title="Atualizar" data-label="Atualizar">↻</button>
+      <span id="auto-refresh-timer" style="font-size:0.7rem;color:var(--text-muted);white-space:nowrap;opacity:0.75;"></span>
+      <span id="cache-indicator" style="display:none;font-size:0.7rem;color:var(--text-muted);opacity:0.7;"></span>
+      <button class="btn-icon" id="btn-pdf" title="Gerar PDF da Prestação de Contas" data-label="Gerar PDF">📄</button>
+      <button class="btn-icon" id="dark-toggle" title="Tema" data-label="Alternar tema">🌙</button>
+    </div>
 
     <div class="avatar">🏢</div>
   </div>
@@ -2703,6 +2732,18 @@ document.getElementById('btn-menu').addEventListener('click', () => {
 });
 overlay.addEventListener('click', closeSidebar);
 sidebar.querySelectorAll('.nav-btn').forEach(btn => btn.addEventListener('click', closeSidebar));
+
+// ── Menu "⋮" (celular) ────────────────────────────────────────
+const btnMore = document.getElementById('btn-more');
+const headerActions = document.getElementById('header-actions');
+function closeMoreMenu() { headerActions.classList.remove('open'); btnMore.setAttribute('aria-expanded', 'false'); }
+btnMore.addEventListener('click', e => {
+  e.stopPropagation();
+  const open = headerActions.classList.toggle('open');
+  btnMore.setAttribute('aria-expanded', open ? 'true' : 'false');
+});
+headerActions.querySelectorAll('button').forEach(b => b.addEventListener('click', closeMoreMenu));
+document.addEventListener('click', e => { if (!headerActions.contains(e.target)) closeMoreMenu(); });
 
 // ── Dark mode ─────────────────────────────────────────────────
 document.getElementById('dark-toggle').addEventListener('click', () => {

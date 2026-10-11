@@ -647,6 +647,11 @@
           <option value="aberto">Em aberto</option>
           <option value="isento">Isento</option>
         </select>
+        <button class="btn-icon" id="btn-csv-rec" title="Baixar tabela em CSV (abre no Excel)" style="margin-left:auto;font-size:0.82rem;padding:7px 14px;width:auto">⬇️ Exportar CSV</button>
+      </div>
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-title">Arrecadação mês a mês <span id="chart-rec-label">—</span></div>
+        <canvas id="chart-rec" height="90"></canvas>
       </div>
       <div class="card">
         <div class="table-wrap">
@@ -695,7 +700,8 @@
           <option value="Pago">Pago</option>
           <option value="A pagar">A pagar</option>
         </select>
-        <a href="https://drive.google.com/drive/folders/1CEIAvGasjOmXtM9hhUfhE8Fg7R-3CgQI?usp=drive_link" target="_blank" rel="noopener noreferrer" style="margin-left:auto;text-decoration:none;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);background:var(--surface);color:var(--text-muted);border-radius:8px;padding:7px 14px;font-size:0.82rem;cursor:pointer;transition:all 0.2s;white-space:nowrap" onmouseover="this.style.borderColor='var(--primary)';this.style.color='var(--primary)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-muted)'" title="Ver comprovantes no Google Drive">🧾 Comprovantes</a>
+        <button class="btn-icon" id="btn-csv-desp" title="Baixar tabela em CSV (abre no Excel)" style="margin-left:auto;font-size:0.82rem;padding:7px 14px;width:auto">⬇️ Exportar CSV</button>
+        <a href="https://drive.google.com/drive/folders/1CEIAvGasjOmXtM9hhUfhE8Fg7R-3CgQI?usp=drive_link" target="_blank" rel="noopener noreferrer" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);background:var(--surface);color:var(--text-muted);border-radius:8px;padding:7px 14px;font-size:0.82rem;cursor:pointer;transition:all 0.2s;white-space:nowrap" onmouseover="this.style.borderColor='var(--primary)';this.style.color='var(--primary)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-muted)'" title="Ver comprovantes no Google Drive">🧾 Comprovantes</a>
       </div>
       <div class="card">
         <div class="table-wrap">
@@ -1430,6 +1436,9 @@ function renderReceitas() {
     });
   }
 
+  linhasReceitasCSV = rows;
+  renderChartReceitas();
+
   const tb = document.getElementById('tbody-receitas');
   if (rows.length === 0) {
     tb.innerHTML = `<tr class="empty-row"><td colspan="4">Nenhum registro encontrado</td></tr>`;
@@ -1442,6 +1451,87 @@ function renderReceitas() {
       <td>${r.valor > 0 ? moeda(r.valor) : '—'}</td>
       <td><span class="pill ${r.status==='pago'?'pill-green':r.status==='isento'?'pill-gray':'pill-red'}">${r.status==='pago'?'Pago':r.status==='isento'?'Isento':'Em aberto'}</span></td>
     </tr>`).join('');
+}
+
+// ── Gráfico de arrecadação (aba Receitas) ─────────────────────
+let recChart = null;
+let linhasReceitasCSV = [];
+let linhasDespesasCSV = [];
+
+function renderChartReceitas() {
+  const ctx = document.getElementById('chart-rec');
+  if (!ctx) return;
+  if (recChart) { recChart.destroy(); recChart = null; }
+  set('chart-rec-label', `${anoSel}`);
+
+  const arrecadado = MESES.map((_, i) => dadosReceitas.reduce((s, r) => s + r.valores[i], 0));
+  // Em aberto só conta meses já vencidos (igual ao resto do sistema)
+  const emAberto = MESES.map((_, i) => mesVencido(i, anoSel)
+    ? dadosReceitas.filter(r => r.valores[i] === 0 && !(r.isentos && r.isentos[i])).length
+    : null);
+
+  recChart = new Chart(ctx, {
+    data: {
+      labels: MESES,
+      datasets: [
+        { type: 'bar', label: 'Arrecadado', data: arrecadado, yAxisID: 'y',
+          backgroundColor: MESES.map((_, i) => i === mesSel ? 'rgba(17,153,142,0.95)' : 'rgba(17,153,142,0.55)'),
+          borderRadius: 5, order: 2 },
+        { type: 'line', label: 'Unidades em aberto', data: emAberto, yAxisID: 'y2',
+          borderColor: '#ff758c', backgroundColor: '#ff758c', borderWidth: 2, tension: 0,
+          pointRadius: 3, spanGaps: false, order: 1 }
+      ]
+    },
+    options: {
+      responsive: true, animation: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { labels: { color: tColor(), font: { size: 11 } } },
+        tooltip: { callbacks: { label: c => c.dataset.yAxisID === 'y2'
+          ? ` ${c.dataset.label}: ${c.parsed.y}` : ` ${c.dataset.label}: ${moeda(c.parsed.y)}` } }
+      },
+      scales: {
+        x: { ticks: { color: tColor() }, grid: { color: gColor() } },
+        y: { beginAtZero: true, grid: { color: gColor() },
+             ticks: { color: tColor(), callback: v => v >= 1000 ? 'R$' + (v / 1000).toFixed(1).replace('.', ',') + 'k' : 'R$' + v } },
+        y2: { position: 'right', beginAtZero: true, grid: { drawOnChartArea: false },
+              ticks: { color: '#ff758c', precision: 0 },
+              suggestedMax: Math.max(dadosReceitas.length, 1) }
+      }
+    }
+  });
+}
+
+// ── Exportar tabelas em CSV ───────────────────────────────────
+function baixarCSV(nome, cabecalho, linhas) {
+  const esc = v => {
+    const t = String(v ?? '');
+    return /[";\n]/.test(t) ? '"' + t.replace(/"/g, '""') + '"' : t;
+  };
+  // ";" como separador e BOM UTF-8: o Excel em português abre certinho, com acentos
+  const csv = [cabecalho, ...linhas].map(l => l.map(esc).join(';')).join('\r\n');
+  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = nome;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
+const numCSV = v => v.toFixed(2).replace('.', ',');
+
+function exportarReceitasCSV() {
+  const nomeStatus = { pago: 'Pago', isento: 'Isento', aberto: 'Em aberto' };
+  baixarCSV(`receitas-${anoSel}.csv`, ['Unidade', 'Mês(es)', 'Valor', 'Status'],
+    linhasReceitasCSV.map(r => [nomUnidade(r.unidade), r.mes, r.valor > 0 ? numCSV(r.valor) : '', nomeStatus[r.status]]));
+}
+
+function exportarDespesasCSV() {
+  baixarCSV(`despesas-${MESES[mesSel].toLowerCase()}-${anoSel}.csv`,
+    ['Data', 'Categoria', 'Descrição', 'Fornecedor', 'Valor', 'Status'],
+    linhasDespesasCSV.map(d => [d.data, d.categoria, d.descricao, d.fornecedor, numCSV(d.valor), d.status]));
 }
 
 function renderDespesas() {
@@ -1478,6 +1568,8 @@ function renderDespesas() {
   set('kpi-desp-apagar-sub', `${aPagar.length} lançamento(s)`);
   set('kpi-desp-count', rows.length);
   set('kpi-desp-count-sub', 'filtrados');
+
+  linhasDespesasCSV = rows;
 
   const tb = document.getElementById('tbody-despesas');
   if (rows.length === 0) {
@@ -2721,6 +2813,8 @@ document.getElementById('fil-rec-mes').addEventListener('change', renderReceitas
 document.getElementById('fil-rec-status').addEventListener('change', renderReceitas);
 document.getElementById('fil-desp-cat').addEventListener('change', renderDespesas);
 document.getElementById('fil-desp-status').addEventListener('change', renderDespesas);
+document.getElementById('btn-csv-rec').addEventListener('click', exportarReceitasCSV);
+document.getElementById('btn-csv-desp').addEventListener('click', exportarDespesasCSV);
 
 
 // ── Mobile sidebar toggle ──────────────────────────────────────
@@ -2751,7 +2845,7 @@ document.getElementById('dark-toggle').addEventListener('click', () => {
   const dark = html.dataset.theme === 'dark';
   html.dataset.theme = dark ? 'light' : 'dark';
   document.getElementById('dark-toggle').textContent = dark ? '🌙' : '☀️';
-  renderGaugeAdimplencia(); renderTendenciaInad();
+  renderGaugeAdimplencia(); renderTendenciaInad(); renderChartReceitas();
   renderBarChart(); renderDoughnut(); renderDRE(); if (fundoChart) { fundoChart.destroy(); fundoChart=null; renderFundo(); }
 });
 

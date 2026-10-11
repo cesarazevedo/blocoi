@@ -1,4 +1,4 @@
-const CACHE = 'blocoi-v5';
+const CACHE = 'blocoi-v6';
 const STATIC_ASSETS = [
   'https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',

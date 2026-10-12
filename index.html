@@ -1543,10 +1543,19 @@ function renderInadimplencia() {
 
   // Inadimplentes = unidades onde algum mês até mesSel já venceu (dia 10 do mês seguinte) e não foi pago
   const inadimpl = dadosReceitas.map(r => {
-    const mesesAbertos = MESES.slice(0, mesSel + 1)
+    // Dívidas de anos anteriores vêm primeiro, com o ano na etiqueta (ex.: Jan/2026)
+    const antigos = Object.keys(dadosAnosAnteriores).map(Number).sort((a, b) => a - b)
+      .flatMap(y => {
+        const ra = dadosAnosAnteriores[y].find(x => x.unidade === r.unidade);
+        if (!ra) return [];
+        return MESES
+          .map((m, i) => ({ mes: `${m}/${y}`, idx: i, valor: ra.valores[i] }))
+          .filter(m => m.valor === 0 && !(ra.isentos && ra.isentos[m.idx]) && mesVencido(m.idx, y));
+      });
+    const atuais = MESES.slice(0, mesSel + 1)
       .map((m, i) => ({ mes: m, idx: i, valor: r.valores[i] }))
       .filter(m => m.valor === 0 && !(r.isentos && r.isentos[m.idx]) && mesVencido(m.idx, anoSel));
-    return { unidade: r.unidade, mesesAbertos };
+    return { unidade: r.unidade, mesesAbertos: [...antigos, ...atuais] };
   }).filter(r => r.mesesAbertos.length > 0);
 
   const total = dadosReceitas.length;
@@ -2561,6 +2570,21 @@ async function calcularSaldoAnterior(ano) {
   }
 }
 
+// ── Anos anteriores (para somar dívidas antigas na Inadimplência) ──
+let dadosAnosAnteriores = {}; // { 2026: [{unidade, valores, isentos}], ... }
+
+async function carregarAnosAnteriores(ano, forcar) {
+  dadosAnosAnteriores = {};
+  const anos = [...document.getElementById('sel-ano').options]
+    .map(o => parseInt(o.value)).filter(y => y < ano);
+  await Promise.all(anos.map(async y => {
+    try {
+      if (forcar) localStorage.removeItem(cacheKey(`Receitas ${y}`));
+      dadosAnosAnteriores[y] = parseReceitas(await fetchSheetCached(`Receitas ${y}`));
+    } catch (e) { /* ano sem dados: ignora */ }
+  }));
+}
+
 // ── Cache localStorage ────────────────────────────────────────
 const CACHE_TTL = 30 * 60 * 1000; // 30 minutos
 
@@ -2695,6 +2719,7 @@ async function carregar(forcarAtualizacao = false) {
     dadosComunicados = parseComunicados(rowsComm);
     dadosContatos = parseContatos(rowsCont);
     await calcularSaldoAnterior(anoSel);
+    await carregarAnosAnteriores(anoSel, forcarAtualizacao);
     buildMapaUnidades();
     renderTudo();
     mostrarIndicadorCache(sheets);
@@ -2906,16 +2931,32 @@ function gerarPDF() {
   const inadMesCount = mesJaVenceu ? (totalUnits - pagasUnits.length) : 0;
   const taxaInad     = totalUnits > 0 ? (inadMesCount / totalUnits * 100) : 0;
   // lista acumulada usada na página 4 (todos os meses em aberto até mesSel)
-  const inadList    = dadosReceitas.map(r => {
-    const mb = MESES.slice(0, mesSel + 1).map((m, i) => ({ mes: m, idx: i }))
-      .filter(({ idx }) => r.valores[idx] === 0 && !(r.isentos && r.isentos[idx]) && mesVencido(idx, anoSel));
-    const valorAberto = mb.reduce((sum, { idx }) => {
+  // Meses em aberto de uma unidade num ano (rows = receitas daquele ano), com valor estimado
+  const abertosDoAno = (rows, unidade, ano, ateMes, etiqueta) => {
+    const r = rows.find(x => x.unidade === unidade);
+    if (!r) return { mb: [], valor: 0 };
+    const mb = MESES.slice(0, ateMes + 1).map((m, i) => ({ mes: etiqueta ? `${m}/${ano}` : m, idx: i }))
+      .filter(({ idx }) => r.valores[idx] === 0 && !(r.isentos && r.isentos[idx]) && mesVencido(idx, ano));
+    const valor = mb.reduce((sum, { idx }) => {
       const taxaMes = r.valores.filter(v => v > 0).slice(-1)[0]
-        || dadosReceitas.filter(x => x.unidade !== r.unidade).map(x => x.valores[idx]).find(v => v > 0)
+        || rows.filter(x => x.unidade !== unidade).map(x => x.valores[idx]).find(v => v > 0)
         || 0;
       return sum + taxaMes;
     }, 0);
-    return { unidade: r.unidade, mesesAbertos: mb, valorAberto };
+    return { mb, valor };
+  };
+  const anosAntigos = Object.keys(dadosAnosAnteriores).map(Number).sort((a, b) => a - b);
+  const inadList    = dadosReceitas.map(r => {
+    // anos anteriores primeiro (com o ano na etiqueta), depois o ano atual
+    const partes = [
+      ...anosAntigos.map(y => abertosDoAno(dadosAnosAnteriores[y], r.unidade, y, 11, true)),
+      abertosDoAno(dadosReceitas, r.unidade, anoSel, mesSel, false)
+    ];
+    return {
+      unidade: r.unidade,
+      mesesAbertos: partes.flatMap(p => p.mb),
+      valorAberto: partes.reduce((s, p) => s + p.valor, 0)
+    };
   }).filter(r => r.mesesAbertos.length > 0);
 
   // ══ PAGE 1: RESUMO ══
@@ -3056,7 +3097,7 @@ function gerarPDF() {
   doc.text(
     inadList.length === 0
       ? 'Nenhuma unidade inadimplente neste período.'
-      : `${inadList.length} unidade(s) com pendências   |   Taxa: ${taxaInad.toFixed(1)}%   |   Total em aberto: ${moeda(totalValorAberto)}`,
+      : `${inadList.length} unidade(s) com pendências   |   Taxa: ${(totalUnits > 0 ? inadList.length / totalUnits * 100 : 0).toFixed(1)}%   |   Total em aberto: ${moeda(totalValorAberto)}`,
     mg, y
   );
   y += 8;

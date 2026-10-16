@@ -1,4 +1,4 @@
-const CACHE = 'blocoi-v6';
+const CACHE = 'blocoi-v7';
 const STATIC_ASSETS = [
   'https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
@@ -19,10 +19,12 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
-  const isAppShell = url.pathname === '/blocoi/' || url.pathname === '/blocoi/index.html';
+  // Arquivos do próprio app (html, css, js, ícones): qualquer coisa do mesmo site
+  const isAppShell = url.origin === self.location.origin;
 
   if (isAppShell) {
-    // Network-first: sempre busca versão mais recente, cai no cache só se offline
+    // Network-first: sempre busca versão mais recente, cai no cache só se offline.
+    // Assim não é preciso trocar a versão do cache a cada mudança.
     e.respondWith(
       fetch(e.request)
         .then(res => {

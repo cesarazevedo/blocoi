@@ -1598,6 +1598,8 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
     btn.classList.add('active');
+    document.querySelectorAll('.nav-btn').forEach(b => b.removeAttribute('aria-current'));
+    btn.setAttribute('aria-current', 'page');
     const tab = btn.dataset.tab;
     document.getElementById('tab-' + tab).classList.add('active');
     window.location.hash = tab;
@@ -1674,6 +1676,20 @@ btnMore.addEventListener('click', e => {
 });
 headerActions.querySelectorAll('button').forEach(b => b.addEventListener('click', closeMoreMenu));
 document.addEventListener('click', e => { if (!headerActions.contains(e.target)) closeMoreMenu(); });
+
+// ── Tamanho da letra (acessibilidade) ─────────────────────────
+const FS_NIVEIS = [90, 100, 115, 130, 150];
+let fsIdx = 1;
+try { const v = parseInt(localStorage.getItem('blocoi-fs'), 10); if (v >= 0 && v < FS_NIVEIS.length) fsIdx = v; } catch(e) {}
+function aplicarFonte() {
+  document.documentElement.style.setProperty('--fs', FS_NIVEIS[fsIdx] + '%');
+  document.getElementById('btn-fs-down').disabled = fsIdx === 0;
+  document.getElementById('btn-fs-up').disabled = fsIdx === FS_NIVEIS.length - 1;
+  try { localStorage.setItem('blocoi-fs', fsIdx); } catch(e) {}
+}
+document.getElementById('btn-fs-down').addEventListener('click', () => { if (fsIdx > 0) { fsIdx--; aplicarFonte(); } });
+document.getElementById('btn-fs-up').addEventListener('click', () => { if (fsIdx < FS_NIVEIS.length - 1) { fsIdx++; aplicarFonte(); } });
+aplicarFonte();
 
 // ── Dark mode ─────────────────────────────────────────────────
 document.getElementById('dark-toggle').addEventListener('click', () => {

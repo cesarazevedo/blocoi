@@ -411,6 +411,29 @@
     }
 
 
+    /* ── Impressão (modo folha A4) ── */
+    .print-header { display: none; }
+    @media print {
+      @page { size: A4; margin: 14mm 12mm; }
+      html, body { height: auto !important; overflow: visible !important; display: block !important;
+        background: #fff !important; color: #000 !important;
+        -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .top-header, .sidebar, .sidebar-overlay, #loading, .btn-icon, .obras-add-btn,
+      .search-wrap, .month-selector, #contatos-busca, #contatos-cat, #btn-menu { display: none !important; }
+      .main-wrap, .content { display: block !important; overflow: visible !important; padding: 0 !important; height: auto !important; }
+      .print-header { display: block; border-bottom: 2px solid #667eea; margin-bottom: 14px; padding-bottom: 6px; }
+      .print-header h1 { font-size: 1.15rem; margin: 0; }
+      .print-header p { font-size: 0.8rem; margin: 2px 0 0; color: #444; }
+      .card, .kpi-card { box-shadow: none !important; border: 1px solid #ccc !important; background: #fff !important;
+        break-inside: avoid; page-break-inside: avoid; }
+      .table-wrap { overflow: visible !important; max-height: none !important; }
+      table { width: 100% !important; font-size: 0.75rem !important; }
+      thead { display: table-header-group; }
+      tr { break-inside: avoid; page-break-inside: avoid; }
+      canvas { max-width: 100% !important; height: auto !important; break-inside: avoid; }
+      a { color: #000 !important; text-decoration: none !important; }
+    }
+
   </style>
 </head>
 <body>
@@ -423,6 +446,10 @@
 
 <!-- ── Header ── -->
 <div class="sidebar-overlay" id="sidebar-overlay"></div>
+<div class="print-header">
+  <h1>🏢 Controle Condominial</h1>
+  <p id="print-sub"></p>
+</div>
 <header class="top-header">
   <button class="btn-menu" id="btn-menu" title="Menu">☰</button>
   <a class="brand" href="#">
@@ -456,6 +483,7 @@
       <span id="auto-refresh-timer" style="font-size:0.7rem;color:var(--text-muted);white-space:nowrap;opacity:0.75;"></span>
       <span id="cache-indicator" style="display:none;font-size:0.7rem;color:var(--text-muted);opacity:0.7;"></span>
       <button class="btn-icon" id="btn-pdf" title="Gerar PDF da Prestação de Contas" data-label="Gerar PDF">📄</button>
+      <button class="btn-icon" id="btn-print" title="Imprimir a tela atual" data-label="Imprimir">🖨️</button>
       <button class="btn-icon" id="dark-toggle" title="Tema" data-label="Alternar tema">🌙</button>
     </div>
 
@@ -3298,6 +3326,17 @@ function gerarPDFDRE() {
 }
 
 document.getElementById('btn-pdf').addEventListener('click', gerarPDF);
+// ── Impressão ─────────────────────────────────────────────────
+function prepararImpressao() {
+  const aba = document.querySelector('.nav-btn.active')?.textContent.trim() || '';
+  const mes = document.getElementById('sel-mes').selectedOptions[0]?.textContent || '';
+  const ano = document.getElementById('sel-ano').value;
+  document.getElementById('print-sub').textContent =
+    `${aba} · ${mes}/${ano} · Impresso em ${new Date().toLocaleDateString('pt-BR')}`;
+}
+window.addEventListener('beforeprint', prepararImpressao);
+document.getElementById('btn-print').addEventListener('click', () => window.print());
+
 document.getElementById('btn-pdf-dre').addEventListener('click', gerarPDFDRE);
 
 function gerarPDFRegimento() {

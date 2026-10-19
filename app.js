@@ -1491,7 +1491,7 @@ function mostrarIndicadorCache(sheets) {
   if (tsList.length === sheets.length) {
     const ts = Math.min(...tsList);
     const d = new Date(ts);
-    const dia = d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+    const dia = d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
     const hhmm = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
     el.textContent = `dados de ${dia} ${hhmm}`;
     el.title = 'Dados em cache. Clique em Atualizar para recarregar.';

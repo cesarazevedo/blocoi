@@ -1490,8 +1490,10 @@ function mostrarIndicadorCache(sheets) {
   if (!el) return;
   if (tsList.length === sheets.length) {
     const ts = Math.min(...tsList);
-    const hhmm = new Date(ts).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-    el.textContent = `dados de ${hhmm}`;
+    const d = new Date(ts);
+    const dia = d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+    const hhmm = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    el.textContent = `dados de ${dia} ${hhmm}`;
     el.title = 'Dados em cache. Clique em Atualizar para recarregar.';
     el.style.display = 'inline';
   } else {

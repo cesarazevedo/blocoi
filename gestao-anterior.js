@@ -22,7 +22,8 @@ const GESTAO_ANTERIOR = {
   periodo: '2024 até março/2026',
   // Resumo final da planilha
   saldoInicial: 8525.07,        // "Financeiro geral recebido do condomínio"
-  saldoFinal: 12899.14,         // saldo informado pela gestão anterior
+  saldoInformado: 12899.14,     // saldo que a gestão anterior informou (antes da correção de R$ 8,25)
+  correcao: 8.25,               // despesa de jan/2024 que ficou fora da soma da gestão anterior
   debito103: { unidade: '103', valor: 4305.00, descricao: 'condomínio + CAERN', ate: '2023' },
 
   anos: {
@@ -60,8 +61,8 @@ const GESTAO_ANTERIOR = {
         ]
       },
       // Totais exatamente como a gestão anterior informou na planilha
-      despesaTotalInformada: { limpeza: 3800.00, cosern: 1515.58, geral: 2385.00, total: 7700.58 },
-      nota: 'A despesa de R$ 8,25 (impressões, janeiro/2024) aparece na lista, mas não entrou no total informado pela gestão anterior.'
+      despesaTotal: { limpeza: 3800.00, cosern: 1515.58, geral: 2393.25, total: 7708.83 },
+      nota: 'Correção: a despesa de R$ 8,25 (impressões, janeiro/2024) havia ficado fora da soma da gestão anterior (que informou Geral R$ 2.385,00 e total R$ 7.700,58). Ela foi incluída nos totais desta página.'
     },
 
     2025: {
@@ -97,7 +98,7 @@ const GESTAO_ANTERIOR = {
           gaG(432, 'Taxa do banco')
         ]
       },
-      despesaTotalInformada: { limpeza: 4352.00, cosern: 2338.20, geral: 3032.00, total: 9722.20 }
+      despesaTotal: { limpeza: 4352.00, cosern: 2338.20, geral: 3032.00, total: 9722.20 }
     },
 
     2026: {
@@ -127,7 +128,7 @@ const GESTAO_ANTERIOR = {
           gaG(108, 'Taxa do banco')
         ]
       },
-      despesaTotalInformada: { limpeza: 0, cosern: 133.46, geral: 169.69, total: 303.15 },
+      despesaTotal: { limpeza: 0, cosern: 133.46, geral: 169.69, total: 303.15 },
       nota: 'Em março/2026 a administração passou para a gestão atual. Alguns condôminos pagaram a gestão anterior e outros já pagaram a gestão atual: cada gestão registra apenas o que recebeu.'
     }
   }
@@ -151,7 +152,7 @@ function gaTotalRecursos() {
 }
 
 function gaTotalDespesas() {
-  return Object.values(GESTAO_ANTERIOR.anos).reduce((s, y) => s + y.despesaTotalInformada.total, 0);
+  return Object.values(GESTAO_ANTERIOR.anos).reduce((s, y) => s + y.despesaTotal.total, 0);
 }
 
 // ── Desenho ───────────────────────────────────────────────────
@@ -173,8 +174,8 @@ function gaRenderResumo() {
   document.getElementById('ga-kpis').innerHTML = `
     <div class="kpi-card" style="--accent:var(--c-anterior)">
       <div class="kpi-label">Saldo da gestão anterior</div>
-      <div class="kpi-value">${moeda(g.saldoFinal)}</div>
-      <div class="kpi-sub">saldo informado ao final do período</div>
+      <div class="kpi-value">${moeda(totRec - totDesp)}</div>
+      <div class="kpi-sub">saldo ao final do período (já com a correção de ${moeda(g.correcao)})</div>
     </div>
     <div class="kpi-card" style="--accent:var(--c-receitas)">
       <div class="kpi-label">Receitas no período</div>
@@ -198,6 +199,8 @@ function gaRenderResumo() {
     <tr class="ga-sub"><td>= Total de recursos</td><td class="ga-num">${moeda(totRec)}</td></tr>
     <tr><td>− Despesas ${g.periodo}</td><td class="ga-num">${moeda(totDesp)}</td></tr>
     <tr class="ga-total"><td>= Saldo da gestão anterior</td><td class="ga-num">${moeda(totRec - totDesp)}</td></tr>`;
+  document.getElementById('ga-correcao').textContent =
+    `Correção: a gestão anterior informou saldo de ${moeda(g.saldoInformado)}. Ao somar ${moeda(g.correcao)} de impressões de janeiro/2024, que haviam ficado fora da soma, o saldo é ${moeda(totRec - totDesp)}.`;
 }
 
 function gaRenderAno() {
@@ -223,7 +226,7 @@ function gaRenderAno() {
     const total = Array.isArray(v) ? v.reduce((s, x) => s + (typeof x === 'number' ? x : 0), 0) : 0;
     return `<tr><td><strong>${nomUnidade(u)}</strong></td>${celulas}<td class="ga-num">${total > 0 ? moeda(total) : '—'}</td></tr>`;
   }).join('') +
-    `<tr class="ga-total"><td colspan="${meses.length + 1}">Total informado</td><td class="ga-num">${moeda(y.receitaTotalInformada)}</td></tr>`;
+    `<tr class="ga-total"><td colspan="${meses.length + 1}">Total</td><td class="ga-num">${moeda(y.receitaTotalInformada)}</td></tr>`;
 
   // Despesas por mês
   const d = y.despesas;
@@ -241,9 +244,9 @@ function gaRenderAno() {
       <td class="ga-num"><strong>${total > 0 ? moeda(total) : '—'}</strong></td>
     </tr>`;
   }).join('');
-  const t = y.despesaTotalInformada;
+  const t = y.despesaTotal;
   document.getElementById('ga-desp-foot').innerHTML = `<tr class="ga-total">
-      <td>Total informado</td>
+      <td>Total</td>
       <td class="ga-num">${moeda(t.limpeza)}</td>
       <td class="ga-num">${moeda(t.cosern)}</td>
       <td class="ga-num">${moeda(t.geral)}</td>

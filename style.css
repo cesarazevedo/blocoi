@@ -163,6 +163,12 @@
     .ga-table .ga-desc { color: var(--text-muted); min-width: 160px; }
     .ga-table .ga-total td, .ga-table .ga-sub td { font-weight: 700; border-top: 2px solid var(--border); }
     .ga-table .ga-total td { color: var(--c-anterior); }
+    /* Tabela de débitos: no celular a coluna Total fica sempre visível */
+    .ga-deb th, .ga-deb td { white-space: nowrap; }
+    .ga-deb th:last-child, .ga-deb td:last-child {
+      position: sticky; right: 0; background: var(--surface);
+      box-shadow: -8px 0 8px -8px rgba(0,0,0,.25);
+    }
     .ga-pago  { color: var(--c-receitas); font-weight: 600; }
     .ga-nao   { color: #c53030; font-weight: 700; }
     [data-theme="dark"] .ga-nao { color: #feb2b2; }

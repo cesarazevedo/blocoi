@@ -6,6 +6,7 @@
       --c-inadimplencia: #ff758c;
       --c-fundo:         #4facfe;
       --c-obras:         #a29bfe;
+      --c-anterior:      #8a6d3b;
       --bg:        #f0f4f8;
       --surface:   #ffffff;
       --border:    #e2e8f0;
@@ -15,6 +16,7 @@
       --radius:    10px;
     }
     [data-theme="dark"] {
+      --c-anterior: #d6b36a;
       --bg:      #0f1117;
       --surface: #1a1d27;
       --border:  #2d3748;
@@ -132,6 +134,42 @@
     .nav-btn.active[data-tab="receitas"]      { color: var(--c-receitas);     background: rgba(17,153,142,.09);   border-left-color: var(--c-receitas); }
     .nav-btn.active[data-tab="despesas"]      { color: var(--c-despesas);     background: rgba(247,151,30,.09);   border-left-color: var(--c-despesas); }
     .nav-btn.active[data-tab="inadimplencia"] { color: var(--c-inadimplencia);background: rgba(255,117,140,.09);  border-left-color: var(--c-inadimplencia); }
+    .nav-btn.active[data-tab="gestao-anterior"] { color: var(--c-anterior);   background: rgba(138,109,59,.12);   border-left-color: var(--c-anterior); }
+
+    /* ── Gestão anterior ── */
+    .ga-banner {
+      display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+      padding: 14px 18px; margin-bottom: 20px; border-radius: var(--radius);
+      background: rgba(138,109,59,.12); border: 1px solid var(--c-anterior);
+      border-left-width: 6px;
+    }
+    .ga-banner-icon { font-size: 1.6rem; }
+    .ga-banner-text { flex: 1; min-width: 220px; display: flex; flex-direction: column; gap: 2px; font-size: 0.85rem; color: var(--text); }
+    .ga-banner-text strong { color: var(--c-anterior); font-size: 0.95rem; }
+    .ga-ativa .month-selector { visibility: hidden; }
+    .ga-voltar { width: auto !important; padding: 7px 14px; font-size: 0.82rem; white-space: nowrap; }
+    .ga-anos { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .ga-anos button {
+      border: 1px solid var(--border); background: var(--surface); color: var(--text-muted);
+      border-radius: 50px; padding: 7px 18px; font-size: 0.85rem; font-weight: 600; cursor: pointer;
+    }
+    .ga-anos button:hover { border-color: var(--c-anterior); color: var(--c-anterior); }
+    .ga-anos button.active { background: var(--c-anterior); border-color: var(--c-anterior); color: #fff; }
+    [data-theme="dark"] .ga-anos button.active { color: #1a1d27; }
+    .ga-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    .ga-table th, .ga-table td { padding: 7px 8px; border-bottom: 1px solid var(--border); }
+    .ga-table .ga-c { text-align: center; min-width: 38px; }
+    .ga-table .ga-num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+    .ga-table .ga-desc { color: var(--text-muted); min-width: 160px; }
+    .ga-table .ga-total td, .ga-table .ga-sub td { font-weight: 700; border-top: 2px solid var(--border); }
+    .ga-table .ga-total td { color: var(--c-anterior); }
+    .ga-pago  { color: var(--c-receitas); font-weight: 600; }
+    .ga-nao   { color: #c53030; font-weight: 700; }
+    [data-theme="dark"] .ga-nao { color: #feb2b2; }
+    .ga-vazio { color: var(--text-muted); }
+    .ga-isento { color: var(--text-muted); font-size: 0.72rem; }
+    .ga-legenda, .ga-nota { font-size: 0.75rem; color: var(--text-muted); margin-top: 10px; }
+    .ga-nota { padding: 8px 10px; border-left: 3px solid var(--c-anterior); background: rgba(138,109,59,.08); border-radius: 4px; }
     .nav-btn.active[data-tab="fundo"]         { color: var(--c-fundo);        background: rgba(79,172,254,.09);   border-left-color: var(--c-fundo); }
     .nav-btn.active[data-tab="obras"]         { color: var(--c-obras);        background: rgba(162,155,254,.09);  border-left-color: var(--c-obras); }
     .nav-btn.active[data-tab="regimento"]     { color: #38b2ac;               background: rgba(56,178,172,.09);   border-left-color: #38b2ac; }

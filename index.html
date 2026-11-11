@@ -91,6 +91,9 @@
     <button class="nav-btn" data-tab="obras"><span>🏗️</span> Simulação de Obras</button>
     <button class="nav-btn" data-tab="regimento"><span>📜</span> Regimento</button>
     <button class="nav-btn" data-tab="contatos"><span>📇</span> Contatos</button>
+    <div class="sidebar-sep"></div>
+    <span class="sidebar-label">Gestão anterior</span>
+    <button class="nav-btn" data-tab="gestao-anterior"><span>🗂️</span> Prestação de Contas</button>
   </nav>
 
   <!-- Content -->
@@ -593,11 +596,67 @@
       </div>
     </div>
 
+    <!-- ════ GESTÃO ANTERIOR ════ -->
+    <div class="tab-pane" id="tab-gestao-anterior">
+      <div class="ga-banner" role="note">
+        <div class="ga-banner-icon" aria-hidden="true">🗂️</div>
+        <div class="ga-banner-text">
+          <strong>Você está vendo a prestação de contas da GESTÃO ANTERIOR</strong>
+          <span>Período: 2024 até março/2026. Estes valores <u>não se misturam</u> com os da gestão atual, que começou em março/2026.</span>
+        </div>
+        <button class="btn-icon ga-voltar" id="ga-voltar" type="button">← Ver gestão atual</button>
+      </div>
+
+      <div class="page-title">
+        <h2 style="color:var(--c-anterior)">Prestação de Contas · Gestão anterior</h2>
+        <p>Dados entregues pela gestão anterior, publicados sem alterações · planilha recebida em 10/11/2026</p>
+      </div>
+
+      <div class="kpi-row" id="ga-kpis"></div>
+
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">Como se chegou ao saldo <span>valores informados pela gestão anterior</span></div>
+        <div class="table-wrap">
+          <table class="ga-table ga-balanco"><tbody id="ga-balanco"></tbody></table>
+        </div>
+      </div>
+
+      <div class="ga-anos" id="ga-anos" role="group" aria-label="Escolher o ano">
+        <button type="button" data-ano="2024" aria-pressed="true" class="active">2024</button>
+        <button type="button" data-ano="2025" aria-pressed="false">2025</button>
+        <button type="button" data-ano="2026" aria-pressed="false">2026 (até março)</button>
+      </div>
+
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title"><span id="ga-rec-titulo" style="color:var(--text);font-weight:700;font-size:.85rem">Receitas por unidade</span><span>valor pago por mês (R$)</span></div>
+        <div class="table-wrap">
+          <table class="ga-table">
+            <thead id="ga-rec-head"></thead>
+            <tbody id="ga-rec-body"></tbody>
+          </table>
+        </div>
+        <p class="ga-legenda"><b class="ga-pago">100</b> valor pago · <b class="ga-nao">0</b> não pagou · <b class="ga-vazio">·</b> sem registro na planilha · <b class="ga-isento">Isento</b></p>
+      </div>
+
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title"><span id="ga-desp-titulo" style="color:var(--text);font-weight:700;font-size:.85rem">Despesas por mês</span><span>a gestão anterior registrou só o total do mês por tipo de gasto</span></div>
+        <div class="table-wrap">
+          <table class="ga-table">
+            <thead><tr><th>Mês</th><th class="ga-num">Limpeza</th><th class="ga-num">Energia (Cosern)</th><th class="ga-num">Geral</th><th>O que foi o gasto geral</th><th class="ga-num">Total do mês</th></tr></thead>
+            <tbody id="ga-desp-body"></tbody>
+            <tfoot id="ga-desp-foot"></tfoot>
+          </table>
+        </div>
+        <p class="ga-nota" id="ga-nota" style="display:none"></p>
+      </div>
+    </div>
+
   </main>
 
   <script src="regimento.js"></script>
 </div>
 
 <script src="app.js"></script>
+<script src="gestao-anterior.js"></script>
 </body>
 </html>

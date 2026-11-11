@@ -271,7 +271,7 @@ function gaRenderResumo() {
     <div class="kpi-card" style="--accent:var(--c-inadimplencia)">
       <div class="kpi-label">Débitos em aberto</div>
       <div class="kpi-value">${moeda(deb.total)}</div>
-      <div class="kpi-sub">${deb.linhas.length} unidades · inclui ${moeda(g.debito103.valor)} do apto ${g.debito103.unidade} (até ${g.debito103.ate})</div>
+      <div class="kpi-sub">${deb.linhas.length} unidades com débitos</div>
     </div>`;
 
   document.getElementById('ga-balanco').innerHTML = `

@@ -155,7 +155,87 @@ function gaTotalDespesas() {
   return Object.values(GESTAO_ANTERIOR.anos).reduce((s, y) => s + y.despesaTotal.total, 0);
 }
 
+// ── Débitos ───────────────────────────────────────────────────
+// Conta como débito só os meses marcados com 0 ("não pagou") na planilha,
+// a R$ 100 por mês. Meses sem registro (null) NÃO entram: em fev/mar 2026,
+// por exemplo, quem não aparece pode ter pago à gestão atual.
+const GA_MENSALIDADE = 100;
+
+function gaDebitos() {
+  const g = GESTAO_ANTERIOR;
+  const porUnidade = {};
+  Object.entries(g.anos).forEach(([ano, y]) => {
+    Object.entries(y.receitas).forEach(([u, v]) => {
+      if (!Array.isArray(v)) return;
+      v.forEach((x, mi) => {
+        if (x === 0) {
+          const d = porUnidade[u] || (porUnidade[u] = { anos: {}, meses: 0, ate2023: 0 });
+          (d.anos[ano] || (d.anos[ano] = [])).push(mi);
+          d.meses++;
+        }
+      });
+    });
+  });
+  // Débito anterior a 2024 (informado à parte pela gestão anterior)
+  const d103 = g.debito103;
+  const x = porUnidade[d103.unidade] || (porUnidade[d103.unidade] = { anos: {}, meses: 0, ate2023: 0 });
+  x.ate2023 = d103.valor;
+
+  const linhas = Object.keys(porUnidade).sort().map(u => {
+    const d = porUnidade[u];
+    const valorMeses = d.meses * GA_MENSALIDADE;
+    return { unidade: u, anos: d.anos, meses: d.meses, valorMeses, ate2023: d.ate2023, total: valorMeses + d.ate2023 };
+  });
+  return {
+    linhas,
+    meses: linhas.reduce((s, l) => s + l.meses, 0),
+    valorMeses: linhas.reduce((s, l) => s + l.valorMeses, 0),
+    ate2023: linhas.reduce((s, l) => s + l.ate2023, 0),
+    total: linhas.reduce((s, l) => s + l.total, 0)
+  };
+}
+
+// [9,10,11] -> "Out a Dez" ; [0] -> "Jan" ; 12 meses -> "Ano todo"
+function gaTextoMeses(idx, nMesesAno) {
+  if (!idx || idx.length === 0) return '—';
+  if (idx.length === 12) return 'Ano todo';
+  const partes = [];
+  let ini = idx[0], fim = idx[0];
+  for (let i = 1; i <= idx.length; i++) {
+    if (i < idx.length && idx[i] === fim + 1) { fim = idx[i]; continue; }
+    partes.push(ini === fim ? GA_MESES[ini] : (fim === ini + 1 ? `${GA_MESES[ini]}, ${GA_MESES[fim]}` : `${GA_MESES[ini]} a ${GA_MESES[fim]}`));
+    ini = fim = idx[i];
+  }
+  return partes.join(', ');
+}
+
 // ── Desenho ───────────────────────────────────────────────────
+function gaRenderDebitos() {
+  const db = gaDebitos();
+  const anos = Object.keys(GESTAO_ANTERIOR.anos);
+  document.getElementById('ga-deb-head').innerHTML =
+    `<tr><th>Unid.</th>${anos.map(a => `<th>${a}</th>`).join('')}<th class="ga-num">Meses</th><th class="ga-num">Em aberto 2024–mar/26</th><th class="ga-num">Até 2023</th><th class="ga-num">Total</th></tr>`;
+  document.getElementById('ga-deb-body').innerHTML = db.linhas.map(l => `<tr>
+      <td><strong>${nomUnidade(l.unidade)}</strong></td>
+      ${anos.map(a => `<td>${gaTextoMeses(l.anos[a])}</td>`).join('')}
+      <td class="ga-num">${l.meses || '—'}</td>
+      <td class="ga-num">${l.valorMeses ? moeda(l.valorMeses) : '—'}</td>
+      <td class="ga-num">${l.ate2023 ? moeda(l.ate2023) : '—'}</td>
+      <td class="ga-num"><strong>${moeda(l.total)}</strong></td>
+    </tr>`).join('');
+  document.getElementById('ga-deb-foot').innerHTML = `<tr class="ga-total">
+      <td colspan="${anos.length + 1}">Total (${db.linhas.length} unidades)</td>
+      <td class="ga-num">${db.meses}</td>
+      <td class="ga-num">${moeda(db.valorMeses)}</td>
+      <td class="ga-num">${moeda(db.ate2023)}</td>
+      <td class="ga-num">${moeda(db.total)}</td>
+    </tr>`;
+  const d103 = GESTAO_ANTERIOR.debito103;
+  document.getElementById('ga-deb-nota').textContent =
+    `Como foi calculado: cada mês marcado como "não pagou" (0) na planilha conta R$ ${GA_MENSALIDADE},00. Meses sem registro não foram contados como débito (em fevereiro e março/2026, quem não aparece pode ter pago à gestão atual). ` +
+    `A coluna "Até 2023" é o débito de ${moeda(d103.valor)} do apto ${d103.unidade} (${d103.descricao}) registrado pela gestão anterior. Não inclui multa nem juros e não considera pagamentos feitos depois da entrega da planilha.`;
+}
+
 function gaCelulaReceita(v) {
   if (v === 'ISENTO') return '<td class="ga-c ga-isento">Isento</td>';
   if (v === null || v === undefined) return '<td class="ga-c ga-vazio" title="Sem registro">·</td>';
@@ -167,6 +247,7 @@ function gaRenderResumo() {
   const g = GESTAO_ANTERIOR;
   const totRec = gaTotalRecursos();
   const totDesp = gaTotalDespesas();
+  const deb = gaDebitos();
   const linhaAno = (k) => {
     const y = g.anos[k];
     return `<tr><td>+ Receitas de ${y.rotulo}</td><td class="ga-num">${moeda(y.receitaTotalInformada)}</td></tr>`;
@@ -188,9 +269,9 @@ function gaRenderResumo() {
       <div class="kpi-sub">${g.periodo}</div>
     </div>
     <div class="kpi-card" style="--accent:var(--c-inadimplencia)">
-      <div class="kpi-label">Débito do apto ${g.debito103.unidade}</div>
-      <div class="kpi-value">${moeda(g.debito103.valor)}</div>
-      <div class="kpi-sub">${g.debito103.descricao} · registrado até ${g.debito103.ate}</div>
+      <div class="kpi-label">Débitos em aberto</div>
+      <div class="kpi-value">${moeda(deb.total)}</div>
+      <div class="kpi-sub">${deb.linhas.length} unidades · inclui ${moeda(g.debito103.valor)} do apto ${g.debito103.unidade} (até ${g.debito103.ate})</div>
     </div>`;
 
   document.getElementById('ga-balanco').innerHTML = `
@@ -261,6 +342,7 @@ function gaRenderAno() {
 
 function renderGestaoAnterior() {
   gaRenderResumo();
+  gaRenderDebitos();
   gaRenderAno();
 }
 

@@ -86,6 +86,7 @@
     <button class="nav-btn" data-tab="despesas"><span>💸</span> Despesas</button>
     <button class="nav-btn" data-tab="inadimplencia"><span>⚠️</span> Inadimplência <span class="nav-badge" id="badge-inad">—</span></button>
     <button class="nav-btn" data-tab="dre"><span>📋</span> DRE</button>
+    <button class="nav-btn" data-tab="analises"><span>🔎</span> Análises</button>
     <div class="sidebar-sep"></div>
     <span class="sidebar-label">Gestão</span>
     <button class="nav-btn" data-tab="obras"><span>🏗️</span> Simulação de Obras</button>
@@ -357,6 +358,24 @@
             <tbody id="tbody-inad"></tbody>
           </table>
         </div>
+      </div>
+    </div>
+
+    <!-- ════ ANÁLISES ════ -->
+    <div class="tab-pane" id="tab-analises">
+      <div class="page-title">
+        <h2 style="color:var(--primary)">Análises</h2>
+        <p>Padrões encontrados cruzando todos os anos da planilha · dados do condomínio como um todo, sem identificar unidades</p>
+      </div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">Insights automáticos <span>gerados a partir dos dados</span></div>
+        <div id="an-insights" class="insights-list"><div class="insight insight-info"><span class="insight-ico">⏳</span><p>Analisando…</p></div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Mapa de calor da adimplência <span>% de pagamentos em dia, por mês e ano</span></div>
+        <div class="hm-wrap" id="an-heatmap"></div>
+        <div class="hm-legend" aria-hidden="true"><span>0%</span><span class="hm-legend-bar"></span><span>100%</span></div>
+        <p class="hm-nota">Cada quadradinho é um mês: quanto mais verde, mais gente pagou em dia; quanto mais vermelho, mais atrasos. "–" significa que o mês ainda não venceu ou não há lançamentos. O prazo é o dia 10 do mês seguinte. Unidades isentas não entram na conta.</p>
       </div>
     </div>
 
@@ -671,5 +690,6 @@
 
 <script src="app.js"></script>
 <script src="gestao-anterior.js"></script>
+<script src="analises.js"></script>
 </body>
 </html>

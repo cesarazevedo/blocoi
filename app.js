@@ -1586,6 +1586,7 @@ async function carregar(forcarAtualizacao = false) {
     await carregarAnosAnteriores(anoSel, forcarAtualizacao);
     buildMapaUnidades();
     renderTudo();
+    if (typeof renderAnalises === 'function') renderAnalises(forcarAtualizacao);
     mostrarIndicadorCache(sheets);
   } catch(e) {
     alert('Erro ao carregar dados: ' + e.message);

@@ -1413,6 +1413,7 @@ function renderTudo() {
   renderObras();
   renderContatos();
   if (typeof renderResumoCompartilhar === 'function') renderResumoCompartilhar();
+  if (typeof renderFaq === 'function') renderFaq();
 }
 
 // ── Saldo anterior (ano precedente completo) ──────────────────
@@ -1566,23 +1567,25 @@ function filtrarContatos() {
 }
 
 async function carregar(forcarAtualizacao = false) {
-  const sheets = [`Receitas ${anoSel}`, 'Despesas', 'Config', 'Comunicados', 'Contatos'];
+  const sheets = [`Receitas ${anoSel}`, 'Despesas', 'Config', 'Comunicados', 'Contatos', 'FAQ'];
   if (forcarAtualizacao) sheets.forEach(s => localStorage.removeItem(cacheKey(s)));
 
   document.getElementById('loading').classList.remove('hidden');
   try {
-    const [rowsR, rowsD, rowsC, rowsComm, rowsCont] = await Promise.all([
+    const [rowsR, rowsD, rowsC, rowsComm, rowsCont, rowsFaq] = await Promise.all([
       fetchSheetCached(`Receitas ${anoSel}`),
       fetchSheetCached('Despesas'),
       fetchSheetCached('Config').catch(() => []),
       fetchSheetCached('Comunicados').catch(() => []),
-      fetchSheetCached('Contatos').catch(() => [])
+      fetchSheetCached('Contatos').catch(() => []),
+      fetchSheetCached('FAQ').catch(() => [])
     ]);
     const isentosMap = parseConfig(rowsC);
     dadosReceitas = parseReceitas(rowsR, isentosMap);
     dadosDespesas = parseDespesas(rowsD);
     dadosComunicados = parseComunicados(rowsComm);
     dadosContatos = parseContatos(rowsCont);
+    if (typeof parseFaq === 'function') dadosFaq = parseFaq(rowsFaq);
     await calcularSaldoAnterior(anoSel);
     await carregarAnosAnteriores(anoSel, forcarAtualizacao);
     buildMapaUnidades();

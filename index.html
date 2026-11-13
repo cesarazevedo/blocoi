@@ -92,6 +92,7 @@
     <button class="nav-btn" data-tab="obras"><span>🏗️</span> Simulação de Obras</button>
     <button class="nav-btn" data-tab="regimento"><span>📜</span> Regimento</button>
     <button class="nav-btn" data-tab="contatos"><span>📇</span> Contatos</button>
+    <button class="nav-btn" data-tab="faq"><span>❓</span> Perguntas Frequentes</button>
     <div class="sidebar-sep"></div>
     <span class="sidebar-label">Gestão anterior</span>
     <button class="nav-btn" data-tab="gestao-anterior"><span>🗂️</span> Prestação de Contas</button>
@@ -646,6 +647,24 @@
       </div>
     </div>
 
+    <!-- ════ PERGUNTAS FREQUENTES ════ -->
+    <div class="tab-pane" id="tab-faq">
+      <div class="page-title">
+        <h2 style="color:#dd6b20">❓ Perguntas Frequentes</h2>
+        <p>Respostas rápidas para as dúvidas mais comuns do condomínio</p>
+      </div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="faq-filtros">
+          <input id="faq-busca" type="search" aria-label="Buscar nas perguntas" placeholder="Buscar… (ex.: água, vencimento, reforma)" oninput="filtrarFaq()">
+          <select id="faq-cat" aria-label="Categoria" onchange="filtrarFaq()"><option value="">Todas as categorias</option></select>
+          <span id="faq-contagem" class="faq-contagem"></span>
+        </div>
+      </div>
+      <div id="faq-lista" class="faq-lista"></div>
+      <div id="faq-vazio" class="card" style="display:none;text-align:center;color:var(--text-muted)">Nenhuma pergunta encontrada. Tente outra palavra.</div>
+      <p class="hm-nota" style="text-align:center;margin-top:18px">Não achou sua dúvida? <button id="faq-ir-contatos" class="faq-link">Veja os contatos</button> e fale com a administração.</p>
+    </div>
+
     <!-- ════ GESTÃO ANTERIOR ════ -->
     <div class="tab-pane" id="tab-gestao-anterior">
       <div class="ga-banner" role="note">
@@ -722,5 +741,6 @@
 <script src="app.js"></script>
 <script src="gestao-anterior.js"></script>
 <script src="analises.js"></script>
+<script src="faq.js"></script>
 </body>
 </html>

@@ -2,27 +2,10 @@
 // Alimentada pela aba "FAQ" da planilha. Colunas:
 //   Pergunta | Resposta | Categoria | Ativo
 // (Ativo: TRUE ou vazio = aparece; FALSE = escondida. Categoria vazia vira "Geral".)
-// As perguntas "Sobre o site" abaixo são fixas e valem sempre.
+// Só aparece o que estiver na planilha (nada fixo no código).
 // Tudo aqui é geral para o condomínio; nada identifica unidade ou morador.
 
 let dadosFaq = [];   // [{pergunta, resposta, categoria}]
-
-const FAQ_DO_SITE = [
-  { categoria: 'Sobre o site', pergunta: 'Quando vence a cota do condomínio?',
-    resposta: 'A cota de cada mês vence no dia 10 do mês seguinte. Por exemplo, a cota de março vence dia 10 de abril. O site só conta atraso depois dessa data.' },
-  { categoria: 'Sobre o site', pergunta: 'O que significa "pagamentos em dia"?',
-    resposta: 'É a porcentagem de pagamentos esperados que já foram feitos naquele mês. Unidades isentas não entram na conta. Enquanto o prazo do mês não vence, o site mostra "prazo em andamento" em vez de uma porcentagem.' },
-  { categoria: 'Sobre o site', pergunta: 'De onde vêm os números do site?',
-    resposta: 'Direto da planilha de controle do condomínio. O site atualiza sozinho a cada poucos minutos. Se quiser ver o dado mais novo agora, use o botão ↻ no topo da página.' },
-  { categoria: 'Sobre o site', pergunta: 'Como vejo para onde o dinheiro foi?',
-    resposta: 'Na aba Despesas você vê cada gasto. Na aba Resumo das Finanças vê os maiores gastos do mês, e na aba Análises vê a evolução por categoria e os gastos fora do normal.' },
-  { categoria: 'Sobre o site', pergunta: 'Como mando o resumo do mês no grupo dos moradores?',
-    resposta: 'Vá na aba Análises, no card "Resumo do mês para compartilhar". Escolha o mês no topo da página e use Compartilhar (imagem) ou Copiar texto. No celular, o botão abre o WhatsApp direto.' },
-  { categoria: 'Sobre o site', pergunta: 'Posso baixar a prestação de contas em PDF?',
-    resposta: 'Pode. Use o botão 📄 no topo da página. Ele gera o PDF do mês escolhido. Em celular, o botão pode estar dentro do menu ⋮.' },
-  { categoria: 'Sobre o site', pergunta: 'Dá para usar o site como aplicativo no celular?',
-    resposta: 'Dá. No navegador do celular, abra o menu e escolha "Adicionar à tela inicial" (ou "Instalar app"). Ele passa a abrir como um aplicativo, com ícone próprio.' }
-];
 
 function parseFaq(rows) {
   // O Google devolve a PRIMEIRA aba quando a aba pedida não existe. Por isso só
@@ -52,7 +35,7 @@ function faqTexto(s) {
 function renderFaq() {
   const sel = document.getElementById('faq-cat');
   if (!sel) return;
-  const todas = [...dadosFaq, ...FAQ_DO_SITE];
+  const todas = dadosFaq;
   const cats = [...new Set(todas.map(f => f.categoria))];
   const atual = sel.value;
   sel.innerHTML = '<option value="">Todas as categorias</option>' +
@@ -68,13 +51,14 @@ function filtrarFaq() {
   const q = faqNorm(document.getElementById('faq-busca').value).trim();
   const cat = document.getElementById('faq-cat').value;
 
-  const itens = [...dadosFaq, ...FAQ_DO_SITE].filter(f =>
+  const itens = dadosFaq.filter(f =>
     (!cat || f.categoria === cat) &&
     (!q || faqNorm(`${f.pergunta} ${f.resposta} ${f.categoria}`).includes(q)));
 
   document.getElementById('faq-contagem').textContent =
     `${itens.length} ${itens.length === 1 ? 'pergunta' : 'perguntas'}`;
   vazio.style.display = itens.length ? 'none' : 'block';
+  vazio.textContent = dadosFaq.length ? 'Nenhuma pergunta encontrada. Tente outra palavra.' : 'Ainda não há perguntas cadastradas.';
   // com busca ativa, as respostas já vêm abertas
   lista.innerHTML = itens.map(f => `
     <details class="faq-item"${q ? ' open' : ''}>

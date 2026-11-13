@@ -206,4 +206,274 @@ async function renderAnalises(forcar = false) {
   if (token !== anToken) return; // chegou uma chamada mais nova, descarta esta
   const grade = anRenderHeatmap(anosData);
   anRenderInsights(anGerarInsights(anosData, grade));
+  anRenderForaDoNormal();
+  anRenderCategorias();
+  renderResumoCompartilhar();
 }
+
+// ══════════════════════════════════════════════════════════════
+// Despesas por categoria: evolução, gastos fora do normal, cartão
+// (sempre só categorias e totais; nunca descrição nem fornecedor)
+// ══════════════════════════════════════════════════════════════
+const AN_CORES = ['#667eea', '#11998e', '#f7971e', '#ff758c', '#4facfe', '#a0aec0'];
+const anYM = (y, m) => y * 12 + m;
+const anNum1 = v => v.toFixed(1).replace('.', ',');
+
+// { porCat: { categoria: { ym: total } }, totalMes: { ym: total }, primeiro: ym mais antigo }
+function anAgregar() {
+  const porCat = {}, totalMes = {};
+  let primeiro = Infinity;
+  dadosDespesas.forEach(d => {
+    if (!d.dataParts || d.dataParts.length < 3) return;
+    const y = parseInt(d.dataParts[2]), m = parseInt(d.dataParts[1]) - 1;
+    if (isNaN(y) || isNaN(m)) return;
+    const k = anYM(y, m), c = (d.categoria || '').trim() || 'Outros';
+    (porCat[c] = porCat[c] || {})[k] = (porCat[c][k] || 0) + d.valor;
+    totalMes[k] = (totalMes[k] || 0) + d.valor;
+    if (k < primeiro) primeiro = k;
+  });
+  return { porCat, totalMes, primeiro };
+}
+
+// Últimos 12 meses, terminando no mês atual
+function anJanela12() {
+  const h = new Date(), out = [];
+  for (let i = 11; i >= 0; i--) {
+    const d = new Date(h.getFullYear(), h.getMonth() - i, 1);
+    out.push({ y: d.getFullYear(), m: d.getMonth(), k: anYM(d.getFullYear(), d.getMonth()) });
+  }
+  return out;
+}
+
+// ── 2) Evolução dos gastos por categoria ──────────────────────
+let anCatChart = null;
+function anRenderCategorias() {
+  const cv = document.getElementById('an-chart-cat');
+  const vazio = document.getElementById('an-cat-vazio');
+  if (!cv || typeof Chart === 'undefined') return;
+  if (anCatChart) { anCatChart.destroy(); anCatChart = null; }
+
+  const jan = anJanela12();
+  const { porCat } = anAgregar();
+  const soma = c => jan.reduce((s, j) => s + (porCat[c][j.k] || 0), 0);
+  const cats = Object.keys(porCat).filter(c => soma(c) > 0).sort((a, b) => soma(b) - soma(a));
+  cv.parentElement.style.display = cats.length ? '' : 'none';
+  vazio.style.display = cats.length ? 'none' : '';
+  if (!cats.length) return;
+
+  const series = cats.slice(0, 5).map(c => ({ nome: c, vals: jan.map(j => porCat[c][j.k] || 0) }));
+  const resto = cats.slice(5);
+  if (resto.length) series.push({ nome: 'Outras', vals: jan.map(j => resto.reduce((s, c) => s + (porCat[c][j.k] || 0), 0)) });
+
+  anCatChart = new Chart(cv, {
+    type: 'line',
+    data: {
+      labels: jan.map(j => `${MESES[j.m]}/${String(j.y).slice(2)}`),
+      datasets: series.map((s, i) => ({
+        label: s.nome, data: s.vals, borderColor: AN_CORES[i], backgroundColor: AN_CORES[i],
+        borderWidth: 2.5, pointRadius: 3, tension: 0,
+        segment: { borderDash: c => (c.p1DataIndex === 11 ? [5, 5] : undefined) } // mês em andamento
+      }))
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { position: 'bottom', labels: { color: tColor(), font: { size: 11 }, boxWidth: 12 } },
+        tooltip: { callbacks: { label: c => ` ${c.dataset.label}: ${moeda(c.parsed.y)}` } }
+      },
+      scales: {
+        x: { ticks: { color: tColor(), font: { size: 10 } }, grid: { display: false } },
+        y: { beginAtZero: true, ticks: { color: tColor(), font: { size: 10 }, callback: v => 'R$ ' + v.toLocaleString('pt-BR') }, grid: { color: gColor() } }
+      }
+    }
+  });
+}
+
+// ── 3) Gastos fora do normal ──────────────────────────────────
+// Regra: um gasto chama atenção quando é pelo menos 1,5× a média dos meses
+// anteriores da própria categoria (até 12 meses, mínimo 4) E a diferença é
+// relevante (≥ 10% do gasto mensal médio do condomínio). Evita alarme à toa.
+function anForaDoNormal() {
+  const { porCat, totalMes, primeiro } = anAgregar();
+  const itens = [];
+  let historicoCurto = true;
+
+  anJanela12().forEach(j => {
+    const ini = Math.max(primeiro, j.k - 12);
+    const n = j.k - ini;
+    if (!isFinite(primeiro) || n < 4) return;
+    historicoCurto = false;
+    let somaTot = 0;
+    for (let k = ini; k < j.k; k++) somaTot += totalMes[k] || 0;
+    const mediaTot = somaTot / n;
+    if (mediaTot <= 0) return;
+
+    Object.keys(porCat).forEach(c => {
+      const v = porCat[c][j.k] || 0;
+      if (v <= 0) return;
+      let s = 0;
+      for (let k = ini; k < j.k; k++) s += porCat[c][k] || 0;
+      const base = s / n;
+      if (base > 0 && v >= base * 1.5 && v - base >= mediaTot * 0.1)
+        itens.push({ tipo: 'cat', y: j.y, m: j.m, c, v, base, ratio: v / base });
+    });
+
+    const vt = totalMes[j.k] || 0;
+    if (vt >= mediaTot * 1.4 && vt - mediaTot >= mediaTot * 0.1)
+      itens.push({ tipo: 'mes', y: j.y, m: j.m, v: vt, base: mediaTot, ratio: vt / mediaTot });
+  });
+
+  itens.sort((a, b) => (b.y * 12 + b.m) - (a.y * 12 + a.m) || b.ratio - a.ratio);
+  return { itens: itens.slice(0, 8), historicoCurto };
+}
+
+function anRenderForaDoNormal() {
+  const el = document.getElementById('an-anomalias');
+  if (!el) return;
+  const { itens, historicoCurto } = anForaDoNormal();
+  const agora = new Date();
+  const emAndamento = i => i.y === agora.getFullYear() && i.m === agora.getMonth() ? ' <em>(mês em andamento)</em>' : '';
+
+  if (historicoCurto) {
+    el.innerHTML = '<div class="insight insight-info"><span class="insight-ico">🔍</span><p>Ainda há poucos meses de histórico para comparar. Esta análise começa a funcionar a partir do 5º mês de despesas lançadas.</p></div>';
+  } else if (!itens.length) {
+    el.innerHTML = '<div class="insight insight-good"><span class="insight-ico">✅</span><p>Nenhum gasto fora do padrão nos últimos 12 meses. Tudo dentro do esperado.</p></div>';
+  } else {
+    el.innerHTML = itens.map(i => i.tipo === 'cat'
+      ? `<div class="insight insight-warn"><span class="insight-ico" aria-hidden="true">🚨</span><p><strong>${escHtml(i.c)}</strong> em <strong>${MESES_FULL[i.m]}/${i.y}</strong>: ${moeda(i.v)}, cerca de <strong>${anNum1(i.ratio)}×</strong> a média dos meses anteriores (${moeda(i.base)})${emAndamento(i)}.</p></div>`
+      : `<div class="insight insight-warn"><span class="insight-ico" aria-hidden="true">📊</span><p><strong>${MESES_FULL[i.m]}/${i.y}</strong> como um todo: ${moeda(i.v)} em gastos, cerca de <strong>${anNum1(i.ratio)}×</strong> a média mensal (${moeda(i.base)})${emAndamento(i)}.</p></div>`
+    ).join('');
+  }
+}
+
+// ── 6) Cartão "Resumo do mês" para compartilhar ───────────────
+function anRR(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+}
+
+function anTexto(ctx, txt, x, y, { size = 32, peso = 400, cor = '#1a202c', alinh = 'left', maxW } = {}) {
+  let s = size;
+  const fam = "'Segoe UI', Roboto, Helvetica, Arial, sans-serif";
+  ctx.font = `${peso} ${s}px ${fam}`;
+  if (maxW) while (ctx.measureText(txt).width > maxW && s > 14) { s -= 1; ctx.font = `${peso} ${s}px ${fam}`; }
+  ctx.fillStyle = cor; ctx.textAlign = alinh; ctx.textBaseline = 'alphabetic';
+  ctx.fillText(txt, x, y);
+}
+
+function renderResumoCompartilhar() {
+  const cv = document.getElementById('an-resumo-canvas');
+  if (!cv) return;
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height, P = 60;
+  const verde = '#11998e', verm = '#e53e5c', cinza = '#4a5568';
+
+  // Mesmos cálculos do Resumo das Finanças, para os números baterem
+  const recMes = dadosReceitas.reduce((s, r) => s + r.valores[mesSel], 0);
+  const pagas = dadosReceitas.filter(r => r.valores[mesSel] > 0).length;
+  const total = dadosReceitas.length;
+  const despMes = despMesAtual(dadosDespesas, mesSel, anoSel);
+  const totalDesp = despMes.reduce((s, d) => s + d.valor, 0);
+  const saldoMes = recMes - totalDesp;
+  const venceu = mesVencido(mesSel, anoSel);
+  const isentos = dadosReceitas.filter(r => r.isentos && r.isentos[mesSel]).length;
+  const inadPct = total > 0 && venceu ? (total - pagas - isentos) / total * 100 : null;
+  const recAcum = dadosReceitas.reduce((s, r) => s + r.valores.slice(0, mesSel + 1).reduce((a, b) => a + b, 0), 0);
+  const despAcum = dadosDespesas
+    .filter(d => d.dataParts && parseInt(d.dataParts[2]) === anoSel && parseInt(d.dataParts[1]) - 1 <= mesSel)
+    .reduce((s, d) => s + d.valor, 0);
+  const caixa = recAcum - despAcum + saldoAnterior;
+  const mesLabel = `${MESES_FULL[mesSel]}/${anoSel}`;
+
+  // fundo
+  ctx.fillStyle = '#f0f4f8'; ctx.fillRect(0, 0, W, H);
+
+  // cabeçalho
+  const g = ctx.createLinearGradient(0, 0, W, 260);
+  g.addColorStop(0, '#667eea'); g.addColorStop(1, '#764ba2');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, 260);
+  anTexto(ctx, 'CONTROLE CONDOMINIAL', P, 90, { size: 28, peso: 700, cor: 'rgba(255,255,255,.8)' });
+  anTexto(ctx, `Resumo de ${mesLabel}`, P, 170, { size: 66, peso: 700, cor: '#fff', maxW: W - 2 * P });
+  anTexto(ctx, 'Prestação de contas para os moradores', P, 222, { size: 28, cor: 'rgba(255,255,255,.85)' });
+
+  // saldo em caixa
+  ctx.fillStyle = '#fff'; anRR(ctx, P, 300, W - 2 * P, 250, 24); ctx.fill();
+  anTexto(ctx, 'SALDO EM CAIXA', P + 40, 362, { size: 26, peso: 700, cor: cinza });
+  anTexto(ctx, moeda(caixa), P + 40, 460, { size: 88, peso: 700, cor: caixa >= 0 ? verde : verm, maxW: W - 2 * P - 80 });
+  anTexto(ctx, `acumulado de Jan a ${MESES[mesSel]}/${anoSel}`, P + 40, 518, { size: 26, cor: cinza });
+
+  // três quadros
+  const tw = (W - 2 * P - 2 * 24) / 3;
+  [['ARRECADADO', recMes, verde], ['GASTOS', totalDesp, '#f7971e'], ['SALDO DO MÊS', saldoMes, saldoMes >= 0 ? verde : verm]]
+    .forEach(([rot, val, cor], i) => {
+      const x = P + i * (tw + 24);
+      ctx.fillStyle = '#fff'; anRR(ctx, x, 580, tw, 190, 24); ctx.fill();
+      ctx.fillStyle = cor; anRR(ctx, x, 580, 10, 190, 5); ctx.fill();
+      anTexto(ctx, rot, x + 34, 640, { size: 22, peso: 700, cor: cinza, maxW: tw - 50 });
+      anTexto(ctx, moeda(val), x + 34, 716, { size: 38, peso: 700, cor, maxW: tw - 50 });
+    });
+
+  // adimplência
+  ctx.fillStyle = '#fff'; anRR(ctx, P, 800, W - 2 * P, 190, 24); ctx.fill();
+  anTexto(ctx, 'PAGAMENTOS EM DIA', P + 40, 860, { size: 26, peso: 700, cor: cinza });
+  if (inadPct === null) {
+    anTexto(ctx, 'Prazo de pagamento ainda em andamento', P + 40, 935, { size: 34, cor: cinza, maxW: W - 2 * P - 80 });
+  } else {
+    const ad = 100 - inadPct;
+    anTexto(ctx, `${Math.round(ad)}%`, W - P - 40, 862, { size: 56, peso: 700, cor: ad >= 90 ? verde : ad >= 70 ? '#f7971e' : verm, alinh: 'right' });
+    ctx.fillStyle = '#e2e8f0'; anRR(ctx, P + 40, 900, W - 2 * P - 80, 34, 17); ctx.fill();
+    ctx.fillStyle = ad >= 90 ? verde : ad >= 70 ? '#f7971e' : verm;
+    if (ad > 0) { anRR(ctx, P + 40, 900, Math.max(34, (W - 2 * P - 80) * ad / 100), 34, 17); ctx.fill(); }
+  }
+
+  // maiores gastos do mês (só categorias)
+  ctx.fillStyle = '#fff'; anRR(ctx, P, 1020, W - 2 * P, 220, 24); ctx.fill();
+  anTexto(ctx, 'ONDE O DINHEIRO FOI', P + 40, 1080, { size: 26, peso: 700, cor: cinza });
+  const cats = {};
+  despMes.forEach(d => { const c = (d.categoria || '').trim() || 'Outros'; cats[c] = (cats[c] || 0) + d.valor; });
+  const top = Object.entries(cats).sort((a, b) => b[1] - a[1]).slice(0, 3);
+  if (!top.length) {
+    anTexto(ctx, 'Sem gastos lançados neste mês', P + 40, 1160, { size: 32, cor: cinza });
+  } else {
+    top.forEach(([c, v], i) => {
+      const y = 1130 + i * 38, bw = 330;
+      anTexto(ctx, c, P + 40, y, { size: 24, cor: '#1a202c', maxW: 300 });
+      ctx.fillStyle = '#e2e8f0'; anRR(ctx, P + 360, y - 20, bw, 20, 10); ctx.fill();
+      ctx.fillStyle = AN_CORES[i]; anRR(ctx, P + 360, y - 20, Math.max(14, bw * v / totalDesp), 20, 10); ctx.fill();
+      anTexto(ctx, `${moeda(v)}`, W - P - 40, y, { size: 24, peso: 700, alinh: 'right' });
+    });
+  }
+
+  // rodapé
+  anTexto(ctx, `Valores da planilha de transparência do condomínio · gerado em ${new Date().toLocaleDateString('pt-BR')}`,
+    W / 2, 1300, { size: 22, cor: cinza, alinh: 'center', maxW: W - 2 * P });
+}
+
+function anResumoBlob() {
+  return new Promise(res => document.getElementById('an-resumo-canvas').toBlob(res, 'image/png'));
+}
+
+async function anResumoBaixar() {
+  renderResumoCompartilhar();
+  const blob = await anResumoBlob();
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `resumo-condominio-${anoSel}-${String(mesSel + 1).padStart(2, '0')}.png`;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+
+async function anResumoCompartilhar() {
+  renderResumoCompartilhar();
+  const blob = await anResumoBlob();
+  const file = new File([blob], `resumo-condominio-${anoSel}-${String(mesSel + 1).padStart(2, '0')}.png`, { type: 'image/png' });
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file], title: `Resumo de ${MESES_FULL[mesSel]}/${anoSel}` }); return; }
+    catch (e) { if (e.name === 'AbortError') return; }
+  }
+  anResumoBaixar(); // sem compartilhamento nativo (ex.: computador): baixa a imagem
+}
+
+document.getElementById('btn-resumo-baixar')?.addEventListener('click', anResumoBaixar);
+document.getElementById('btn-resumo-compartilhar')?.addEventListener('click', anResumoCompartilhar);

@@ -371,11 +371,34 @@
         <div class="card-title">Insights automáticos <span>gerados a partir dos dados</span></div>
         <div id="an-insights" class="insights-list"><div class="insight insight-info"><span class="insight-ico">⏳</span><p>Analisando…</p></div></div>
       </div>
-      <div class="card">
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">Gastos fora do normal <span>últimos 12 meses</span></div>
+        <div id="an-anomalias" class="insights-list"></div>
+        <p class="hm-nota">Aparece quando uma categoria (ou o mês todo) gasta bem mais que a média dos meses anteriores. Gasto alto nem sempre é problema (pode ser uma obra planejada): serve só para chamar atenção e facilitar a conversa.</p>
+      </div>
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-title">Gastos por categoria ao longo do tempo <span>últimos 12 meses</span></div>
+        <div class="an-chart-box"><canvas id="an-chart-cat"></canvas></div>
+        <p id="an-cat-vazio" class="hm-nota" style="display:none">Ainda não há despesas lançadas nos últimos 12 meses.</p>
+        <p class="hm-nota">A linha tracejada no final é o mês em andamento (ainda pode subir). Mostra as 5 maiores categorias; as demais ficam juntas em "Outras".</p>
+      </div>
+      <div class="card" style="margin-bottom:16px">
         <div class="card-title">Mapa de calor da adimplência <span>% de pagamentos em dia, por mês e ano</span></div>
         <div class="hm-wrap" id="an-heatmap"></div>
         <div class="hm-legend" aria-hidden="true"><span>0%</span><span class="hm-legend-bar"></span><span>100%</span></div>
         <p class="hm-nota">Cada quadradinho é um mês: quanto mais verde, mais gente pagou em dia; quanto mais vermelho, mais atrasos. "–" significa que o mês ainda não venceu ou não há lançamentos. O prazo é o dia 10 do mês seguinte. Unidades isentas não entram na conta.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">Resumo do mês para compartilhar <span>imagem pronta para o grupo dos moradores</span></div>
+        <div class="resumo-wrap">
+          <canvas id="an-resumo-canvas" width="1080" height="1350" aria-label="Prévia do resumo do mês"></canvas>
+          <div class="resumo-side">
+            <p class="hm-nota" style="margin-top:0">A imagem acompanha o <strong>mês e o ano escolhidos no topo</strong> da página. Ela mostra só os números do condomínio (saldo, arrecadação, gastos, pagamentos em dia e categorias), sem identificar nenhuma unidade.</p>
+            <button class="btn-icon resumo-btn" id="btn-resumo-compartilhar">📤 Compartilhar</button>
+            <button class="btn-icon resumo-btn" id="btn-resumo-baixar">⬇️ Baixar imagem</button>
+            <p class="hm-nota">No celular, "Compartilhar" abre o WhatsApp e outros apps. No computador, a imagem é baixada para você enviar.</p>
+          </div>
+        </div>
       </div>
     </div>
 

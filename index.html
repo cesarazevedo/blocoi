@@ -389,7 +389,7 @@
         <p class="hm-nota">Cada quadradinho é um mês: quanto mais verde, mais gente pagou em dia; quanto mais vermelho, mais atrasos. "–" significa que o mês ainda não venceu ou não há lançamentos. O prazo é o dia 10 do mês seguinte. Unidades isentas não entram na conta.</p>
       </div>
       <div class="card">
-        <div class="card-title">Resumo do mês para compartilhar <span>imagem pronta para o grupo dos moradores</span></div>
+        <div class="card-title">Resumo do mês para compartilhar <span>imagem ou texto prontos para o grupo dos moradores</span></div>
         <div class="resumo-wrap">
           <canvas id="an-resumo-canvas" width="1080" height="1350" aria-label="Prévia do resumo do mês"></canvas>
           <div class="resumo-side">
@@ -397,6 +397,14 @@
             <button class="btn-icon resumo-btn" id="btn-resumo-compartilhar">📤 Compartilhar</button>
             <button class="btn-icon resumo-btn" id="btn-resumo-baixar">⬇️ Baixar imagem</button>
             <p class="hm-nota">No celular, "Compartilhar" abre o WhatsApp e outros apps. No computador, a imagem é baixada para você enviar.</p>
+            <div class="resumo-texto-box">
+              <div class="resumo-texto-titulo">Ou prefira em texto</div>
+              <textarea id="an-resumo-texto" class="resumo-texto" rows="15" readonly aria-label="Resumo do mês em texto"></textarea>
+              <div class="resumo-texto-acoes">
+                <button class="btn-icon resumo-btn" id="btn-texto-copiar">📋 Copiar texto</button>
+                <button class="btn-icon resumo-btn" id="btn-texto-compartilhar">💬 Compartilhar texto</button>
+              </div>
+            </div>
           </div>
         </div>
       </div>

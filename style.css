@@ -180,6 +180,24 @@
     .nav-btn.active[data-tab="obras"]         { color: var(--c-obras);        background: rgba(162,155,254,.09);  border-left-color: var(--c-obras); }
     .nav-btn.active[data-tab="regimento"]     { color: #38b2ac;               background: rgba(56,178,172,.09);   border-left-color: #38b2ac; }
     .nav-btn.active[data-tab="contatos"]      { color: #e53e9c;               background: rgba(229,62,156,.09);   border-left-color: #e53e9c; }
+    .nav-btn.active[data-tab="faq"]           { color: #dd6b20;               background: rgba(221,107,32,.09);   border-left-color: #dd6b20; }
+    /* ── Perguntas frequentes ── */
+    .faq-filtros { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .faq-filtros input, .faq-filtros select { padding: 9px 14px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 0.88rem; outline: none; }
+    .faq-filtros input { flex: 1; min-width: 200px; }
+    .faq-contagem { font-size: 0.78rem; color: var(--text-muted); margin-left: auto; }
+    .faq-lista { display: flex; flex-direction: column; gap: 10px; }
+    .faq-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
+    .faq-item summary { cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; }
+    .faq-item summary::-webkit-details-marker { display: none; }
+    .faq-item summary::after { content: '＋'; color: #dd6b20; font-weight: 700; flex-shrink: 0; order: 3; }
+    .faq-item[open] summary::after { content: '－'; }
+    .faq-item[open] summary { border-bottom: 1px solid var(--border); }
+    .faq-q { font-weight: 600; font-size: 0.92rem; color: var(--text); flex: 1; }
+    .faq-cat { font-size: 0.7rem; font-weight: 600; padding: 2px 9px; border-radius: 20px; background: rgba(221,107,32,.12); color: #dd6b20; white-space: nowrap; }
+    .faq-a { padding: 14px 16px 16px; font-size: 0.88rem; line-height: 1.6; color: var(--text); white-space: pre-line; }
+    .faq-a a { color: var(--primary); }
+    .faq-link { background: none; border: none; padding: 0; color: var(--primary); font: inherit; text-decoration: underline; cursor: pointer; }
     /* ── Simulação de Obras ── */
     .obras-params-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
     .obras-form-rows { display: flex; flex-direction: column; gap: 12px; }

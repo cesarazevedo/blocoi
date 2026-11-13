@@ -269,6 +269,11 @@
     .hm-legend { display: flex; align-items: center; gap: 8px; justify-content: flex-end; margin-top: 12px; font-size: 0.72rem; color: var(--text-muted); }
     .hm-legend-bar { width: 140px; height: 10px; border-radius: 5px;
       background: linear-gradient(90deg, hsl(0,58%,36%), hsl(60,58%,36%), hsl(120,58%,36%)); }
+    .an-chart-box { position: relative; height: 320px; }
+    .resumo-wrap { display: flex; gap: 24px; align-items: flex-start; flex-wrap: wrap; }
+    .resumo-wrap canvas { width: 100%; max-width: 360px; height: auto; border-radius: 10px; border: 1px solid var(--border); }
+    .resumo-side { flex: 1; min-width: 220px; display: flex; flex-direction: column; gap: 10px; }
+    .resumo-btn { width: auto !important; padding: 10px 16px !important; font-size: 0.88rem !important; justify-content: center; }
     .hm-nota { font-size: 0.76rem; color: var(--text-muted); margin-top: 10px; line-height: 1.5; }
 
     /* ── Tables ── */

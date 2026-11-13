@@ -1412,6 +1412,7 @@ function renderTudo() {
   renderDRE();
   renderObras();
   renderContatos();
+  if (typeof renderResumoCompartilhar === 'function') renderResumoCompartilhar();
 }
 
 // ── Saldo anterior (ano precedente completo) ──────────────────
@@ -1701,6 +1702,7 @@ document.getElementById('dark-toggle').addEventListener('click', () => {
   html.dataset.theme = dark ? 'light' : 'dark';
   document.getElementById('dark-toggle').textContent = dark ? '🌙' : '☀️';
   renderGaugeAdimplencia(); renderTendenciaInad();
+  if (typeof anRenderCategorias === 'function') anRenderCategorias();
   renderBarChart(); renderDoughnut(); renderDRE(); if (fundoChart) { fundoChart.destroy(); fundoChart=null; renderFundo(); }
 });
 

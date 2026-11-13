@@ -362,20 +362,14 @@ function anTexto(ctx, txt, x, y, { size = 32, peso = 400, cor = '#1a202c', alinh
   ctx.fillText(txt, x, y);
 }
 
-function renderResumoCompartilhar() {
-  const cv = document.getElementById('an-resumo-canvas');
-  if (!cv) return;
-  const ctx = cv.getContext('2d');
-  const W = cv.width, H = cv.height, P = 60;
-  const verde = '#11998e', verm = '#e53e5c', cinza = '#4a5568';
-
-  // Mesmos cálculos do Resumo das Finanças, para os números baterem
+// Mesmos cálculos do Resumo das Finanças, para os números baterem
+// (usado pela imagem e pelo texto, que nunca divergem entre si)
+function anDadosResumo() {
   const recMes = dadosReceitas.reduce((s, r) => s + r.valores[mesSel], 0);
   const pagas = dadosReceitas.filter(r => r.valores[mesSel] > 0).length;
   const total = dadosReceitas.length;
   const despMes = despMesAtual(dadosDespesas, mesSel, anoSel);
   const totalDesp = despMes.reduce((s, d) => s + d.valor, 0);
-  const saldoMes = recMes - totalDesp;
   const venceu = mesVencido(mesSel, anoSel);
   const isentos = dadosReceitas.filter(r => r.isentos && r.isentos[mesSel]).length;
   const inadPct = total > 0 && venceu ? (total - pagas - isentos) / total * 100 : null;
@@ -383,8 +377,26 @@ function renderResumoCompartilhar() {
   const despAcum = dadosDespesas
     .filter(d => d.dataParts && parseInt(d.dataParts[2]) === anoSel && parseInt(d.dataParts[1]) - 1 <= mesSel)
     .reduce((s, d) => s + d.valor, 0);
-  const caixa = recAcum - despAcum + saldoAnterior;
-  const mesLabel = `${MESES_FULL[mesSel]}/${anoSel}`;
+  const cats = {};
+  despMes.forEach(d => { const c = (d.categoria || '').trim() || 'Outros'; cats[c] = (cats[c] || 0) + d.valor; });
+  return {
+    recMes, totalDesp, saldoMes: recMes - totalDesp,
+    adPct: inadPct === null ? null : 100 - inadPct,
+    caixa: recAcum - despAcum + saldoAnterior,
+    mesLabel: `${MESES_FULL[mesSel]}/${anoSel}`,
+    top: Object.entries(cats).sort((a, b) => b[1] - a[1]).slice(0, 3)
+  };
+}
+
+function renderResumoCompartilhar() {
+  const cv = document.getElementById('an-resumo-canvas');
+  if (!cv) return;
+  const ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height, P = 60;
+  const verde = '#11998e', verm = '#e53e5c', cinza = '#4a5568';
+  const { recMes, totalDesp, saldoMes, adPct, caixa, mesLabel, top } = anDadosResumo();
+
+  anRenderResumoTexto();
 
   // fundo
   ctx.fillStyle = '#f0f4f8'; ctx.fillRect(0, 0, W, H);
@@ -417,10 +429,10 @@ function renderResumoCompartilhar() {
   // adimplência
   ctx.fillStyle = '#fff'; anRR(ctx, P, 800, W - 2 * P, 190, 24); ctx.fill();
   anTexto(ctx, 'PAGAMENTOS EM DIA', P + 40, 860, { size: 26, peso: 700, cor: cinza });
-  if (inadPct === null) {
+  if (adPct === null) {
     anTexto(ctx, 'Prazo de pagamento ainda em andamento', P + 40, 935, { size: 34, cor: cinza, maxW: W - 2 * P - 80 });
   } else {
-    const ad = 100 - inadPct;
+    const ad = adPct;
     anTexto(ctx, `${Math.round(ad)}%`, W - P - 40, 862, { size: 56, peso: 700, cor: ad >= 90 ? verde : ad >= 70 ? '#f7971e' : verm, alinh: 'right' });
     ctx.fillStyle = '#e2e8f0'; anRR(ctx, P + 40, 900, W - 2 * P - 80, 34, 17); ctx.fill();
     ctx.fillStyle = ad >= 90 ? verde : ad >= 70 ? '#f7971e' : verm;
@@ -430,9 +442,6 @@ function renderResumoCompartilhar() {
   // maiores gastos do mês (só categorias)
   ctx.fillStyle = '#fff'; anRR(ctx, P, 1020, W - 2 * P, 220, 24); ctx.fill();
   anTexto(ctx, 'ONDE O DINHEIRO FOI', P + 40, 1080, { size: 26, peso: 700, cor: cinza });
-  const cats = {};
-  despMes.forEach(d => { const c = (d.categoria || '').trim() || 'Outros'; cats[c] = (cats[c] || 0) + d.valor; });
-  const top = Object.entries(cats).sort((a, b) => b[1] - a[1]).slice(0, 3);
   if (!top.length) {
     anTexto(ctx, 'Sem gastos lançados neste mês', P + 40, 1160, { size: 32, cor: cinza });
   } else {
@@ -477,3 +486,65 @@ async function anResumoCompartilhar() {
 
 document.getElementById('btn-resumo-baixar')?.addEventListener('click', anResumoBaixar);
 document.getElementById('btn-resumo-compartilhar')?.addEventListener('click', anResumoCompartilhar);
+
+// ── 6b) Resumo do mês em TEXTO (pronto para colar no WhatsApp) ─
+// Usa *asteriscos* para negrito, que é como o WhatsApp entende.
+function anResumoTexto() {
+  const { recMes, totalDesp, saldoMes, adPct, caixa, mesLabel, top } = anDadosResumo();
+  const linhas = [
+    `🏢 *Resumo de ${mesLabel}*`,
+    'Prestação de contas · Controle Condominial',
+    '',
+    `💰 *Saldo em caixa:* ${moeda(caixa)}`,
+    `(acumulado de Jan a ${MESES[mesSel]}/${anoSel})`,
+    '',
+    `📥 Arrecadado no mês: ${moeda(recMes)}`,
+    `📤 Gastos no mês: ${moeda(totalDesp)}`,
+    `📊 Saldo do mês: ${moeda(saldoMes)}`,
+    '',
+    adPct === null
+      ? `⏳ Pagamentos: prazo ainda em andamento (vence dia 10/${MESES[(mesSel + 1) % 12]})`
+      : `✅ Pagamentos em dia: ${Math.round(adPct)}%`
+  ];
+  if (top.length) {
+    linhas.push('', '🧾 *Onde o dinheiro foi:*');
+    top.forEach(([c, v]) => linhas.push(`• ${c}: ${moeda(v)} (${Math.round(v / totalDesp * 100)}%)`));
+  } else {
+    linhas.push('', '🧾 Sem gastos lançados neste mês.');
+  }
+  linhas.push('', '_Valores da planilha de transparência do condomínio._');
+  return linhas.join('\n');
+}
+
+function anRenderResumoTexto() {
+  const el = document.getElementById('an-resumo-texto');
+  if (el) el.value = anResumoTexto();
+}
+
+async function anCopiarTexto() {
+  const btn = document.getElementById('btn-texto-copiar');
+  const txt = anResumoTexto();
+  let ok = false;
+  try { await navigator.clipboard.writeText(txt); ok = true; } catch (e) {
+    // plano B para navegadores que bloqueiam a área de transferência
+    const el = document.getElementById('an-resumo-texto');
+    el.select();
+    try { ok = document.execCommand('copy'); } catch (e2) { /* sem cópia automática */ }
+    window.getSelection().removeAllRanges();
+  }
+  const antes = btn.textContent;
+  btn.textContent = ok ? '✅ Copiado!' : '⚠️ Selecione e copie manualmente';
+  setTimeout(() => { btn.textContent = antes; }, 2200);
+}
+
+async function anCompartilharTexto() {
+  const txt = anResumoTexto();
+  if (navigator.share) {
+    try { await navigator.share({ text: txt }); return; }
+    catch (e) { if (e.name === 'AbortError') return; }
+  }
+  anCopiarTexto(); // sem compartilhamento nativo: copia
+}
+
+document.getElementById('btn-texto-copiar')?.addEventListener('click', anCopiarTexto);
+document.getElementById('btn-texto-compartilhar')?.addEventListener('click', anCompartilharTexto);

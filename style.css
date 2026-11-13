@@ -274,6 +274,11 @@
     .resumo-wrap canvas { width: 100%; max-width: 360px; height: auto; border-radius: 10px; border: 1px solid var(--border); }
     .resumo-side { flex: 1; min-width: 220px; display: flex; flex-direction: column; gap: 10px; }
     .resumo-btn { width: auto !important; padding: 10px 16px !important; font-size: 0.88rem !important; justify-content: center; }
+    .resumo-texto-box { margin-top: 6px; padding-top: 14px; border-top: 1px solid var(--border); }
+    .resumo-texto-titulo { font-size: 0.82rem; font-weight: 700; margin-bottom: 8px; }
+    .resumo-texto { width: 100%; box-sizing: border-box; font: inherit; font-size: 0.84rem; line-height: 1.5; padding: 10px 12px;
+      border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); resize: vertical; }
+    .resumo-texto-acoes { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
     .hm-nota { font-size: 0.76rem; color: var(--text-muted); margin-top: 10px; line-height: 1.5; }
 
     /* ── Tables ── */

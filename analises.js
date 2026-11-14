@@ -441,7 +441,7 @@ function renderResumoCompartilhar() {
 
   // maiores gastos do mês (só categorias)
   ctx.fillStyle = '#fff'; anRR(ctx, P, 1020, W - 2 * P, 220, 24); ctx.fill();
-  anTexto(ctx, 'ONDE O DINHEIRO FOI UTILIZADO ', P + 40, 1080, { size: 26, peso: 700, cor: cinza });
+  anTexto(ctx, 'COMO O DINHEIRO FOI UTILIZADO ', P + 40, 1080, { size: 26, peso: 700, cor: cinza });
   if (!top.length) {
     anTexto(ctx, 'Sem gastos lançados neste mês', P + 40, 1160, { size: 32, cor: cinza });
   } else {
@@ -507,7 +507,7 @@ function anResumoTexto() {
       : `✅ Pagamentos em dia: ${Math.round(adPct)}%`
   ];
   if (top.length) {
-    linhas.push('', '🧾 *Onde o dinheiro foi utilizado*');
+    linhas.push('', '🧾 *Como o dinheiro foi utilizado*');
     top.forEach(([c, v]) => linhas.push(`• ${c}: ${moeda(v)} (${Math.round(v / totalDesp * 100)}%)`));
   } else {
     linhas.push('', '🧾 Sem gastos lançados neste mês.');

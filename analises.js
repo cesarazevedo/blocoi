@@ -441,7 +441,7 @@ function renderResumoCompartilhar() {
 
   // maiores gastos do mês (só categorias)
   ctx.fillStyle = '#fff'; anRR(ctx, P, 1020, W - 2 * P, 220, 24); ctx.fill();
-  anTexto(ctx, 'ONDE O DINHEIRO FOI', P + 40, 1080, { size: 26, peso: 700, cor: cinza });
+  anTexto(ctx, 'ONDE O DINHEIRO FOI UTILIZADO', P + 40, 1080, { size: 26, peso: 700, cor: cinza });
   if (!top.length) {
     anTexto(ctx, 'Sem gastos lançados neste mês', P + 40, 1160, { size: 32, cor: cinza });
   } else {

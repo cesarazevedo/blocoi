@@ -195,7 +195,7 @@ function gerarCartaCobranca(unidade) {
     doc.text('Condomínio Parque dos Rios - Bloco I', PW / 2, PH - 17, { align: 'center' });
     doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(...C.gray);
     doc.text('Rua Alice Azevedo, 133 - Capim Macio - Natal/RN - CEP 59080-015', PW / 2, PH - 12.5, { align: 'center' });
-    doc.text(`Unidade ${unidade}  |  Pág. ${p} de ${total}`, PW / 2, PH - 8, { align: 'center' });
+    doc.text(`Pág. ${p} de ${total}`, PW / 2, PH - 8, { align: 'center' });
   }
 
   // O nome do arquivo é a própria unidade (ex.: 101.pdf), sem caracteres perigosos

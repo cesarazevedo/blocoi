@@ -124,7 +124,7 @@ function gerarCartaCobranca(unidade) {
   paragrafo([[`Prezado(a) proprietário(a) da unidade ${unidade},`, false]]);
   paragrafo([['Em consulta ao controle financeiro do condomínio, identificamos ', false], [itemTxt, true],
              [', totalizando ', false], [moeda(tTotal), true], [`, conforme posição de ${cobrancaData(hoje)}.`, false]]);
-  paragrafo([['Solicitamos, por gentileza, que regularize os débitos.', false]]);
+  paragrafo([['Solicitamos sua colaboração para regularizar os débitos.', false]]);
   paragrafo([['Caso o pagamento já tenha sido realizado, pedimos que encaminhe os respectivos comprovantes para atualização do nosso controle financeiro.', false]]);
   paragrafo([['Agradecemos pela atenção e colaboração.', false]]);
   y += 2;

@@ -103,8 +103,8 @@ function gerarCartaCobranca(unidade) {
   const texto =
     `Prezado(a) morador(a) da unidade ${unidade},\n\n` +
     `Em consulta ao controle financeiro do condomínio, identificamos ${todos.length} taxa(s) condominial(is) ` +
-    `em aberto${anteriores ? ' e um débito anterior a 2024' : ''}, distribuída(s) em ${anos.length + (anteriores ? 1 : 0)} período(s) ` +
-    `(gestão anterior e gestão atual), somando ${moeda(tTotal)} ` +
+    `em aberto${anteriores ? ' e um débito anterior a 2024' : ''}, ` +
+    `somando ${moeda(tTotal)} ` +
     `(sem multa e sem juros), posição em ${cobrancaData(hoje)}. Pedimos a gentileza de regularizar a situação.\n\n` +
     `Caso o pagamento já tenha sido feito, por favor desconsidere este comunicado e nos envie o comprovante ` +
     `para que o registro seja atualizado.`;

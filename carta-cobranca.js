@@ -178,22 +178,6 @@ function gerarCartaCobranca(unidade) {
   doc.text(moeda(tTotal), PW - mg - 5, y + 10.5, { align: 'right' });
   y += 24;
 
-  // ── Observações ──
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(...C.dark);
-  doc.text('Como os valores foram calculados', mg, y); y += 5;
-  doc.setFont('helvetica', 'normal'); doc.setTextColor(...C.gray);
-  const obs = doc.splitTextToSize(
-    '• Vencimento: dia 10 do mês seguinte ao de referência (Regimento Interno).\n' +
-    '• Os valores são o principal da taxa, sem multa e sem juros.\n' +
-    '• O valor original de cada parcela é a taxa paga pelas demais unidades naquele mês; ' +
-    'valores aproximados, sujeitos à conferência com o comprovante.\n' +
-    '• Débitos da gestão anterior (2024 até mar/2026, parcela de R$ 100) e da gestão atual foram somados; um mesmo mês nunca é contado duas vezes.\n' +
-    (anteriores ? '• O débito anterior a 2024 é um valor fechado informado pela gestão anterior.\n' : '') +
-    '• Meses isentos ou já pagos não aparecem neste comunicado.', PW - mg * 2);
-  doc.setFontSize(8.5);
-  if (y + obs.length * 4 > PH - 15) { doc.addPage(); y = 20; }
-  doc.text(obs, mg, y);
-
   // ── Rodapé com paginação ──
   const total = doc.internal.getNumberOfPages();
   for (let p = 1; p <= total; p++) {

@@ -99,18 +99,35 @@ function gerarCartaCobranca(unidade) {
   doc.setDrawColor(...C.primary); doc.setLineWidth(0.6); doc.line(mg, 43, PW - mg, 43);
 
   doc.setFontSize(11); doc.text(`Unidade: ${unidade}`, mg, 52);
-  doc.setFont('helvetica', 'normal'); doc.setFontSize(10);
-  const texto =
-    `Prezado(a) morador(a) da unidade ${unidade},\n\n` +
-    `Em consulta ao controle financeiro do condomínio, identificamos ${todos.length} taxa(s) condominial(is) ` +
-    `em aberto${anteriores ? ' e um débito anterior a 2024' : ''}, ` +
-    `somando ${moeda(tTotal)} ` +
-    `(sem multa e sem juros), posição em ${cobrancaData(hoje)}. Pedimos a gentileza de regularizar a situação.\n\n` +
-    `Caso o pagamento já tenha sido feito, por favor desconsidere este comunicado e nos envie o comprovante ` +
-    `para que o registro seja atualizado.`;
-  const linhas = doc.splitTextToSize(texto, PW - mg * 2);
-  doc.text(linhas, mg, 60);
-  let y = 60 + linhas.length * 4.6 + 6;
+  doc.setFontSize(10);
+  // Escreve parágrafos com trechos em negrito, quebrando linha na mão
+  // (o jsPDF não mistura negrito e normal na mesma frase sozinho).
+  const maxW = PW - mg * 2, lh = 5;
+  let y = 60;
+  const paragrafo = (partes) => {
+    const palavras = [];
+    partes.forEach(([txt, neg]) => txt.split(/(\s+)/).forEach(t => { if (t) palavras.push({ t, neg }); }));
+    let x = mg;
+    palavras.forEach(w => {
+      doc.setFont('helvetica', w.neg ? 'bold' : 'normal');
+      const larg = doc.getTextWidth(w.t);
+      const espaco = /^\s+$/.test(w.t);
+      if (!espaco && x + larg > mg + maxW) { x = mg; y += lh; }
+      if (!(espaco && x === mg)) { doc.text(w.t, x, y); x += larg; }
+    });
+    y += lh + 4;
+  };
+
+  const qtd = todos.length;
+  const itemTxt = qtd === 0 ? 'débito anterior em aberto'
+    : `${qtd} ${qtd === 1 ? 'taxa condominial' : 'taxas condominiais'} em aberto`;
+  paragrafo([[`Prezado(a) proprietário(a) da unidade ${unidade},`, false]]);
+  paragrafo([['Em consulta ao controle financeiro do condomínio, identificamos ', false], [itemTxt, true],
+             [', totalizando ', false], [moeda(tTotal), true], [`, conforme posição de ${cobrancaData(hoje)}.`, false]]);
+  paragrafo([['Solicitamos, por gentileza, que regularize os débitos.', false]]);
+  paragrafo([['Caso o pagamento já tenha sido realizado, pedimos que encaminhe os respectivos comprovantes para atualização do nosso controle financeiro.', false]]);
+  paragrafo([['Agradecemos pela atenção e colaboração.', false]]);
+  y += 2;
 
   // ── Resumo geral por ano ──
   const secao = (titulo) => {

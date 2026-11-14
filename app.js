@@ -436,7 +436,7 @@ function renderInadimplencia() {
 
   const tb = document.getElementById('tbody-inad');
   if (inadimpl.length === 0) {
-    tb.innerHTML = `<tr class="empty-row"><td colspan="3">Nenhuma unidade inadimplente neste período 🎉</td></tr>`;
+    tb.innerHTML = `<tr class="empty-row"><td colspan="4">Nenhuma unidade inadimplente neste período 🎉</td></tr>`;
     return;
   }
   tb.innerHTML = inadimpl.map(r => {
@@ -445,6 +445,7 @@ function renderInadimplencia() {
       <td><strong>${nomUnidade(r.unidade)}</strong></td>
       <td>${r.mesesAbertos.map(m=>m.mes).join(', ')}</td>
       <td>${n}</td>
+      <td><button class="btn-icon" type="button" data-carta="${r.unidade}" title="Gerar carta de cobrança em PDF" style="width:auto;padding:4px 10px;font-size:.8rem">📄 Gerar carta</button></td>
     </tr>`;
   }).join('');
 }

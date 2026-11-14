@@ -119,7 +119,7 @@ function gerarCartaCobranca(unidade) {
     doc.text(titulo, mg, y); y += 3;
   };
   const estiloTabela = {
-    margin: { left: mg, right: mg },
+    margin: { left: mg, right: mg, bottom: 30 },
     styles: { fontSize: 9, cellPadding: { top: 3, bottom: 3, left: 4, right: 4 }, textColor: C.dark },
     headStyles: { fillColor: C.primary, textColor: C.white, fontStyle: 'bold' },
     footStyles: { fillColor: C.lgray, textColor: C.dark, fontStyle: 'bold' },
@@ -190,6 +190,11 @@ function gerarCartaCobranca(unidade) {
   const total = doc.internal.getNumberOfPages();
   for (let p = 1; p <= total; p++) {
     doc.setPage(p); doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(...C.gray);
+    doc.setDrawColor(...C.lgray); doc.setLineWidth(0.3); doc.line(mg, PH - 22, PW - mg, PH - 22);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(...C.dark);
+    doc.text('Condomínio Parque dos Rios - Bloco I', PW / 2, PH - 17, { align: 'center' });
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(...C.gray);
+    doc.text('Rua Alice Azevedo, 133 - Capim Macio - Natal/RN - CEP 59080-015', PW / 2, PH - 12.5, { align: 'center' });
     doc.text(`Unidade ${unidade}  |  Pág. ${p} de ${total}`, PW / 2, PH - 8, { align: 'center' });
   }
 

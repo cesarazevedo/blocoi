@@ -1158,6 +1158,7 @@ function renderObras() {
 
   obrasRenderProgresso(sobraMensal);
   obrasRenderChart(sobraMensal);
+  if (typeof obrasRelRender === 'function') obrasRelRender();
 }
 
 function obrasRenderProgresso(sobraMensal) {

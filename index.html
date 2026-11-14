@@ -580,6 +580,28 @@
         </div>
         <canvas id="chart-obras" height="80"></canvas>
       </div>
+
+      <!-- Relatório para compartilhar -->
+      <div class="card" style="margin-top:20px">
+        <div class="card-title">Relatório das obras para compartilhar <span>imagem ou texto prontos para o grupo dos moradores</span></div>
+        <div class="resumo-wrap">
+          <canvas id="obras-rel-canvas" width="1080" height="1500" aria-label="Prévia do relatório das obras"></canvas>
+          <div class="resumo-side">
+            <p class="hm-nota" style="margin-top:0">O relatório mostra as <strong>obras cadastradas acima</strong>, com valor, prazo e conclusão estimada, além das premissas usadas no cálculo. Traz só números do condomínio, sem identificar nenhuma unidade.</p>
+            <button class="btn-icon resumo-btn" id="btn-obras-rel-compartilhar">📤 Compartilhar</button>
+            <button class="btn-icon resumo-btn" id="btn-obras-rel-baixar">⬇️ Baixar imagem</button>
+            <p class="hm-nota">No celular, "Compartilhar" abre o WhatsApp e outros apps. No computador, a imagem é baixada para você enviar.</p>
+            <div class="resumo-texto-box">
+              <div class="resumo-texto-titulo">Ou prefira em texto</div>
+              <textarea id="obras-rel-texto" class="resumo-texto" rows="15" readonly aria-label="Relatório das obras em texto"></textarea>
+              <div class="resumo-texto-acoes">
+                <button class="btn-icon resumo-btn" id="btn-obras-rel-copiar">📋 Copiar texto</button>
+                <button class="btn-icon resumo-btn" id="btn-obras-rel-texto">💬 Compartilhar texto</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="tab-pane" id="tab-regimento">
@@ -741,6 +763,7 @@
 <script src="app.js"></script>
 <script src="gestao-anterior.js"></script>
 <script src="analises.js"></script>
+<script src="obras-relatorio.js"></script>
 <script src="carta-cobranca.js"></script>
 <script src="faq.js"></script>
 </body>

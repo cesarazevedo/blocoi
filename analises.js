@@ -388,6 +388,12 @@ function anDadosResumo() {
   };
 }
 
+// "14/11/2026 às 15:32" — usado na imagem e no texto
+function anDataHora() {
+  const d = new Date();
+  return `${d.toLocaleDateString('pt-BR')} às ${d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}`;
+}
+
 function renderResumoCompartilhar() {
   const cv = document.getElementById('an-resumo-canvas');
   if (!cv) return;
@@ -455,7 +461,7 @@ function renderResumoCompartilhar() {
   }
 
   // rodapé
-  anTexto(ctx, `Valores da planilha de transparência do condomínio · gerado em ${new Date().toLocaleDateString('pt-BR')}`,
+  anTexto(ctx, `Valores da planilha de transparência do condomínio · gerado em ${anDataHora()}`,
     W / 2, 1300, { size: 22, cor: cinza, alinh: 'center', maxW: W - 2 * P });
 }
 
@@ -512,7 +518,7 @@ function anResumoTexto() {
   } else {
     linhas.push('', '🧾 Sem gastos lançados neste mês.');
   }
-  linhas.push('', '_Valores da planilha de transparência do condomínio._');
+  linhas.push('', '_Valores da planilha de transparência do condomínio._', `_Gerado em ${anDataHora()}_`);
   return linhas.join('\n');
 }
 
@@ -523,6 +529,7 @@ function anRenderResumoTexto() {
 
 async function anCopiarTexto() {
   const btn = document.getElementById('btn-texto-copiar');
+  anRenderResumoTexto(); // atualiza a hora de geração
   const txt = anResumoTexto();
   let ok = false;
   try { await navigator.clipboard.writeText(txt); ok = true; } catch (e) {

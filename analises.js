@@ -507,7 +507,7 @@ function anResumoTexto() {
       : `✅ Pagamentos em dia: ${Math.round(adPct)}%`
   ];
   if (top.length) {
-    linhas.push('', '🧾 *Onde o dinheiro foi:*');
+    linhas.push('', '🧾 *Onde o dinheiro foi utilizado*');
     top.forEach(([c, v]) => linhas.push(`• ${c}: ${moeda(v)} (${Math.round(v / totalDesp * 100)}%)`));
   } else {
     linhas.push('', '🧾 Sem gastos lançados neste mês.');

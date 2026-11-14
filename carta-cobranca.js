@@ -178,6 +178,14 @@ function gerarCartaCobranca(unidade) {
   doc.text(moeda(tTotal), PW - mg - 5, y + 10.5, { align: 'right' });
   y += 24;
 
+  // ── Espaço para assinatura do síndico ──
+  if (y + 40 > PH - 15) { doc.addPage(); y = 20; }
+  y += 22;
+  doc.setDrawColor(...C.dark); doc.setLineWidth(0.3);
+  doc.line(PW / 2 - 40, y, PW / 2 + 40, y);
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(...C.dark);
+  doc.text('Síndico(a)', PW / 2, y + 5.5, { align: 'center' });
+
   // ── Rodapé com paginação ──
   const total = doc.internal.getNumberOfPages();
   for (let p = 1; p <= total; p++) {

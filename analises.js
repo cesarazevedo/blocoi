@@ -29,7 +29,7 @@ function anPctMes(unidades, mes, ano) {
   if (!mesVencido(mes, ano)) return null;
   const base = unidades.filter(r => !(r.isentos && r.isentos[mes]));
   if (!base.length) return null;
-  return base.filter(r => r.valores[mes] > 0).length / base.length * 100;
+  return base.filter(r => unidadePaga(r, mes, ano)).length / base.length * 100;
 }
 
 const anMedia = arr => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : null;
@@ -366,7 +366,7 @@ function anTexto(ctx, txt, x, y, { size = 32, peso = 400, cor = '#1a202c', alinh
 // (usado pela imagem e pelo texto, que nunca divergem entre si)
 function anDadosResumo() {
   const recMes = dadosReceitas.reduce((s, r) => s + r.valores[mesSel], 0);
-  const pagas = dadosReceitas.filter(r => r.valores[mesSel] > 0).length;
+  const pagas = dadosReceitas.filter(r => unidadePaga(r, mesSel)).length;
   const total = dadosReceitas.length;
   const despMes = despMesAtual(dadosDespesas, mesSel, anoSel);
   const totalDesp = despMes.reduce((s, d) => s + d.valor, 0);

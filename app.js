@@ -171,7 +171,7 @@ function renderDashboard() {
 
   // Receitas do mês
   const recMes = dadosReceitas.reduce((s, r) => s + r.valores[mesSel], 0);
-  const pagas  = dadosReceitas.filter(r => r.valores[mesSel] > 0).length;
+  const pagas  = dadosReceitas.filter(r => unidadePaga(r, mesSel)).length;
   const total  = dadosReceitas.length;
 
   // Despesas do mês
@@ -257,11 +257,12 @@ function renderReceitas() {
   // KPIs (sempre baseados no mês do header)
   const recMes = dadosReceitas.reduce((s, r) => s + r.valores[mesSel], 0);
   const pagas  = dadosReceitas.filter(r => r.valores[mesSel] > 0);
-  const aberto = dadosReceitas.filter(r => r.valores[mesSel] === 0 && !(r.isentos && r.isentos[mesSel]));
+  const aberto = dadosReceitas.filter(r => r.valores[mesSel] === 0 && !(r.isentos && r.isentos[mesSel]) && !mesAjustado(r.unidade, anoSel, mesSel));
+  const ajustadasMes = dadosReceitas.filter(r => r.valores[mesSel] === 0 && mesAjustado(r.unidade, anoSel, mesSel)).length;
 
   set('kpi-rec-total', moeda(recMes));
   set('kpi-rec-total-sub', mesLabel);
-  set('kpi-rec-pagas', pagas.length);
+  set('kpi-rec-pagas', pagas.length + ajustadasMes);
   set('kpi-rec-pagas-sub', `de ${dadosReceitas.length} unidades`);
   set('kpi-rec-ticket', pagas.length ? moeda(recMes / pagas.length) : '—');
   const recMesVenceu = mesVencido(mesSel, anoSel);
@@ -277,7 +278,7 @@ function renderReceitas() {
     dadosReceitas.forEach(r => {
       const mesesPagos = MESES.filter((_, mi) => r.valores[mi] > 0);
       const totalPago  = r.valores.reduce((s, v) => s + v, 0);
-      const hasAberto  = MESES.some((_, mi) => r.valores[mi] === 0 && !(r.isentos && r.isentos[mi]) && mesVencido(mi, anoSel));
+      const hasAberto  = MESES.some((_, mi) => r.valores[mi] === 0 && !(r.isentos && r.isentos[mi]) && !mesAjustado(r.unidade, anoSel, mi) && mesVencido(mi, anoSel));
       const status     = mesesPagos.length > 0 ? 'pago' : hasAberto ? 'aberto' : 'isento';
       if (filStatus && filStatus !== status) return;
       rows.push({ unidade: r.unidade, mes: mesesPagos.length > 0 ? mesesPagos.join(', ') : '—', valor: totalPago, status });
@@ -287,9 +288,10 @@ function renderReceitas() {
       dadosReceitas.forEach(r => {
         const v = r.valores[mi];
         const isento = r.isentos && r.isentos[mi];
-        const status = v > 0 ? 'pago' : isento ? 'isento' : 'aberto';
+        const ajuste = v === 0 && !isento && mesAjustado(r.unidade, anoSel, mi);
+        const status = v > 0 || ajuste ? 'pago' : isento ? 'isento' : 'aberto';
         if (filStatus && filStatus !== status) return;
-        rows.push({ unidade: r.unidade, mes: MESES[mi], valor: v, status });
+        rows.push({ unidade: r.unidade, mes: MESES[mi], valor: v, status, ajuste });
       });
     });
   }
@@ -306,7 +308,7 @@ function renderReceitas() {
       <td><strong>${nomUnidade(r.unidade)}</strong></td>
       <td>${r.mes}</td>
       <td>${r.valor > 0 ? moeda(r.valor) : '—'}</td>
-      <td><span class="pill ${r.status==='pago'?'pill-green':r.status==='isento'?'pill-gray':'pill-red'}">${r.status==='pago'?'Pago':r.status==='isento'?'Isento':'Em aberto'}</span></td>
+      <td><span class="pill ${r.status==='pago'?'pill-green':r.status==='isento'?'pill-gray':'pill-red'}">${r.status==='pago'?(r.ajuste?'Pago (comprovante)':'Pago'):r.status==='isento'?'Isento':'Em aberto'}</span></td>
     </tr>`).join('');
 }
 
@@ -448,6 +450,16 @@ function renderInadimplencia() {
       <td><button class="btn-icon" type="button" data-carta="${r.unidade}" title="Gerar carta de cobrança em PDF" style="width:auto;padding:4px 10px;font-size:.8rem">📄 Gerar carta</button></td>
     </tr>`;
   }).join('');
+}
+
+// Mês pago à gestão anterior e comprovado (ver card "Ajustes" em Gestão anterior).
+// Não entra no caixa da gestão atual, mas a unidade NÃO está em débito.
+function mesAjustado(unidade, ano, idx) {
+  return typeof gaAjustePago === 'function' && gaAjustePago(unidade, ano, idx);
+}
+// Unidade em dia no mês: pagou na planilha atual ou tem pagamento comprovado
+function unidadePaga(r, idx, ano = anoSel) {
+  return r.valores[idx] > 0 || mesAjustado(r.unidade, ano, idx);
 }
 
 // ── Regra de vencimento: dia 10 do mês seguinte ───────────────
@@ -614,7 +626,7 @@ function renderGaugeAdimplencia() {
   if (!ctx) return;
   if (gaugeChart) { gaugeChart.destroy(); gaugeChart = null; }
 
-  const pagas = dadosReceitas.filter(r => r.valores[mesSel] > 0).length;
+  const pagas = dadosReceitas.filter(r => unidadePaga(r, mesSel)).length;
   const total  = dadosReceitas.length;
   const pct    = total > 0 ? (pagas / total * 100) : 0;
   const cor    = pct >= 80 ? '#48bb78' : pct >= 60 ? '#f6ad55' : '#fc8181';
@@ -654,7 +666,7 @@ function renderTendenciaInad() {
   const total = dadosReceitas.length;
   for (let m = 0; m <= mesSel; m++) {
     if (!mesVencido(m, anoSel)) break;
-    const pagas = dadosReceitas.filter(r => r.valores[m] > 0).length;
+    const pagas = dadosReceitas.filter(r => unidadePaga(r, m)).length;
     labels.push(MESES[m]);
     data.push(total > 0 ? parseFloat(((total - pagas) / total * 100).toFixed(1)) : 0);
   }
@@ -1803,7 +1815,7 @@ function gerarPDF() {
 
   // ── Dados ──
   const recMes     = dadosReceitas.reduce((s, r) => s + r.valores[mesSel], 0);
-  const pagasUnits = dadosReceitas.filter(r => r.valores[mesSel] > 0 || (r.isentos && r.isentos[mesSel]));
+  const pagasUnits = dadosReceitas.filter(r => unidadePaga(r, mesSel) || (r.isentos && r.isentos[mesSel]));
   const totalUnits = dadosReceitas.length;
   const despData   = despMesAtual(dadosDespesas, mesSel, anoSel);
   const totalDesp  = despData.reduce((s, d) => s + d.valor, 0);
@@ -1922,7 +1934,7 @@ function gerarPDF() {
     body: dadosReceitas.map(r => {
       const v = r.valores[mesSel];
       const isento = r.isentos && r.isentos[mesSel];
-      return [pdfStr(nomUnidade(r.unidade)), v > 0 ? moeda(v) : '—', v > 0 ? 'Pago' : isento ? 'Isento' : 'Em aberto'];
+      return [pdfStr(nomUnidade(r.unidade)), v > 0 ? moeda(v) : '—', v > 0 ? 'Pago' : isento ? 'Isento' : mesAjustado(r.unidade, anoSel, mesSel) ? 'Pago (comprovante)' : 'Em aberto'];
     }),
     margin: { left: mg, right: mg },
     styles: { fontSize: 9, cellPadding: { top: 4, bottom: 4, left: 5, right: 5 }, textColor: C.dark },
@@ -1934,7 +1946,7 @@ function gerarPDF() {
       if (data.column.index === 2) data.cell.styles.halign = 'center';
       if (data.column.index === 2 && data.section === 'body') {
         data.cell.styles.fontStyle = 'bold';
-        data.cell.styles.textColor = data.cell.raw === 'Pago' ? [39,103,73] : data.cell.raw === 'Isento' ? [74,85,104] : [197,48,48];
+        data.cell.styles.textColor = String(data.cell.raw).startsWith('Pago') ? [39,103,73] : data.cell.raw === 'Isento' ? [74,85,104] : [197,48,48];
       }
     }
   });

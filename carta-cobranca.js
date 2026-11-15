@@ -49,7 +49,8 @@ function cobrancaDebitosDaUnidade(unidade, hoje = new Date()) {
       const gaV = gaRec === 'ISENTO' ? 'ISENTO' : (Array.isArray(gaRec) ? gaRec[idx] : undefined);
       const shV = r ? r.valores[idx] : undefined;
       const isento = gaV === 'ISENTO' || !!(r && r.isentos && r.isentos[idx]);
-      const pago = (typeof gaV === 'number' && gaV > 0) || (typeof shV === 'number' && shV > 0);
+      const pago = (typeof gaV === 'number' && gaV > 0) || (typeof shV === 'number' && shV > 0) ||
+        (typeof gaAjustePago === 'function' && gaAjustePago(unidade, ano, idx));
       const naoPagou = gaV === 0 || shV === 0;
       if (isento || pago || !naoPagou || !mesVencido(idx, ano)) continue;
 

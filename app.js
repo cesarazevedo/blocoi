@@ -412,11 +412,11 @@ function renderInadimplencia() {
         if (!ra) return [];
         return MESES
           .map((m, i) => ({ mes: `${m}/${y}`, idx: i, valor: ra.valores[i] }))
-          .filter(m => m.valor === 0 && !(ra.isentos && ra.isentos[m.idx]) && mesVencido(m.idx, y));
+          .filter(m => m.valor === 0 && !(ra.isentos && ra.isentos[m.idx]) && mesVencido(m.idx, y) && !(typeof gaAjustePago === 'function' && gaAjustePago(r.unidade, y, m.idx)));
       });
     const atuais = MESES.slice(0, mesSel + 1)
       .map((m, i) => ({ mes: m, idx: i, valor: r.valores[i] }))
-      .filter(m => m.valor === 0 && !(r.isentos && r.isentos[m.idx]) && mesVencido(m.idx, anoSel));
+      .filter(m => m.valor === 0 && !(r.isentos && r.isentos[m.idx]) && mesVencido(m.idx, anoSel) && !(typeof gaAjustePago === 'function' && gaAjustePago(r.unidade, anoSel, m.idx)));
     return { unidade: r.unidade, mesesAbertos: [...antigos, ...atuais] };
   }).filter(r => r.mesesAbertos.length > 0);
 
@@ -1824,7 +1824,7 @@ function gerarPDF() {
     const r = rows.find(x => x.unidade === unidade);
     if (!r) return { mb: [], valor: 0 };
     const mb = MESES.slice(0, ateMes + 1).map((m, i) => ({ mes: etiqueta ? `${m}/${ano}` : m, idx: i }))
-      .filter(({ idx }) => r.valores[idx] === 0 && !(r.isentos && r.isentos[idx]) && mesVencido(idx, ano));
+      .filter(({ idx }) => r.valores[idx] === 0 && !(r.isentos && r.isentos[idx]) && mesVencido(idx, ano) && !(typeof gaAjustePago === 'function' && gaAjustePago(unidade, ano, idx)));
     const valor = mb.reduce((sum, { idx }) => {
       const taxaMes = r.valores.filter(v => v > 0).slice(-1)[0]
         || rows.filter(x => x.unidade !== unidade).map(x => x.valores[idx]).find(v => v > 0)

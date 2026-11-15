@@ -29,8 +29,16 @@ const GESTAO_ANTERIOR = {
   // Não guardar nomes de pessoas: só data e valor.
   repasses: [
     { data: '09/09/2026', valor: 1000.00 },
-    { data: '07/10/2026', valor: 1000.00 },
+    { data: '08/10/2026', valor: 1000.00 },
     { data: '10/11/2026', valor: 1000.00 }
+  ],
+  // Ajustes: pagamentos que o condômino comprovou, mas que não constam na planilha
+  // da gestão anterior. O mês passa a contar como PAGO (some da inadimplência e das
+  // cartas) e o valor é somado ao saldo que a gestão anterior deve repassar.
+  ajustes: [
+    { unidade: '102', ano: 2026, meses: [1, 2], valorMes: 100,
+      motivo: 'Comprovantes de pagamento apresentados pela proprietária; os meses estavam sem registro na planilha da gestão anterior.',
+      registradoEm: '15/11/2026' }
   ],
   debito103: { unidade: '103', valor: 4305.00, descricao: 'condomínio + CAERN', ate: '2023' },
 
@@ -143,6 +151,15 @@ const GESTAO_ANTERIOR = {
 };
 
 let gaAnoSel = 2024;
+
+// ── Ajustes (pagamentos comprovados e não registrados) ────────
+// Usados também pela Inadimplência e pela carta de cobrança.
+function gaAjustePago(unidade, ano, idx) {
+  return GESTAO_ANTERIOR.ajustes.some(a => a.unidade === unidade && a.ano === ano && a.meses.includes(idx));
+}
+function gaAjusteTotal() {
+  return GESTAO_ANTERIOR.ajustes.reduce((s, a) => s + a.meses.length * a.valorMes, 0);
+}
 
 // ── Cálculos ──────────────────────────────────────────────────
 function gaSomaReceitas(ano) {
@@ -290,17 +307,36 @@ function gaRenderResumo() {
     <tr class="ga-total"><td>= Saldo da gestão anterior</td><td class="ga-num">${moeda(totRec - totDesp)}</td></tr>`;
   // Repasse do saldo: saldo da gestão anterior menos o que já foi enviado
   const saldoFinal = totRec - totDesp;
+  const ajuste = gaAjusteTotal();
+  const saldoAjustado = saldoFinal + ajuste;
   const repassado = g.repasses.reduce((s, p) => s + p.valor, 0);
-  const falta = saldoFinal - repassado;
+  const falta = saldoAjustado - repassado;
   const ultima = g.repasses.length ? g.repasses[g.repasses.length - 1].data : null;
   document.getElementById('ga-repasse').innerHTML = `
-    <tr><td>Saldo da gestão anterior (a repassar)</td><td class="ga-num">${moeda(saldoFinal)}</td></tr>
+    <tr><td>Saldo da gestão anterior (conforme prestação de contas)</td><td class="ga-num">${moeda(saldoFinal)}</td></tr>
+    ${ajuste ? `<tr><td>+ Ajuste: pagamentos comprovados e não registrados (veja o card abaixo)</td><td class="ga-num">${moeda(ajuste)}</td></tr>
+    <tr class="ga-sub"><td>= Saldo ajustado a repassar</td><td class="ga-num">${moeda(saldoAjustado)}</td></tr>` : ''}
     ${g.repasses.map((p, i) => `<tr><td>− Parcela ${i + 1} · recebida em ${p.data}</td><td class="ga-num">${moeda(p.valor)}</td></tr>`).join('')}
     <tr class="ga-sub"><td>= Já repassado (${g.repasses.length} parcela${g.repasses.length === 1 ? '' : 's'})</td><td class="ga-num">${moeda(repassado)}</td></tr>
     <tr class="ga-total"><td>= Falta repassar</td><td class="ga-num">${moeda(falta)}</td></tr>`;
   document.getElementById('ga-repasse-nota').textContent = ultima
     ? `A gestão anterior ainda não repassou o saldo por inteiro: está enviando em parcelas. Última parcela recebida em ${ultima}.`
     : 'Nenhuma parcela do saldo foi repassada até agora.';
+  document.getElementById('ga-ajustes-body').innerHTML = g.ajustes.map(a => {
+    const meses = a.meses.map(i => `${GA_MESES[i]}/${a.ano}`).join(' e ');
+    return `<tr>
+      <td><strong>${nomUnidade(a.unidade)}</strong></td>
+      <td>${meses}</td>
+      <td>Sem registro na planilha (aparecia como em aberto)</td>
+      <td>Pago, com comprovantes</td>
+      <td class="ga-num">${moeda(a.meses.length * a.valorMes)}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="5">Nenhum ajuste registrado.</td></tr>';
+  document.getElementById('ga-ajustes-foot').innerHTML =
+    `<tr class="ga-total"><td colspan="4">Diferença total a favor da gestão atual (a repassar)</td><td class="ga-num">${moeda(gaAjusteTotal())}</td></tr>`;
+  document.getElementById('ga-ajustes-nota').textContent =
+    g.ajustes.map(a => `Apto ${nomUnidade(a.unidade)}: ${a.motivo} Registrado em ${a.registradoEm}.`).join(' ') +
+    ` Esses meses passam a contar como pagos na Inadimplência e na carta de cobrança, e o valor é somado ao saldo que a gestão anterior deve repassar.`;
   document.getElementById('ga-correcao').textContent =
     `Correção: a gestão anterior informou saldo de ${moeda(g.saldoInformado)}. Ao somar ${moeda(g.correcao)} de impressões de janeiro/2024, que haviam ficado fora da soma, o saldo é ${moeda(totRec - totDesp)}.`;
 }

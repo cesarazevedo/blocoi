@@ -80,8 +80,107 @@ function anRenderHeatmap(anosData) {
     `<table class="hm-table"><thead><tr><th></th>${MESES.map(m => `<th>${m}</th>`).join('')}<th>Ano</th></tr></thead>
      <tbody>${linhas.join('')}</tbody></table>`;
 
+  anGradeAtual = grade;
   return grade;
 }
+
+// ── Mapa de calor em IMAGEM (mesmo jeito do resumo do mês) ────
+let anGradeAtual = null;
+
+function anHeatmapCanvas() {
+  const grade = anGradeAtual;
+  if (!grade) return null;
+  const anos = Object.keys(grade).map(Number).sort((a, b) => b - a);
+  if (!anos.length) return null;
+
+  const W = 1080, P = 50, rotW = 90, gap = 6, cabH = 80, linH = 64;
+  const colW = (W - 2 * P - rotW - 13 * gap) / 13; // 12 meses + coluna "Ano"
+  const tabY = 300;
+  const H = tabY + 50 + (anos.length + 1) * (linH + gap) + 200;
+  const cv = document.createElement('canvas');
+  cv.width = W; cv.height = H;
+  const ctx = cv.getContext('2d');
+  const cinza = '#4a5568';
+  const cor = p => `hsl(${Math.round(p * 1.2)}, 58%, 36%)`;
+
+  ctx.fillStyle = '#f0f4f8'; ctx.fillRect(0, 0, W, H);
+  const g = ctx.createLinearGradient(0, 0, W, 240);
+  g.addColorStop(0, '#667eea'); g.addColorStop(1, '#764ba2');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, 240);
+  anTexto(ctx, 'CONTROLE CONDOMINIAL', P, 80, { size: 26, peso: 700, cor: 'rgba(255,255,255,.8)' });
+  anTexto(ctx, 'Mapa de calor da adimplência', P, 156, { size: 56, peso: 700, cor: '#fff', maxW: W - 2 * P });
+  anTexto(ctx, '% de pagamentos em dia, por mês e ano', P, 206, { size: 26, cor: 'rgba(255,255,255,.85)' });
+
+  // fundo branco do cartão
+  ctx.fillStyle = '#fff'; anRR(ctx, 30, tabY - 20, W - 60, H - tabY - 160, 24); ctx.fill();
+
+  const x0 = P + rotW;
+  const xCol = i => x0 + i * (colW + gap);
+  const rotulos = [...MESES, 'Ano'];
+  rotulos.forEach((r, i) => anTexto(ctx, r, xCol(i) + colW / 2, tabY + 40, { size: 22, peso: 700, cor: cinza, alinh: 'center' }));
+
+  const celula = (txt, x, y, fundo, corTxt, borda) => {
+    ctx.fillStyle = fundo; anRR(ctx, x, y, colW, linH, 8); ctx.fill();
+    if (borda) { ctx.strokeStyle = '#cbd5e0'; ctx.lineWidth = 2; ctx.setLineDash([6, 5]); anRR(ctx, x, y, colW, linH, 8); ctx.stroke(); ctx.setLineDash([]); }
+    anTexto(ctx, txt, x + colW / 2, y + linH / 2 + 8, { size: 22, peso: 700, cor: corTxt, alinh: 'center' });
+  };
+  const vazio = (x, y) => celula('–', x, y, '#f7fafc', '#a0aec0', true);
+  const media = (p, x, y) => p === null ? vazio(x, y) : celula(anPct(p), x, y, '#edf2f7', '#1a202c', false);
+
+  anos.forEach((ano, r) => {
+    const y = tabY + 60 + r * (linH + gap);
+    anTexto(ctx, String(ano), x0 - 14, y + linH / 2 + 8, { size: 24, peso: 700, cor: '#1a202c', alinh: 'right' });
+    grade[ano].forEach((p, m) => p === null ? vazio(xCol(m), y) : celula(anPct(p), xCol(m), y, cor(p), '#fff', false));
+    media(anMedia(grade[ano].filter(p => p !== null)), xCol(12), y);
+  });
+
+  const yMed = tabY + 60 + anos.length * (linH + gap) + 10;
+  anTexto(ctx, 'Média', x0 - 14, yMed + linH / 2 + 8, { size: 24, peso: 700, cor: '#1a202c', alinh: 'right' });
+  const medias = MESES.map((_, m) => anMedia(anos.map(y => grade[y][m]).filter(p => p !== null)));
+  medias.forEach((p, m) => media(p, xCol(m), yMed));
+  media(anMedia(medias.filter(p => p !== null)), xCol(12), yMed);
+
+  // legenda
+  const ly = yMed + linH + 50;
+  const lg = ctx.createLinearGradient(P + 60, 0, P + 360, 0);
+  for (let i = 0; i <= 10; i++) lg.addColorStop(i / 10, cor(i * 10));
+  anTexto(ctx, '0%', P, ly + 16, { size: 22, cor: cinza });
+  ctx.fillStyle = lg; anRR(ctx, P + 60, ly, 300, 20, 10); ctx.fill();
+  anTexto(ctx, '100%', P + 376, ly + 16, { size: 22, cor: cinza });
+  anTexto(ctx, 'Mais verde = mais gente pagou em dia · prazo: dia 10 do mês seguinte', P, ly + 64, { size: 22, cor: cinza, maxW: W - 2 * P });
+  anTexto(ctx, `Valores da planilha de transparência do condomínio · gerado em ${anDataHora()}`,
+    W / 2, H - 30, { size: 20, cor: cinza, alinh: 'center', maxW: W - 2 * P });
+  return cv;
+}
+
+async function anHeatmapBlob() {
+  const cv = anHeatmapCanvas();
+  return cv ? new Promise(res => cv.toBlob(res, 'image/png')) : null;
+}
+
+async function anHeatmapBaixar() {
+  const blob = await anHeatmapBlob();
+  if (!blob) return;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'mapa-calor-adimplencia.png';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+
+async function anHeatmapCompartilhar() {
+  const blob = await anHeatmapBlob();
+  if (!blob) return;
+  const file = new File([blob], 'mapa-calor-adimplencia.png', { type: 'image/png' });
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file], title: 'Mapa de calor da adimplência' }); return; }
+    catch (e) { if (e.name === 'AbortError') return; }
+  }
+  anHeatmapBaixar();
+}
+
+document.getElementById('btn-heatmap-baixar')?.addEventListener('click', anHeatmapBaixar);
+document.getElementById('btn-heatmap-compartilhar')?.addEventListener('click', anHeatmapCompartilhar);
 
 // ── Insights automáticos (sempre sobre o condomínio inteiro) ──
 function anGerarInsights(anosData, grade) {

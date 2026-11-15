@@ -24,6 +24,14 @@ const GESTAO_ANTERIOR = {
   saldoInicial: 8525.07,        // "Financeiro geral recebido do condomínio"
   saldoInformado: 12899.14,     // saldo que a gestão anterior informou (antes da correção de R$ 8,25)
   correcao: 8.25,               // despesa de jan/2024 que ficou fora da soma da gestão anterior
+  // Repasse do saldo à gestão atual: a gestão anterior está enviando em parcelas.
+  // Para registrar uma nova parcela, é só acrescentar uma linha aqui (data e valor).
+  // Não guardar nomes de pessoas: só data e valor.
+  repasses: [
+    { data: '09/09/2026', valor: 1000.00 },
+    { data: '07/10/2026', valor: 1000.00 },
+    { data: '10/11/2026', valor: 1000.00 }
+  ],
   debito103: { unidade: '103', valor: 4305.00, descricao: 'condomínio + CAERN', ate: '2023' },
 
   anos: {
@@ -280,6 +288,19 @@ function gaRenderResumo() {
     <tr class="ga-sub"><td>= Total de recursos</td><td class="ga-num">${moeda(totRec)}</td></tr>
     <tr><td>− Despesas ${g.periodo}</td><td class="ga-num">${moeda(totDesp)}</td></tr>
     <tr class="ga-total"><td>= Saldo da gestão anterior</td><td class="ga-num">${moeda(totRec - totDesp)}</td></tr>`;
+  // Repasse do saldo: saldo da gestão anterior menos o que já foi enviado
+  const saldoFinal = totRec - totDesp;
+  const repassado = g.repasses.reduce((s, p) => s + p.valor, 0);
+  const falta = saldoFinal - repassado;
+  const ultima = g.repasses.length ? g.repasses[g.repasses.length - 1].data : null;
+  document.getElementById('ga-repasse').innerHTML = `
+    <tr><td>Saldo da gestão anterior (a repassar)</td><td class="ga-num">${moeda(saldoFinal)}</td></tr>
+    ${g.repasses.map((p, i) => `<tr><td>− Parcela ${i + 1} · recebida em ${p.data}</td><td class="ga-num">${moeda(p.valor)}</td></tr>`).join('')}
+    <tr class="ga-sub"><td>= Já repassado (${g.repasses.length} parcela${g.repasses.length === 1 ? '' : 's'})</td><td class="ga-num">${moeda(repassado)}</td></tr>
+    <tr class="ga-total"><td>= Falta repassar</td><td class="ga-num">${moeda(falta)}</td></tr>`;
+  document.getElementById('ga-repasse-nota').textContent = ultima
+    ? `A gestão anterior ainda não repassou o saldo por inteiro: está enviando em parcelas. Última parcela recebida em ${ultima}.`
+    : 'Nenhuma parcela do saldo foi repassada até agora.';
   document.getElementById('ga-correcao').textContent =
     `Correção: a gestão anterior informou saldo de ${moeda(g.saldoInformado)}. Ao somar ${moeda(g.correcao)} de impressões de janeiro/2024, que haviam ficado fora da soma, o saldo é ${moeda(totRec - totDesp)}.`;
 }

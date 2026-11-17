@@ -1392,7 +1392,7 @@ function gerarPDFObras() {
   } else {
     doc.autoTable({
       startY: y,
-      head: [['#', 'Nome da Obra', 'Valor Estimado', 'Prazo', 'Conclusao Estimada']],
+      head: [['#', 'Nome da Obra', 'Valor Estimado', 'Prazo', 'Verba Disponivel em']],
       body: obras.map((o, i) => {
         const t = tempos[i];
         return [

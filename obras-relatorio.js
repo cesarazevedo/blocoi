@@ -49,10 +49,10 @@ function obrasRelTexto() {
   ];
   d.linhas.forEach((l, i) => {
     t.push(`${i + 1}. *${l.nome}* — ${moeda(l.valor)}`);
-    t.push(`   Prazo: ${l.prazo} · Conclusão: ${l.conclusao}`);
+    t.push(`   Prazo: ${l.prazo} · Verba disponível: ${l.conclusao}`);
   });
   t.push('', `📌 *Total das obras:* ${moeda(d.total)}`);
-  t.push(`⏱️ *Tempo para concluir todas:* ${d.tempoTotal}${d.conclusaoTotal ? ` (${d.conclusaoTotal})` : ''}`);
+  t.push(`⏱️ *Tempo para juntar a verba de todas:* ${d.tempoTotal}${d.conclusaoTotal ? ` (${d.conclusaoTotal})` : ''}`);
   t.push('', `_Gerado em ${anDataHora()}_`);
   return t.join('\n');
 }
@@ -120,7 +120,7 @@ function obrasRelRender() {
       ctx.fillStyle = AN_CORES[i % AN_CORES.length]; anRR(ctx, P + 40, y - 14, 36, 36, 18); ctx.fill();
       anTexto(ctx, String(i + 1), P + 58, y + 12, { size: 22, peso: 700, cor: '#fff', alinh: 'center' });
       anTexto(ctx, l.nome, P + 96, y + 8, { size: 32, peso: 700, cor: '#1a202c', maxW: 520 });
-      anTexto(ctx, `${l.prazo} · ${l.conclusao}`, P + 96, y + 40, { size: 22, cor: cinza, maxW: 520 });
+      anTexto(ctx, `${l.prazo} · verba em ${l.conclusao}`, P + 96, y + 40, { size: 22, cor: cinza, maxW: 520 });
       anTexto(ctx, moeda(l.valor), W - P - 40, y + 14, { size: 34, peso: 700, cor: '#1a202c', alinh: 'right', maxW: 340 });
     });
   }

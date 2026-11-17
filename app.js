@@ -2221,14 +2221,14 @@ function gerarTextoZap() {
   const venceu   = mesVencido(mesSel, anoSel);
 
   const L = [];
-  L.push(`🏢 *PRESTAÇÃO DE CONTAS - ${periodo.toUpperCase()}*`, '');
-  L.push('💰 *RESUMO*');
+  L.push(`*PRESTAÇÃO DE CONTAS - ${periodo.toUpperCase()}*`, '');
+  L.push('*RESUMO*');
   L.push(`• Saldo em caixa (Jan a ${MESES[mesSel]}): *${moeda(saldoCaixa)}*`);
   L.push(`• Receitas do mês: ${moeda(recMes)} (${pagas.length} de ${totalUnits} unidades pagas)`);
   L.push(`• Despesas do mês: ${moeda(totalDesp)}`);
-  L.push(`• Saldo do mês: *${moeda(saldoMes)}* ${saldoMes >= 0 ? '✅' : '⚠️'}`, '');
+  L.push(`• Saldo do mês: *${moeda(saldoMes)}*`, '');
 
-  L.push('💸 *DESPESAS*');
+  L.push('*DESPESAS*');
   if (despData.length === 0) L.push('Nenhuma despesa registrada neste mês.');
   despData.forEach(d => {
     const forn = d.fornecedor ? ` - ${d.fornecedor}` : '';
@@ -2236,26 +2236,27 @@ function gerarTextoZap() {
   });
   L.push('');
 
-  L.push('📥 *RECEITAS*');
+  L.push('*RECEITAS*');
   if (venceu) {
     const abertas = dadosReceitas.filter(r => !pagas.includes(r));
     L.push(abertas.length === 0
-      ? '✅ Todas as unidades estão em dia!'
+      ? 'Todas as unidades estão em dia!'
       : `Em aberto no mês: ${abertas.map(r => nomUnidade(r.unidade)).join(', ')}`);
   } else {
     L.push(`${pagas.length} de ${totalUnits} unidades pagas (vencimento dia 10/${MESES[(mesSel + 1) % 12]})`);
   }
   L.push('');
 
-  L.push('⚠️ *INADIMPLÊNCIA*');
+  L.push('*INADIMPLÊNCIA*');
   if (inadList.length === 0) {
-    L.push('✅ Nenhuma unidade inadimplente.');
+    L.push('Nenhuma unidade inadimplente.');
   } else {
     inadList.forEach(r => {
       const val = r.valorAberto > 0 ? ` - ${moeda(r.valorAberto)}` : '';
       L.push(`• ${nomUnidade(r.unidade)}: ${r.mesesAbertos.map(m => m.mes).join(', ')}${val}`);
     });
     L.push(`Total em aberto: *${moeda(inadList.reduce((s, r) => s + r.valorAberto, 0))}*`);
+    L.push('', '_Obs.: se algum mês aparecer como em aberto mas já foi pago, confira se o pagamento está registrado na gestão anterior. Veja no menu *Prestação de Contas* (Gestão anterior) do site._');
   }
   L.push('', '_Gerado pelo Controle Condominial_');
   return L.join('\n');

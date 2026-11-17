@@ -2203,7 +2203,8 @@ function gerarPDFDRE() {
 
 document.getElementById('btn-pdf').addEventListener('click', gerarPDF);
 // ── Texto para WhatsApp ───────────────────────────────────────
-function gerarTextoZap() {
+function gerarTextoZap(op = {}) {
+  const { despesas = true, receitas = true, inad = 'detalhada', link = true } = op; // inad: 'detalhada' | 'total' | 'nao'
   const mesLabel = MESES_FULL[mesSel];
   const periodo  = `${mesLabel}/${anoSel}`;
   const recMes   = dadosReceitas.reduce((s, r) => s + r.valores[mesSel], 0);
@@ -2228,49 +2229,110 @@ function gerarTextoZap() {
   L.push(`• Despesas do mês: ${moeda(totalDesp)}`);
   L.push(`• Saldo do mês: *${moeda(saldoMes)}*`, '');
 
-  L.push('*DESPESAS*');
-  if (despData.length === 0) L.push('Nenhuma despesa registrada neste mês.');
-  despData.forEach(d => {
-    const forn = d.fornecedor ? ` - ${d.fornecedor}` : '';
-    L.push(`• ${d.categoria}: ${d.descricao}${forn} - ${moeda(d.valor)}${d.status && d.status !== 'Pago' ? ' (' + d.status + ')' : ''}`);
-  });
-  L.push('');
-
-  L.push('*RECEITAS*');
-  if (venceu) {
-    const abertas = dadosReceitas.filter(r => !pagas.includes(r));
-    L.push(abertas.length === 0
-      ? 'Todas as unidades estão em dia!'
-      : `Em aberto no mês: ${abertas.map(r => nomUnidade(r.unidade)).join(', ')}`);
-  } else {
-    L.push(`${pagas.length} de ${totalUnits} unidades pagas (vencimento dia 10/${MESES[(mesSel + 1) % 12]})`);
-  }
-  L.push('');
-
-  L.push('*INADIMPLÊNCIA*');
-  if (inadList.length === 0) {
-    L.push('Nenhuma unidade inadimplente.');
-  } else {
-    inadList.forEach(r => {
-      const val = r.valorAberto > 0 ? ` - ${moeda(r.valorAberto)}` : '';
-      L.push(`• ${nomUnidade(r.unidade)}: ${r.mesesAbertos.map(m => m.mes).join(', ')}${val}`);
+  if (despesas) {
+    L.push('*DESPESAS*');
+    if (despData.length === 0) L.push('Nenhuma despesa registrada neste mês.');
+    despData.forEach(d => {
+      const forn = d.fornecedor ? ` - ${d.fornecedor}` : '';
+      L.push(`• ${d.categoria}: ${d.descricao}${forn} - ${moeda(d.valor)}${d.status && d.status !== 'Pago' ? ' (' + d.status + ')' : ''}`);
     });
-    L.push(`Total em aberto: *${moeda(inadList.reduce((s, r) => s + r.valorAberto, 0))}*`);
-    L.push('', '_Obs.: se algum mês aparecer como em aberto mas já foi pago, confira se o pagamento está registrado na gestão anterior. Veja no menu *Prestação de Contas* (Gestão anterior) do site._');
+    L.push('');
   }
-  L.push('', '_Gerado pelo Controle Condominial_');
+
+  if (receitas) {
+    L.push('*RECEITAS*');
+    if (venceu) {
+      const abertas = dadosReceitas.filter(r => !pagas.includes(r));
+      L.push(abertas.length === 0
+        ? 'Todas as unidades estão em dia!'
+        : `Em aberto no mês: ${abertas.map(r => nomUnidade(r.unidade)).join(', ')}`);
+    } else {
+      L.push(`${pagas.length} de ${totalUnits} unidades pagas (vencimento dia 10/${MESES[(mesSel + 1) % 12]})`);
+    }
+    L.push('');
+  }
+
+  if (inad !== 'nao') {
+    L.push('*INADIMPLÊNCIA*');
+    if (inadList.length === 0) {
+      L.push('Nenhuma unidade inadimplente.');
+    } else {
+      const total = inadList.reduce((s, r) => s + r.valorAberto, 0);
+      if (inad === 'detalhada') {
+        inadList.forEach(r => {
+          const val = r.valorAberto > 0 ? ` - ${moeda(r.valorAberto)}` : '';
+          L.push(`• ${nomUnidade(r.unidade)}: ${r.mesesAbertos.map(m => m.mes).join(', ')}${val}`);
+        });
+      } else {
+        L.push(`${inadList.length} unidade(s) com pendências`);
+      }
+      L.push(`Total em aberto: *${moeda(total)}*`);
+      L.push('', '_Obs.: se algum mês aparecer como em aberto mas já foi pago, confira se o pagamento está registrado na gestão anterior. Veja no menu *Prestação de Contas* (Gestão anterior) do site._');
+    }
+    L.push('');
+  }
+
+  if (link) L.push(`Veja os detalhes completos no site: ${location.origin}${location.pathname}`, '');
+  L.push('_Gerado pelo Controle Condominial_');
   return L.join('\n');
 }
 
-async function compartilharZap() {
-  const texto = gerarTextoZap();
-  let copiou = false;
-  try { await navigator.clipboard.writeText(texto); copiou = true; } catch (e) {}
-  const url = 'https://wa.me/?text=' + encodeURIComponent(texto);
-  if (window.open(url, '_blank', 'noopener')) return;
-  alert(copiou ? 'Texto copiado! Cole no WhatsApp.' : 'Não foi possível abrir o WhatsApp.');
+// Janela de prévia: escolhe o que entra, edita o texto e envia
+function abrirZap() {
+  document.getElementById('zap-modal')?.remove();
+  const m = document.createElement('div');
+  m.id = 'zap-modal';
+  m.className = 'zap-overlay';
+  m.innerHTML = `
+    <div class="zap-box" role="dialog" aria-modal="true" aria-label="Enviar prestação de contas pelo WhatsApp">
+      <h3>Enviar no WhatsApp</h3>
+      <div class="zap-opts">
+        <label><input type="checkbox" id="zap-desp" checked> Despesas</label>
+        <label><input type="checkbox" id="zap-rec" checked> Receitas</label>
+        <label><input type="checkbox" id="zap-link" checked> Link do site</label>
+        <label>Inadimplência:
+          <select id="zap-inad">
+            <option value="detalhada">Por unidade</option>
+            <option value="total">Só o total</option>
+            <option value="nao">Não incluir</option>
+          </select>
+        </label>
+      </div>
+      <textarea id="zap-texto" rows="14" aria-label="Texto da mensagem"></textarea>
+      <p class="zap-dica">Você pode editar o texto antes de enviar.</p>
+      <div class="zap-botoes">
+        <button type="button" id="zap-fechar">Fechar</button>
+        <button type="button" id="zap-copiar">Copiar</button>
+        <button type="button" id="zap-enviar" class="zap-primario">Enviar no WhatsApp</button>
+      </div>
+    </div>`;
+  document.body.appendChild(m);
+  const $ = id => m.querySelector('#' + id);
+  const ta = $('zap-texto');
+  const atualizar = () => {
+    ta.value = gerarTextoZap({
+      despesas: $('zap-desp').checked, receitas: $('zap-rec').checked,
+      link: $('zap-link').checked, inad: $('zap-inad').value
+    });
+  };
+  ['zap-desp', 'zap-rec', 'zap-link', 'zap-inad'].forEach(id => $(id).addEventListener('change', atualizar));
+  const fechar = () => { m.remove(); document.removeEventListener('keydown', esc); };
+  const esc = e => { if (e.key === 'Escape') fechar(); };
+  document.addEventListener('keydown', esc);
+  m.addEventListener('click', e => { if (e.target === m) fechar(); });
+  $('zap-fechar').addEventListener('click', fechar);
+  $('zap-copiar').addEventListener('click', async () => {
+    const b = $('zap-copiar');
+    try { await navigator.clipboard.writeText(ta.value); b.textContent = 'Copiado!'; }
+    catch (e) { ta.select(); b.textContent = 'Selecione e copie'; }
+    setTimeout(() => { b.textContent = 'Copiar'; }, 2000);
+  });
+  $('zap-enviar').addEventListener('click', () => {
+    window.open('https://wa.me/?text=' + encodeURIComponent(ta.value), '_blank', 'noopener');
+  });
+  atualizar();
 }
-document.getElementById('btn-zap').addEventListener('click', compartilharZap);
+document.getElementById('btn-zap').addEventListener('click', abrirZap);
 
 // ── Impressão ─────────────────────────────────────────────────
 function prepararImpressao() {

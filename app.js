@@ -1736,6 +1736,37 @@ function pdfStr(s) {
   return String(s || '');
 }
 
+// Unidades com meses em aberto (anos anteriores + ano atual até mesSel)
+function calcInadList() {
+  // Meses em aberto de uma unidade num ano (rows = receitas daquele ano), com valor estimado
+  const abertosDoAno = (rows, unidade, ano, ateMes, etiqueta) => {
+    const r = rows.find(x => x.unidade === unidade);
+    if (!r) return { mb: [], valor: 0 };
+    const mb = MESES.slice(0, ateMes + 1).map((m, i) => ({ mes: etiqueta ? `${m}/${ano}` : m, idx: i }))
+      .filter(({ idx }) => r.valores[idx] === 0 && !(r.isentos && r.isentos[idx]) && mesVencido(idx, ano) && !(typeof gaAjustePago === 'function' && gaAjustePago(unidade, ano, idx)));
+    const valor = mb.reduce((sum, { idx }) => {
+      const taxaMes = r.valores.filter(v => v > 0).slice(-1)[0]
+        || rows.filter(x => x.unidade !== unidade).map(x => x.valores[idx]).find(v => v > 0)
+        || 0;
+      return sum + taxaMes;
+    }, 0);
+    return { mb, valor };
+  };
+  const anosAntigos = Object.keys(dadosAnosAnteriores).map(Number).sort((a, b) => a - b);
+  return dadosReceitas.map(r => {
+    // anos anteriores primeiro (com o ano na etiqueta), depois o ano atual
+    const partes = [
+      ...anosAntigos.map(y => abertosDoAno(dadosAnosAnteriores[y], r.unidade, y, 11, true)),
+      abertosDoAno(dadosReceitas, r.unidade, anoSel, mesSel, false)
+    ];
+    return {
+      unidade: r.unidade,
+      mesesAbertos: partes.flatMap(p => p.mb),
+      valorAberto: partes.reduce((s, p) => s + p.valor, 0)
+    };
+  }).filter(r => r.mesesAbertos.length > 0);
+}
+
 function gerarPDF() {
   if (!window.jspdf) {
     alert('Biblioteca PDF não carregada. Recarregue a página e tente novamente.');
@@ -1830,34 +1861,7 @@ function gerarPDF() {
   // inadimplência do mês selecionado (consistente com adimplência do resumo)
   const inadMesCount = mesJaVenceu ? (totalUnits - pagasUnits.length) : 0;
   const taxaInad     = totalUnits > 0 ? (inadMesCount / totalUnits * 100) : 0;
-  // lista acumulada usada na página 4 (todos os meses em aberto até mesSel)
-  // Meses em aberto de uma unidade num ano (rows = receitas daquele ano), com valor estimado
-  const abertosDoAno = (rows, unidade, ano, ateMes, etiqueta) => {
-    const r = rows.find(x => x.unidade === unidade);
-    if (!r) return { mb: [], valor: 0 };
-    const mb = MESES.slice(0, ateMes + 1).map((m, i) => ({ mes: etiqueta ? `${m}/${ano}` : m, idx: i }))
-      .filter(({ idx }) => r.valores[idx] === 0 && !(r.isentos && r.isentos[idx]) && mesVencido(idx, ano) && !(typeof gaAjustePago === 'function' && gaAjustePago(unidade, ano, idx)));
-    const valor = mb.reduce((sum, { idx }) => {
-      const taxaMes = r.valores.filter(v => v > 0).slice(-1)[0]
-        || rows.filter(x => x.unidade !== unidade).map(x => x.valores[idx]).find(v => v > 0)
-        || 0;
-      return sum + taxaMes;
-    }, 0);
-    return { mb, valor };
-  };
-  const anosAntigos = Object.keys(dadosAnosAnteriores).map(Number).sort((a, b) => a - b);
-  const inadList    = dadosReceitas.map(r => {
-    // anos anteriores primeiro (com o ano na etiqueta), depois o ano atual
-    const partes = [
-      ...anosAntigos.map(y => abertosDoAno(dadosAnosAnteriores[y], r.unidade, y, 11, true)),
-      abertosDoAno(dadosReceitas, r.unidade, anoSel, mesSel, false)
-    ];
-    return {
-      unidade: r.unidade,
-      mesesAbertos: partes.flatMap(p => p.mb),
-      valorAberto: partes.reduce((s, p) => s + p.valor, 0)
-    };
-  }).filter(r => r.mesesAbertos.length > 0);
+  const inadList    = calcInadList();
 
   // ══ PAGE 1: RESUMO ══
   let y = pgHeader(`Resumo Financeiro - ${periodo}`);
@@ -2198,6 +2202,75 @@ function gerarPDFDRE() {
 }
 
 document.getElementById('btn-pdf').addEventListener('click', gerarPDF);
+// ── Texto para WhatsApp ───────────────────────────────────────
+function gerarTextoZap() {
+  const mesLabel = MESES_FULL[mesSel];
+  const periodo  = `${mesLabel}/${anoSel}`;
+  const recMes   = dadosReceitas.reduce((s, r) => s + r.valores[mesSel], 0);
+  const totalUnits = dadosReceitas.length;
+  const pagas    = dadosReceitas.filter(r => unidadePaga(r, mesSel) || (r.isentos && r.isentos[mesSel]));
+  const despData = despMesAtual(dadosDespesas, mesSel, anoSel);
+  const totalDesp = despData.reduce((s, d) => s + d.valor, 0);
+  const saldoMes = recMes - totalDesp;
+  const recAcum  = dadosReceitas.reduce((s, r) => s + r.valores.slice(0, mesSel + 1).reduce((a, b) => a + b, 0), 0);
+  const despAcum = dadosDespesas
+    .filter(d => d.dataParts && parseInt(d.dataParts[2]) === anoSel && parseInt(d.dataParts[1]) - 1 <= mesSel)
+    .reduce((s, d) => s + d.valor, 0);
+  const saldoCaixa = recAcum - despAcum + saldoAnterior;
+  const inadList = calcInadList();
+  const venceu   = mesVencido(mesSel, anoSel);
+
+  const L = [];
+  L.push(`🏢 *PRESTAÇÃO DE CONTAS - ${periodo.toUpperCase()}*`, '');
+  L.push('💰 *RESUMO*');
+  L.push(`• Saldo em caixa (Jan a ${MESES[mesSel]}): *${moeda(saldoCaixa)}*`);
+  L.push(`• Receitas do mês: ${moeda(recMes)} (${pagas.length} de ${totalUnits} unidades pagas)`);
+  L.push(`• Despesas do mês: ${moeda(totalDesp)}`);
+  L.push(`• Saldo do mês: *${moeda(saldoMes)}* ${saldoMes >= 0 ? '✅' : '⚠️'}`, '');
+
+  L.push('💸 *DESPESAS*');
+  if (despData.length === 0) L.push('Nenhuma despesa registrada neste mês.');
+  despData.forEach(d => {
+    const forn = d.fornecedor ? ` - ${d.fornecedor}` : '';
+    L.push(`• ${d.categoria}: ${d.descricao}${forn} - ${moeda(d.valor)}${d.status && d.status !== 'Pago' ? ' (' + d.status + ')' : ''}`);
+  });
+  L.push('');
+
+  L.push('📥 *RECEITAS*');
+  if (venceu) {
+    const abertas = dadosReceitas.filter(r => !pagas.includes(r));
+    L.push(abertas.length === 0
+      ? '✅ Todas as unidades estão em dia!'
+      : `Em aberto no mês: ${abertas.map(r => nomUnidade(r.unidade)).join(', ')}`);
+  } else {
+    L.push(`${pagas.length} de ${totalUnits} unidades pagas (vencimento dia 10/${MESES[(mesSel + 1) % 12]})`);
+  }
+  L.push('');
+
+  L.push('⚠️ *INADIMPLÊNCIA*');
+  if (inadList.length === 0) {
+    L.push('✅ Nenhuma unidade inadimplente.');
+  } else {
+    inadList.forEach(r => {
+      const val = r.valorAberto > 0 ? ` - ${moeda(r.valorAberto)}` : '';
+      L.push(`• ${nomUnidade(r.unidade)}: ${r.mesesAbertos.map(m => m.mes).join(', ')}${val}`);
+    });
+    L.push(`Total em aberto: *${moeda(inadList.reduce((s, r) => s + r.valorAberto, 0))}*`);
+  }
+  L.push('', '_Gerado pelo Controle Condominial_');
+  return L.join('\n');
+}
+
+async function compartilharZap() {
+  const texto = gerarTextoZap();
+  let copiou = false;
+  try { await navigator.clipboard.writeText(texto); copiou = true; } catch (e) {}
+  const url = 'https://wa.me/?text=' + encodeURIComponent(texto);
+  if (window.open(url, '_blank', 'noopener')) return;
+  alert(copiou ? 'Texto copiado! Cole no WhatsApp.' : 'Não foi possível abrir o WhatsApp.');
+}
+document.getElementById('btn-zap').addEventListener('click', compartilharZap);
+
 // ── Impressão ─────────────────────────────────────────────────
 function prepararImpressao() {
   const aba = document.querySelector('.nav-btn.active')?.textContent.trim() || '';

@@ -49,10 +49,10 @@ function obrasRelTexto() {
   ];
   d.linhas.forEach((l, i) => {
     t.push(`${i + 1}. *${l.nome}* — ${moeda(l.valor)}`);
-    t.push(`   Prazo: ${l.prazo} · Verba disponível: ${l.conclusao}`);
+    t.push(`   Tempo para juntar a verba: ${l.prazo} · Verba disponível em: ${l.conclusao}`);
   });
   t.push('', `📌 *Total das obras:* ${moeda(d.total)}`);
-  t.push(`⏱️ *Tempo para juntar a verba de todas:* ${d.tempoTotal}${d.conclusaoTotal ? ` (${d.conclusaoTotal})` : ''}`);
+  t.push(`⏱️ *Tempo para juntar a verba de todas as obras:* ${d.tempoTotal}${d.conclusaoTotal ? ` (${d.conclusaoTotal})` : ''}`);
   t.push('', `_Gerado em ${anDataHora()}_`);
   return t.join('\n');
 }
@@ -103,7 +103,7 @@ function obrasRelRender() {
   const meio = W / 2;
   anTexto(ctx, 'TOTAL DAS OBRAS', P + 40, 702, { size: 24, peso: 700, cor: cinza });
   anTexto(ctx, moeda(d.total), P + 40, 770, { size: 52, peso: 700, cor: '#1a202c', maxW: meio - P - 60 });
-  anTexto(ctx, 'TEMPO PARA CONCLUIR TODAS', meio + 20, 702, { size: 24, peso: 700, cor: cinza, maxW: meio - P - 60 });
+  anTexto(ctx, 'TEMPO PARA JUNTAR A VERBA', meio + 20, 702, { size: 24, peso: 700, cor: cinza, maxW: meio - P - 60 });
   anTexto(ctx, d.tempoTotal, meio + 20, 760, { size: 40, peso: 700, cor: roxo, maxW: meio - P - 60 });
   if (d.conclusaoTotal) anTexto(ctx, d.conclusaoTotal, meio + 20, 788, { size: 22, cor: cinza, maxW: meio - P - 60 });
 
@@ -120,7 +120,7 @@ function obrasRelRender() {
       ctx.fillStyle = AN_CORES[i % AN_CORES.length]; anRR(ctx, P + 40, y - 14, 36, 36, 18); ctx.fill();
       anTexto(ctx, String(i + 1), P + 58, y + 12, { size: 22, peso: 700, cor: '#fff', alinh: 'center' });
       anTexto(ctx, l.nome, P + 96, y + 8, { size: 32, peso: 700, cor: '#1a202c', maxW: 520 });
-      anTexto(ctx, `${l.prazo} · verba em ${l.conclusao}`, P + 96, y + 40, { size: 22, cor: cinza, maxW: 520 });
+      anTexto(ctx, `verba em ${l.prazo} · disponível em ${l.conclusao}`, P + 96, y + 40, { size: 22, cor: cinza, maxW: 520 });
       anTexto(ctx, moeda(l.valor), W - P - 40, y + 14, { size: 34, peso: 700, cor: '#1a202c', alinh: 'right', maxW: 340 });
     });
   }

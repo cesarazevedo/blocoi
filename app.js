@@ -2267,7 +2267,7 @@ function gerarTextoZap(op = {}) {
         L.push(`${inadList.length} unidade(s) com pendências`);
       }
       L.push(`Total em aberto: *${moeda(total)}*`);
-      L.push('', '_Obs.: se algum mês aparecer como em aberto mas já foi pago, confira se o pagamento está registrado na gestão anterior. Veja no menu *Prestação de Contas* (Gestão anterior) do site._');
+      L.push('', '_Observação: Se algum mês aparecer como pendente, mas o pagamento já tiver sido realizado, verifique se ele foi registrado pela gestão anterior. Essa informação está disponível no menu Prestação de Contas → Gestão Anterior, no site._');
     }
     L.push('');
   }

@@ -182,6 +182,122 @@ async function anHeatmapCompartilhar() {
 document.getElementById('btn-heatmap-baixar')?.addEventListener('click', anHeatmapBaixar);
 document.getElementById('btn-heatmap-compartilhar')?.addEventListener('click', anHeatmapCompartilhar);
 
+// ── Aba Receitas em IMAGEM (mesmo molde do mapa de calor) ─────
+// Desenha o que está na tela: grade Unidade × Mês (todos os meses)
+// ou lista (um mês só), respeitando os filtros escolhidos.
+function recCompCanvas() {
+  const filMes = parseInt(document.getElementById('fil-rec-mes').value);
+  const visiveis = new Set((linhasReceitasCSV || []).map(r => r.unidade));
+  const lista = dadosReceitas.filter(r => visiveis.has(r.unidade));
+  if (!lista.length) return null;
+
+  const grade = filMes === -1;
+  const W = grade ? 1600 : 1080, P = 50, gap = 6, linH = grade ? 58 : 64, tabY = 300;
+  const cinza = '#4a5568';
+  const nCols = grade ? 14 : 4;                       // unid + 12 meses + total | unid, mês, valor, status
+  const linhas = lista.length + (grade ? 1 : 0);      // grade tem linha de total
+  const H = tabY + 70 + linhas * (linH + gap) + 150;
+  const cv = document.createElement('canvas');
+  cv.width = W; cv.height = H;
+  const ctx = cv.getContext('2d');
+
+  const mesLabel = `${MESES_FULL[mesSel]}/${anoSel}`;
+  const filStatus = document.getElementById('fil-rec-status').value;
+  const nomeSt = { pago: 'pagos', aberto: 'em aberto', isento: 'isentos' };
+
+  ctx.fillStyle = '#f0f4f8'; ctx.fillRect(0, 0, W, H);
+  const g = ctx.createLinearGradient(0, 0, W, 240);
+  g.addColorStop(0, '#667eea'); g.addColorStop(1, '#764ba2');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, 240);
+  anTexto(ctx, 'CONTROLE CONDOMINIAL', P, 80, { size: 26, peso: 700, cor: 'rgba(255,255,255,.8)' });
+  anTexto(ctx, `Receitas ${grade ? anoSel : MESES_FULL[filMes] + '/' + anoSel}`, P, 156, { size: 56, peso: 700, cor: '#fff', maxW: W - 2 * P });
+  anTexto(ctx, grade ? `Arrecadação por unidade e mês${filStatus ? ' · só ' + nomeSt[filStatus] : ''} · valores em R$`
+                     : `Arrecadação por unidade${filStatus ? ' · só ' + nomeSt[filStatus] : ''}`,
+    P, 206, { size: 26, cor: 'rgba(255,255,255,.85)', maxW: W - 2 * P });
+
+  ctx.fillStyle = '#fff'; anRR(ctx, 30, tabY - 20, W - 60, H - tabY - 100, 24); ctx.fill();
+
+  const sem = v => moeda(v).replace(/^R\$\s*/, '');
+  const caixa = (txt, x, y, w, fundo, corTxt, opc = {}) => {
+    if (fundo) { ctx.fillStyle = fundo; anRR(ctx, x, y, w, linH, 8); ctx.fill(); }
+    anTexto(ctx, txt, opc.alinh === 'left' ? x + 12 : x + w / 2, y + linH / 2 + 8,
+      { size: opc.size || 21, peso: opc.peso || 400, cor: corTxt, alinh: opc.alinh || 'center', maxW: w - 12, ...(opc.extra || {}) });
+  };
+
+  if (grade) {
+    const unW = 110, colW = (W - 2 * P - unW - 13 * gap) / 13;
+    const xCol = i => P + unW + gap + i * (colW + gap);
+    caixa('Unid.', P, tabY, unW, null, cinza, { peso: 700, alinh: 'left' });
+    [...MESES, 'Total'].forEach((m, i) => caixa(m.toUpperCase(), xCol(i), tabY, colW, null, i === mesSel ? '#667eea' : cinza, { peso: 700, size: 20 }));
+    const totMes = MESES.map(() => 0);
+    lista.forEach((r, ri) => {
+      const y = tabY + 60 + ri * (linH + gap);
+      caixa(nomUnidade(r.unidade), P, y, unW, null, '#1a202c', { peso: 700, alinh: 'left', size: 24 });
+      MESES.forEach((_, mi) => {
+        const v = r.valores[mi]; totMes[mi] += v;
+        if (v > 0) caixa(sem(v), xCol(mi), y, colW, '#e6f4ec', '#1a202c');
+        else if (r.isentos && r.isentos[mi]) caixa('isento', xCol(mi), y, colW, '#f1f3f6', '#718096', { extra: {} });
+        else if (mesAjustado(r.unidade, anoSel, mi)) caixa('✓', xCol(mi), y, colW, '#e6f4ec', '#1a202c', { size: 26 });
+        else caixa('', xCol(mi), y, colW, '#f7fafc', cinza);
+      });
+      caixa(sem(r.valores.reduce((a, b) => a + b, 0)), xCol(12), y, colW, '#edf2f7', '#1a202c', { peso: 700 });
+    });
+    const yT = tabY + 60 + lista.length * (linH + gap) + 6;
+    caixa('Total', P, yT, unW, null, '#1a202c', { peso: 700, alinh: 'left', size: 24 });
+    totMes.forEach((v, mi) => caixa(v > 0 ? sem(v) : '', xCol(mi), yT, colW, '#edf2f7', '#1a202c', { peso: 700 }));
+    caixa(sem(totMes.reduce((a, b) => a + b, 0)), xCol(12), yT, colW, '#667eea', '#fff', { peso: 700 });
+  } else {
+    const cols = [P, P + 190, P + 450, P + 700];
+    ['UNIDADE', 'MÊS', 'VALOR', 'STATUS'].forEach((t, i) => anTexto(ctx, t, cols[i] + 12, tabY + 40, { size: 22, peso: 700, cor: cinza }));
+    const nomeS = { pago: 'Pago', isento: 'Isento', aberto: 'Em aberto' };
+    const corS = { pago: ['#e6f4ec', '#1c7a4a'], isento: ['#f1f3f6', '#718096'], aberto: ['#fde8ec', '#c53053'] };
+    lista.forEach((r, ri) => {
+      const y = tabY + 60 + ri * (linH + gap);
+      const v = r.valores[filMes];
+      const isento = r.isentos && r.isentos[filMes];
+      const ajuste = v === 0 && !isento && mesAjustado(r.unidade, anoSel, filMes);
+      const st = v > 0 || ajuste ? 'pago' : isento ? 'isento' : 'aberto';
+      ctx.fillStyle = ri % 2 ? '#fff' : '#f7fafc'; anRR(ctx, P, y, W - 2 * P, linH, 8); ctx.fill();
+      anTexto(ctx, nomUnidade(r.unidade), cols[0] + 12, y + linH / 2 + 8, { size: 24, peso: 700 });
+      anTexto(ctx, MESES[filMes], cols[1] + 12, y + linH / 2 + 8, { size: 24 });
+      anTexto(ctx, v > 0 ? moeda(v) : '—', cols[2] + 12, y + linH / 2 + 8, { size: 24 });
+      ctx.fillStyle = corS[st][0]; anRR(ctx, cols[3], y + 8, 250, linH - 16, 14); ctx.fill();
+      anTexto(ctx, st === 'pago' && ajuste ? 'Pago (comprovante)' : nomeS[st], cols[3] + 125, y + linH / 2 + 8,
+        { size: 21, peso: 700, cor: corS[st][1], alinh: 'center', maxW: 230 });
+    });
+  }
+
+  anTexto(ctx, `Valores da planilha de transparência do condomínio · gerado em ${anDataHora()}`,
+    W / 2, H - 30, { size: 20, cor: cinza, alinh: 'center', maxW: W - 2 * P });
+  return cv;
+}
+
+async function recCompBlob() {
+  const cv = recCompCanvas();
+  return cv ? new Promise(res => cv.toBlob(res, 'image/png')) : null;
+}
+
+async function recCompBaixar(blob) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `receitas-${anoSel}.png`;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+
+async function recCompartilhar() {
+  const blob = await recCompBlob();
+  if (!blob) { alert('Não há receitas para compartilhar com esses filtros.'); return; }
+  const file = new File([blob], `receitas-${anoSel}.png`, { type: 'image/png' });
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file], title: `Receitas ${anoSel}` }); return; }
+    catch (e) { if (e.name === 'AbortError') return; }
+  }
+  recCompBaixar(blob);
+}
+
+document.getElementById('btn-rec-compartilhar')?.addEventListener('click', recCompartilhar);
+
 // ── Insights automáticos (sempre sobre o condomínio inteiro) ──
 function anGerarInsights(anosData, grade) {
   const out = [];

@@ -270,8 +270,6 @@ function renderReceitas() {
   set('kpi-rec-aberto-sub', recMesVenceu ? `unidade(s) inadimplentes` : `vence dia 10/${MESES[(mesSel + 1) % 12]}`);
 
   // Tabela
-  const th = document.getElementById('rec-th-mes');
-  th.textContent = 'Mês(es)';
 
   const rows = [];
   if (filMes === -1) {
@@ -299,6 +297,42 @@ function renderReceitas() {
   linhasReceitasCSV = rows;
 
   const tb = document.getElementById('tbody-receitas');
+  const thead = document.getElementById('thead-receitas');
+  const tfoot = document.getElementById('tfoot-receitas');
+  const tabela = tb.closest('table');
+  tabela.classList.toggle('rec-grid', filMes === -1);
+
+  // Todos os meses → grade Unidade × Mês (como na planilha)
+  if (filMes === -1) {
+    thead.innerHTML = `<tr><th class="rg-un">Unidade</th>${MESES.map((m, i) =>
+      `<th class="rg-c${i === mesSel ? ' rg-atual' : ''}">${m}</th>`).join('')}<th class="rg-tot">Total</th></tr>`;
+    const visiveis = new Set(rows.map(r => r.unidade));
+    const lista = dadosReceitas.filter(r => visiveis.has(r.unidade));
+    if (lista.length === 0) {
+      tb.innerHTML = `<tr class="empty-row"><td colspan="14">Nenhum registro encontrado</td></tr>`;
+      tfoot.innerHTML = '';
+      return;
+    }
+    tb.innerHTML = lista.map(r => {
+      const cels = MESES.map((_, mi) => {
+        const v = r.valores[mi];
+        const atual = mi === mesSel ? ' rg-atual' : '';
+        if (v > 0) return `<td class="rg-c rg-pago${atual}">${moeda(v)}</td>`;
+        if (r.isentos && r.isentos[mi]) return `<td class="rg-c rg-isento${atual}" title="Isento">isento</td>`;
+        if (mesAjustado(r.unidade, anoSel, mi)) return `<td class="rg-c rg-pago${atual}" title="Pago (comprovante)">✓</td>`;
+        return `<td class="rg-c${atual}"></td>`;
+      }).join('');
+      const tot = r.valores.reduce((a, b) => a + b, 0);
+      return `<tr><td class="rg-un"><strong>${nomUnidade(r.unidade)}</strong></td>${cels}<td class="rg-tot">${moeda(tot)}</td></tr>`;
+    }).join('');
+    const totMes = MESES.map((_, mi) => lista.reduce((a, r) => a + r.valores[mi], 0));
+    tfoot.innerHTML = `<tr><td class="rg-un">Total</td>${totMes.map((v, mi) =>
+      `<td class="rg-c${mi === mesSel ? ' rg-atual' : ''}">${v > 0 ? moeda(v) : ''}</td>`).join('')}<td class="rg-tot">${moeda(totMes.reduce((a, b) => a + b, 0))}</td></tr>`;
+    return;
+  }
+
+  thead.innerHTML = `<tr><th>Unidade</th><th>Mês</th><th>Valor</th><th>Status</th></tr>`;
+  tfoot.innerHTML = '';
   if (rows.length === 0) {
     tb.innerHTML = `<tr class="empty-row"><td colspan="4">Nenhum registro encontrado</td></tr>`;
     return;

@@ -2433,6 +2433,7 @@ function gerarPDFRegimento() {
 
   // Cabeçalho e rodapé em todas as páginas
   const nomeCondominio = 'Condomínio Parque dos Rios - Bloco I';
+  const enderecoBloco = 'Rua Alice Azevedo, 133 - Capim Macio - Natal/RN - CEP 59080-015';
   const pages = doc.getNumberOfPages();
   for (let i = 1; i <= pages; i++) {
     doc.setPage(i);
@@ -2446,13 +2447,13 @@ function gerarPDFRegimento() {
     doc.text(nomeCondominio, mg, 9);
     doc.text('Regimento Interno', mg + pw, 9, { align: 'right' });
 
-    // Rodapé: linha, administração à esquerda e página à direita
+    // Rodapé: linha, endereço do bloco à esquerda e página à direita
     doc.setDrawColor(220, 220, 220);
     doc.line(mg, 284, mg + pw, 284);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(8);
     doc.setTextColor(140, 140, 140);
-    doc.text(`${nomeCondominio} — Administração`, mg, 289);
+    doc.text(enderecoBloco, mg, 289);
     doc.text(`Página ${i} de ${pages}`, mg + pw, 289, { align: 'right' });
   }
 

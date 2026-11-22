@@ -2453,6 +2453,14 @@ obrasInicializarEventos();
 // Espera os scripts com defer (Chart.js, jsPDF) ficarem prontos
 document.addEventListener('DOMContentLoaded', () => {
   inicializarAnos().then(() => carregar());
+
+  // Eventos que antes ficavam dentro do HTML (onclick/oninput/onchange)
+  const on = (id, ev, fn) => { const el = document.getElementById(id); if (el) el.addEventListener(ev, fn); };
+  on('btn-regimento-pdf', 'click',  () => gerarPDFRegimento());
+  on('contatos-busca',    'input',  () => filtrarContatos());
+  on('contatos-cat',      'change', () => filtrarContatos());
+  on('faq-busca',         'input',  () => filtrarFaq());
+  on('faq-cat',           'change', () => filtrarFaq());
 });
 
 if ('serviceWorker' in navigator) {

@@ -407,8 +407,7 @@ function anGerarInsights(anosData, grade) {
 // ── Insights em IMAGEM (mesmo molde do mapa de calor) ─────────
 let anInsightsAtuais = [];
 
-function anInsightsCanvas() {
-  const lista = anInsightsAtuais;
+function anInsightsCanvas(lista = anInsightsAtuais, titulo = 'Insights automáticos', sub = 'padrões encontrados nos dados do condomínio') {
   if (!lista || !lista.length) return null;
   const W = 1080, P = 50, tabY = 300, fonte = 26, linAlt = 36, padV = 24, gapI = 16;
   const txtX = P + 100, txtW = W - 2 * P - 100 - 24;
@@ -453,8 +452,8 @@ function anInsightsCanvas() {
   g.addColorStop(0, '#667eea'); g.addColorStop(1, '#764ba2');
   ctx.fillStyle = g; ctx.fillRect(0, 0, W, 240);
   anTexto(ctx, 'CONTROLE CONDOMINIAL', P, 80, { size: 26, peso: 700, cor: 'rgba(255,255,255,.8)' });
-  anTexto(ctx, 'Insights automáticos', P, 156, { size: 56, peso: 700, cor: '#fff', maxW: W - 2 * P });
-  anTexto(ctx, 'padrões encontrados nos dados do condomínio', P, 206, { size: 26, cor: 'rgba(255,255,255,.85)' });
+  anTexto(ctx, titulo, P, 156, { size: 56, peso: 700, cor: '#fff', maxW: W - 2 * P });
+  anTexto(ctx, sub, P, 206, { size: 26, cor: 'rgba(255,255,255,.85)' });
 
   ctx.fillStyle = '#fff'; anRR(ctx, 30, tabY - 20, W - 60, cardH + 20, 24); ctx.fill();
 
@@ -747,6 +746,8 @@ function anForaDoNormal() {
   return { itens: itens.slice(0, 8), historicoCurto };
 }
 
+// Lista no mesmo formato dos insights ({ tone, ico, html }): serve pra tela e pra imagem
+let anForaAtuais = [];
 function anRenderForaDoNormal() {
   const el = document.getElementById('an-anomalias');
   if (!el) return;
@@ -754,17 +755,49 @@ function anRenderForaDoNormal() {
   const agora = new Date();
   const emAndamento = i => i.y === agora.getFullYear() && i.m === agora.getMonth() ? ' <em>(mês em andamento)</em>' : '';
 
+  let lista;
   if (historicoCurto) {
-    el.innerHTML = '<div class="insight insight-info"><span class="insight-ico">🔍</span><p>Ainda há poucos meses de histórico para comparar. Esta análise começa a funcionar a partir do 5º mês de despesas lançadas.</p></div>';
+    lista = [{ tone: 'info', ico: '🔍', html: 'Ainda há poucos meses de histórico para comparar. Esta análise começa a funcionar a partir do 5º mês de despesas lançadas.' }];
   } else if (!itens.length) {
-    el.innerHTML = '<div class="insight insight-good"><span class="insight-ico">✅</span><p>Nenhum gasto fora do padrão nos últimos 12 meses. Tudo dentro do esperado.</p></div>';
+    lista = [{ tone: 'good', ico: '✅', html: 'Nenhum gasto fora do padrão nos últimos 12 meses. Tudo dentro do esperado.' }];
   } else {
-    el.innerHTML = itens.map(i => i.tipo === 'cat'
-      ? `<div class="insight insight-warn"><span class="insight-ico" aria-hidden="true">🚨</span><p><strong>${escHtml(i.c)}</strong> em <strong>${MESES_FULL[i.m]}/${i.y}</strong>: ${moeda(i.v)}, cerca de <strong>${anNum1(i.ratio)}×</strong> a média dos meses anteriores (${moeda(i.base)})${emAndamento(i)}.</p></div>`
-      : `<div class="insight insight-warn"><span class="insight-ico" aria-hidden="true">📊</span><p><strong>${MESES_FULL[i.m]}/${i.y}</strong> como um todo: ${moeda(i.v)} em gastos, cerca de <strong>${anNum1(i.ratio)}×</strong> a média mensal (${moeda(i.base)})${emAndamento(i)}.</p></div>`
-    ).join('');
+    lista = itens.map(i => i.tipo === 'cat'
+      ? { tone: 'warn', ico: '🚨', html: `<strong>${escHtml(i.c)}</strong> em <strong>${MESES_FULL[i.m]}/${i.y}</strong>: ${moeda(i.v)}, cerca de <strong>${anNum1(i.ratio)}×</strong> a média dos meses anteriores (${moeda(i.base)})${emAndamento(i)}.` }
+      : { tone: 'warn', ico: '📊', html: `<strong>${MESES_FULL[i.m]}/${i.y}</strong> como um todo: ${moeda(i.v)} em gastos, cerca de <strong>${anNum1(i.ratio)}×</strong> a média mensal (${moeda(i.base)})${emAndamento(i)}.` });
   }
+  anForaAtuais = lista;
+  el.innerHTML = lista.map(i =>
+    `<div class="insight insight-${i.tone}"><span class="insight-ico" aria-hidden="true">${i.ico}</span><p>${i.html}</p></div>`).join('');
 }
+
+async function anForaBlob() {
+  const cv = anInsightsCanvas(anForaAtuais, 'Gastos fora do normal', 'últimos 12 meses · comparação com a média dos meses anteriores');
+  return cv ? new Promise(res => cv.toBlob(res, 'image/png')) : null;
+}
+
+async function anForaBaixar() {
+  const blob = await anForaBlob();
+  if (!blob) return;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'gastos-fora-do-normal.png';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+
+async function anForaCompartilhar() {
+  const blob = await anForaBlob();
+  if (!blob) return;
+  const file = new File([blob], 'gastos-fora-do-normal.png', { type: 'image/png' });
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file], title: 'Gastos fora do normal' }); return; }
+    catch (e) { if (e.name === 'AbortError') return; }
+  }
+  anForaBaixar();
+}
+
+document.getElementById('btn-fora-baixar')?.addEventListener('click', anForaBaixar);
+document.getElementById('btn-fora-compartilhar')?.addEventListener('click', anForaCompartilhar);
 
 // ── 6) Cartão "Resumo do mês" para compartilhar ───────────────
 function anRR(ctx, x, y, w, h, r) {

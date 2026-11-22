@@ -404,7 +404,114 @@ function anGerarInsights(anosData, grade) {
   return out;
 }
 
+// ── Insights em IMAGEM (mesmo molde do mapa de calor) ─────────
+let anInsightsAtuais = [];
+
+function anInsightsCanvas() {
+  const lista = anInsightsAtuais;
+  if (!lista || !lista.length) return null;
+  const W = 1080, P = 50, tabY = 300, fonte = 26, linAlt = 36, padV = 24, gapI = 16;
+  const txtX = P + 100, txtW = W - 2 * P - 100 - 24;
+  const fam = 'system-ui, -apple-system, "Segoe UI", sans-serif';
+  const medir = document.createElement('canvas').getContext('2d');
+
+  // quebra o texto (sem as tags <strong>) em linhas; guarda pedaços em negrito
+  const quebrar = html => {
+    const partes = [];
+    html.replace(/<em>|<\/em>/g, '').split(/(<strong>.*?<\/strong>)/g).forEach(p => {
+      if (!p) return;
+      const neg = p.startsWith('<strong>');
+      const t = p.replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+      t.split(/(\s+)/).forEach(w => { if (w) partes.push({ w, neg }); });
+    });
+    const linhas = [[]]; let x = 0;
+    partes.forEach(p => {
+      medir.font = `${p.neg ? 700 : 400} ${fonte}px ${fam}`;
+      const lw = medir.measureText(p.w).width;
+      if (x + lw > txtW && linhas[linhas.length - 1].length && p.w.trim()) { linhas.push([]); x = 0; }
+      if (!x && !p.w.trim()) return; // não começa linha com espaço
+      linhas[linhas.length - 1].push({ ...p, lw }); x += lw;
+    });
+    return linhas;
+  };
+
+  const itens = lista.map(i => {
+    const linhas = quebrar(i.html);
+    return { ...i, linhas, h: Math.max(linhas.length * linAlt + 2 * padV, 90) };
+  });
+  const cardH = 40 + itens.reduce((s, i) => s + i.h + gapI, 0);
+  const H = tabY + cardH + 130;
+
+  const cv = document.createElement('canvas');
+  cv.width = W; cv.height = H;
+  const ctx = cv.getContext('2d');
+  const cinza = '#4a5568';
+  const cores = { good: ['#f0fff4', '#38a169'], warn: ['#fffaf0', '#dd6b20'], info: ['#ebf4ff', '#667eea'] };
+
+  ctx.fillStyle = '#f0f4f8'; ctx.fillRect(0, 0, W, H);
+  const g = ctx.createLinearGradient(0, 0, W, 240);
+  g.addColorStop(0, '#667eea'); g.addColorStop(1, '#764ba2');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, 240);
+  anTexto(ctx, 'CONTROLE CONDOMINIAL', P, 80, { size: 26, peso: 700, cor: 'rgba(255,255,255,.8)' });
+  anTexto(ctx, 'Insights automáticos', P, 156, { size: 56, peso: 700, cor: '#fff', maxW: W - 2 * P });
+  anTexto(ctx, 'padrões encontrados nos dados do condomínio', P, 206, { size: 26, cor: 'rgba(255,255,255,.85)' });
+
+  ctx.fillStyle = '#fff'; anRR(ctx, 30, tabY - 20, W - 60, cardH + 20, 24); ctx.fill();
+
+  let y = tabY + 10;
+  itens.forEach(i => {
+    const [fundo, borda] = cores[i.tone] || cores.info;
+    ctx.fillStyle = fundo; anRR(ctx, P, y, W - 2 * P, i.h, 16); ctx.fill();
+    ctx.fillStyle = borda; anRR(ctx, P, y, 8, i.h, 4); ctx.fill();
+    ctx.font = `400 44px ${fam}`; ctx.textAlign = 'center'; ctx.fillStyle = '#1a202c';
+    ctx.fillText(i.ico, P + 56, y + i.h / 2 + 15); ctx.textAlign = 'left';
+    const ini = y + (i.h - i.linhas.length * linAlt) / 2 + 27;
+    i.linhas.forEach((ln, li) => {
+      let x = txtX;
+      ln.forEach(p => {
+        ctx.font = `${p.neg ? 700 : 400} ${fonte}px ${fam}`;
+        ctx.fillStyle = '#1a202c'; ctx.fillText(p.w, x, ini + li * linAlt); x += p.lw;
+      });
+    });
+    y += i.h + gapI;
+  });
+
+  anTexto(ctx, `Valores da planilha de transparência do condomínio · gerado em ${anDataHora()}`,
+    W / 2, H - 30, { size: 20, cor: cinza, alinh: 'center', maxW: W - 2 * P });
+  return cv;
+}
+
+async function anInsightsBlob() {
+  const cv = anInsightsCanvas();
+  return cv ? new Promise(res => cv.toBlob(res, 'image/png')) : null;
+}
+
+async function anInsightsBaixar() {
+  const blob = await anInsightsBlob();
+  if (!blob) return;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'insights-automaticos.png';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+
+async function anInsightsCompartilhar() {
+  const blob = await anInsightsBlob();
+  if (!blob) return;
+  const file = new File([blob], 'insights-automaticos.png', { type: 'image/png' });
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file], title: 'Insights automáticos' }); return; }
+    catch (e) { if (e.name === 'AbortError') return; }
+  }
+  anInsightsBaixar();
+}
+
+document.getElementById('btn-insights-baixar')?.addEventListener('click', anInsightsBaixar);
+document.getElementById('btn-insights-compartilhar')?.addEventListener('click', anInsightsCompartilhar);
+
 function anRenderInsights(lista) {
+  anInsightsAtuais = lista;
   const el = document.getElementById('an-insights');
   if (!lista.length) {
     el.innerHTML = '<div class="insight insight-info"><span class="insight-ico">🔍</span><p>Ainda não há dados suficientes para gerar insights. Eles aparecem conforme a planilha vai sendo preenchida.</p></div>';

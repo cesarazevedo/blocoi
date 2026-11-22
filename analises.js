@@ -462,11 +462,13 @@ function anJanela12() {
 
 // ── 2) Evolução dos gastos por categoria ──────────────────────
 let anCatChart = null;
+let anCatDados = null; // { labels, series } usados também na imagem exportada
 function anRenderCategorias() {
   const cv = document.getElementById('an-chart-cat');
   const vazio = document.getElementById('an-cat-vazio');
   if (!cv || typeof Chart === 'undefined') return;
   if (anCatChart) { anCatChart.destroy(); anCatChart = null; }
+  anCatDados = null;
 
   const jan = anJanela12();
   const { porCat } = anAgregar();
@@ -479,6 +481,8 @@ function anRenderCategorias() {
   const series = cats.slice(0, 5).map(c => ({ nome: c, vals: jan.map(j => porCat[c][j.k] || 0) }));
   const resto = cats.slice(5);
   if (resto.length) series.push({ nome: 'Outras', vals: jan.map(j => resto.reduce((s, c) => s + (porCat[c][j.k] || 0), 0)) });
+
+  anCatDados = { labels: jan.map(j => `${MESES[j.m]}/${String(j.y).slice(2)}`), series };
 
   anCatChart = new Chart(cv, {
     type: 'line',
@@ -503,6 +507,100 @@ function anRenderCategorias() {
     }
   });
 }
+
+// ── Gráfico de categorias em IMAGEM (mesmo molde do mapa de calor) ──
+function anCatCanvas() {
+  const d = anCatDados;
+  if (!d || !d.series.length) return null;
+  const W = 1080, P = 50, tabY = 300, cardH = 700, H = tabY + cardH + 150;
+  const cv = document.createElement('canvas');
+  cv.width = W; cv.height = H;
+  const ctx = cv.getContext('2d');
+  const cinza = '#4a5568';
+
+  ctx.fillStyle = '#f0f4f8'; ctx.fillRect(0, 0, W, H);
+  const g = ctx.createLinearGradient(0, 0, W, 240);
+  g.addColorStop(0, '#667eea'); g.addColorStop(1, '#764ba2');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, 240);
+  anTexto(ctx, 'CONTROLE CONDOMINIAL', P, 80, { size: 26, peso: 700, cor: 'rgba(255,255,255,.8)' });
+  anTexto(ctx, 'Gastos por categoria', P, 156, { size: 56, peso: 700, cor: '#fff', maxW: W - 2 * P });
+  anTexto(ctx, 'ao longo dos últimos 12 meses', P, 206, { size: 26, cor: 'rgba(255,255,255,.85)' });
+
+  ctx.fillStyle = '#fff'; anRR(ctx, 30, tabY - 20, W - 60, cardH + 20, 24); ctx.fill();
+
+  // área do gráfico
+  const gx0 = P + 130, gx1 = W - P - 20, gy0 = tabY + 20, gy1 = tabY + 470;
+  const max = Math.max(...d.series.flatMap(s => s.vals), 1);
+  const passo = [50, 100, 200, 250, 500, 1000, 2000, 2500, 5000, 10000, 20000, 50000, 100000]
+    .find(p => max / p <= 5) || Math.ceil(max / 5);
+  const topo = Math.ceil(max / passo) * passo;
+  const xi = i => gx0 + (gx1 - gx0) * i / (d.labels.length - 1);
+  const yv = v => gy1 - (gy1 - gy0) * v / topo;
+
+  ctx.lineWidth = 1; ctx.strokeStyle = '#e2e8f0';
+  for (let v = 0; v <= topo; v += passo) {
+    ctx.beginPath(); ctx.moveTo(gx0, yv(v)); ctx.lineTo(gx1, yv(v)); ctx.stroke();
+    anTexto(ctx, 'R$ ' + v.toLocaleString('pt-BR'), gx0 - 14, yv(v) + 8, { size: 22, cor: cinza, alinh: 'right' });
+  }
+  d.labels.forEach((l, i) => anTexto(ctx, l, xi(i), gy1 + 40, { size: 20, cor: cinza, alinh: 'center' }));
+
+  const ult = d.labels.length - 1;
+  d.series.forEach((s, si) => {
+    const cor = AN_CORES[si];
+    ctx.strokeStyle = cor; ctx.fillStyle = cor; ctx.lineWidth = 5; ctx.lineJoin = 'round';
+    for (let i = 1; i <= ult; i++) {
+      ctx.setLineDash(i === ult ? [12, 10] : []); // mês em andamento tracejado
+      ctx.beginPath(); ctx.moveTo(xi(i - 1), yv(s.vals[i - 1])); ctx.lineTo(xi(i), yv(s.vals[i])); ctx.stroke();
+    }
+    ctx.setLineDash([]);
+    s.vals.forEach((v, i) => { ctx.beginPath(); ctx.arc(xi(i), yv(v), 7, 0, Math.PI * 2); ctx.fill(); });
+  });
+
+  // legenda (quebra em linhas se não couber)
+  let lx = P + 10, ly = gy1 + 100;
+  d.series.forEach((s, si) => {
+    ctx.font = '600 24px system-ui, sans-serif';
+    const w = 40 + ctx.measureText(s.nome).width + 30;
+    if (lx + w > W - P) { lx = P + 10; ly += 44; }
+    ctx.fillStyle = AN_CORES[si]; anRR(ctx, lx, ly - 18, 24, 24, 6); ctx.fill();
+    anTexto(ctx, s.nome, lx + 34, ly + 2, { size: 24, cor: '#1a202c' });
+    lx += w;
+  });
+
+  anTexto(ctx, 'A linha tracejada no final é o mês em andamento (ainda pode subir).', P, tabY + cardH - 40, { size: 22, cor: cinza, maxW: W - 2 * P });
+  anTexto(ctx, `Valores da planilha de transparência do condomínio · gerado em ${anDataHora()}`,
+    W / 2, H - 30, { size: 20, cor: cinza, alinh: 'center', maxW: W - 2 * P });
+  return cv;
+}
+
+async function anCatBlob() {
+  const cv = anCatCanvas();
+  return cv ? new Promise(res => cv.toBlob(res, 'image/png')) : null;
+}
+
+async function anCatBaixar() {
+  const blob = await anCatBlob();
+  if (!blob) return;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'gastos-por-categoria.png';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+
+async function anCatCompartilhar() {
+  const blob = await anCatBlob();
+  if (!blob) return;
+  const file = new File([blob], 'gastos-por-categoria.png', { type: 'image/png' });
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file], title: 'Gastos por categoria' }); return; }
+    catch (e) { if (e.name === 'AbortError') return; }
+  }
+  anCatBaixar();
+}
+
+document.getElementById('btn-cat-baixar')?.addEventListener('click', anCatBaixar);
+document.getElementById('btn-cat-compartilhar')?.addEventListener('click', anCatCompartilhar);
 
 // ── 3) Gastos fora do normal ──────────────────────────────────
 // Regra: um gasto chama atenção quando é pelo menos 1,5× a média dos meses

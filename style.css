@@ -571,3 +571,18 @@
   text-align: left; padding: 10px 12px; color: var(--text-muted); font-weight: 600;
   font-size: 0.75rem; text-transform: uppercase; letter-spacing: .5px;
 }
+
+/* ── Regimento: botão PDF ── */
+.btn-regimento-pdf {
+  display: flex; align-items: center; gap: 6px; padding: 8px 14px;
+  background: var(--primary); color: #fff; border: none; border-radius: 8px;
+  font-size: 0.82rem; font-weight: 600; cursor: pointer;
+}
+
+/* ── Contatos: busca e categoria ── */
+.contatos-filtro {
+  padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border);
+  background: var(--bg); color: var(--text); font-size: 0.85rem;
+}
+#contatos-busca { flex: 1; min-width: 200px; padding: 8px 14px; outline: none; }
+.contatos-filtro-cat { cursor: pointer; }

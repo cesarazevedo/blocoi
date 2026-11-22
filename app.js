@@ -202,12 +202,12 @@ function renderDashboard() {
   set('kpi-caixa-mes',  moeda(saldoMes));
   renderSparkline();
 
-  set('kpi-saldo',       moeda(recMes));
-  set('kpi-saldo-sub',   `${pagas} de ${total} unidades pagas`);
+  set('kpi-receitas',    moeda(recMes));
+  set('kpi-receitas-sub', `${pagas} de ${total} unidades pagas`);
   set('kpi-despesas',    moeda(totalDesp));
   set('kpi-despesas-sub',`${despMes.length} lançamento(s)`);
-  set('kpi-receitas',    moeda(saldoMes));
-  set('kpi-receitas-sub', saldoMes >= 0 ? '✓ Positivo' : '⚠ Negativo');
+  set('kpi-saldo',       moeda(saldoMes));
+  set('kpi-saldo-sub',   saldoMes >= 0 ? '✓ Positivo' : '⚠ Negativo');
   set('kpi-inad',        mesJaVenceu ? inadimpl.toFixed(1) + '%' : '—');
   set('kpi-inad-sub',    mesJaVenceu ? `${inadimplCount} unidade(s) em aberto` : `vence dia 10/${MESES[mesSel + 1] || 'Jan'}`);
   set('badge-inad', inadimplCount);
@@ -2450,7 +2450,10 @@ function gerarPDFRegimento() {
 obrasInicializarEventos();
 
 // ── Init ──────────────────────────────────────────────────────
-inicializarAnos().then(() => carregar());
+// Espera os scripts com defer (Chart.js, jsPDF) ficarem prontos
+document.addEventListener('DOMContentLoaded', () => {
+  inicializarAnos().then(() => carregar());
+});
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/blocoi/sw.js');

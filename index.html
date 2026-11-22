@@ -8,9 +8,9 @@
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
   <link rel="apple-touch-icon" href="icon-192.png" />
   <meta name="theme-color" content="#667eea" />
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -29,7 +29,7 @@
   <p id="print-sub"></p>
 </div>
 <header class="top-header">
-  <button class="btn-menu" id="btn-menu" title="Menu">☰</button>
+  <button type="button" class="btn-menu" id="btn-menu" title="Menu">☰</button>
   <a class="brand" href="#">
     <div class="brand-icon">🏢</div>
     <div>
@@ -44,7 +44,7 @@
   </div>
   <div class="header-right">
     <div class="month-selector">
-      <label>Mês:</label>
+      <label for="sel-mes">Mês:</label>
       <select id="sel-mes" aria-label="Mês">
         <option value="0">Janeiro</option><option value="1">Fevereiro</option>
         <option value="2">Março</option><option value="3">Abril</option>
@@ -55,17 +55,17 @@
       </select>
       <select id="sel-ano" aria-label="Ano"></select>
     </div>
-    <button class="btn-icon btn-more" id="btn-more" aria-label="Mais opções" title="Mais opções" aria-haspopup="true" aria-expanded="false">⋮</button>
+    <button type="button" class="btn-icon btn-more" id="btn-more" aria-label="Mais opções" title="Mais opções" aria-haspopup="true" aria-expanded="false">⋮</button>
     <div class="header-actions" id="header-actions">
-      <button class="btn-icon" id="btn-refresh" aria-label="Atualizar dados" title="Atualizar" data-label="Atualizar">↻</button>
+      <button type="button" class="btn-icon" id="btn-refresh" aria-label="Atualizar dados" title="Atualizar" data-label="Atualizar">↻</button>
       <span id="auto-refresh-timer" style="font-size:0.7rem;color:var(--text-muted);white-space:nowrap;opacity:0.75;"></span>
       <span id="cache-indicator" style="display:none;font-size:0.7rem;color:var(--text-muted);opacity:0.7;"></span>
-      <button class="btn-icon" id="btn-pdf" aria-label="Gerar PDF da prestação de contas" title="Gerar PDF da Prestação de Contas" data-label="Gerar PDF">📄</button>
-      <button class="btn-icon" id="btn-zap" aria-label="Enviar prestação de contas como texto pelo WhatsApp" title="Enviar como texto (WhatsApp)" data-label="Enviar no WhatsApp">💬</button>
-      <button class="btn-icon" id="btn-fs-down" title="Diminuir letra" aria-label="Diminuir tamanho da letra" data-label="Letra menor" style="font-size:.8rem;font-weight:700">A−</button>
-      <button class="btn-icon" id="btn-fs-up" title="Aumentar letra" aria-label="Aumentar tamanho da letra" data-label="Letra maior" style="font-size:1.05rem;font-weight:700">A+</button>
-      <button class="btn-icon" id="btn-print" aria-label="Imprimir a tela atual" title="Imprimir a tela atual" data-label="Imprimir">🖨️</button>
-      <button class="btn-icon" id="dark-toggle" aria-label="Alternar tema claro e escuro" title="Tema" data-label="Alternar tema">🌙</button>
+      <button type="button" class="btn-icon" id="btn-pdf" aria-label="Gerar PDF da prestação de contas" title="Gerar PDF da Prestação de Contas" data-label="Gerar PDF">📄</button>
+      <button type="button" class="btn-icon" id="btn-zap" aria-label="Enviar prestação de contas como texto pelo WhatsApp" title="Enviar como texto (WhatsApp)" data-label="Enviar no WhatsApp">💬</button>
+      <button type="button" class="btn-icon" id="btn-fs-down" title="Diminuir letra" aria-label="Diminuir tamanho da letra" data-label="Letra menor" style="font-size:.8rem;font-weight:700">A−</button>
+      <button type="button" class="btn-icon" id="btn-fs-up" title="Aumentar letra" aria-label="Aumentar tamanho da letra" data-label="Letra maior" style="font-size:1.05rem;font-weight:700">A+</button>
+      <button type="button" class="btn-icon" id="btn-print" aria-label="Imprimir a tela atual" title="Imprimir a tela atual" data-label="Imprimir">🖨️</button>
+      <button type="button" class="btn-icon" id="dark-toggle" aria-label="Alternar tema claro e escuro" title="Tema" data-label="Alternar tema">🌙</button>
     </div>
 
     <div class="avatar">🏢</div>
@@ -80,23 +80,23 @@
   <!-- Sidebar -->
   <nav class="sidebar" aria-label="Menu principal">
     <span class="sidebar-label">Visão Geral</span>
-    <button class="nav-btn active" data-tab="dashboard" aria-current="page"><span>📊</span> Resumo das Finanças</button>
+    <button type="button" class="nav-btn active" data-tab="dashboard" aria-current="page"><span>📊</span> Resumo das Finanças</button>
     <div class="sidebar-sep"></div>
     <span class="sidebar-label">Financeiro</span>
-    <button class="nav-btn" data-tab="receitas"><span>💰</span> Receitas</button>
-    <button class="nav-btn" data-tab="despesas"><span>💸</span> Despesas</button>
-    <button class="nav-btn" data-tab="inadimplencia"><span>⚠️</span> Inadimplência <span class="nav-badge" id="badge-inad">—</span></button>
-    <button class="nav-btn" data-tab="dre"><span>📋</span> DRE</button>
-    <button class="nav-btn" data-tab="analises"><span>🔎</span> Análises</button>
+    <button type="button" class="nav-btn" data-tab="receitas"><span>💰</span> Receitas</button>
+    <button type="button" class="nav-btn" data-tab="despesas"><span>💸</span> Despesas</button>
+    <button type="button" class="nav-btn" data-tab="inadimplencia"><span>⚠️</span> Inadimplência <span class="nav-badge" id="badge-inad">—</span></button>
+    <button type="button" class="nav-btn" data-tab="dre"><span>📋</span> DRE</button>
+    <button type="button" class="nav-btn" data-tab="analises"><span>🔎</span> Análises</button>
     <div class="sidebar-sep"></div>
     <span class="sidebar-label">Gestão</span>
-    <button class="nav-btn" data-tab="obras"><span>🏗️</span> Simulação de Obras</button>
-    <button class="nav-btn" data-tab="regimento"><span>📜</span> Regimento</button>
-    <button class="nav-btn" data-tab="contatos"><span>📇</span> Contatos</button>
-    <button class="nav-btn" data-tab="faq"><span>❓</span> Perguntas Frequentes</button>
+    <button type="button" class="nav-btn" data-tab="obras"><span>🏗️</span> Simulação de Obras</button>
+    <button type="button" class="nav-btn" data-tab="regimento"><span>📜</span> Regimento</button>
+    <button type="button" class="nav-btn" data-tab="contatos"><span>📇</span> Contatos</button>
+    <button type="button" class="nav-btn" data-tab="faq"><span>❓</span> Perguntas Frequentes</button>
     <div class="sidebar-sep"></div>
     <span class="sidebar-label">Gestão anterior</span>
-    <button class="nav-btn" data-tab="gestao-anterior"><span>🗂️</span> Prestação de Contas</button>
+    <button type="button" class="nav-btn" data-tab="gestao-anterior"><span>🗂️</span> Prestação de Contas</button>
   </nav>
 
   <!-- Content -->
@@ -136,8 +136,8 @@
         <div class="kpi-card" style="--accent:var(--c-receitas)">
           <div class="kpi-icon">⬆️</div>
           <div class="kpi-label">Receitas do Mês</div>
-          <div class="kpi-value" id="kpi-saldo">—</div>
-          <div class="kpi-sub" id="kpi-saldo-sub">—</div>
+          <div class="kpi-value" id="kpi-receitas">—</div>
+          <div class="kpi-sub" id="kpi-receitas-sub">—</div>
         </div>
         <div class="kpi-card" style="--accent:var(--c-despesas)">
           <div class="kpi-icon">⬇️</div>
@@ -148,8 +148,8 @@
         <div class="kpi-card" style="--accent:var(--primary)">
           <div class="kpi-icon">💰</div>
           <div class="kpi-label">Saldo do Mês</div>
-          <div class="kpi-value" id="kpi-receitas">—</div>
-          <div class="kpi-sub" id="kpi-receitas-sub">—</div>
+          <div class="kpi-value" id="kpi-saldo">—</div>
+          <div class="kpi-sub" id="kpi-saldo-sub">—</div>
         </div>
         <div class="kpi-card" style="--accent:var(--c-inadimplencia)">
           <div class="kpi-icon">⚠️</div>
@@ -261,8 +261,8 @@
           <option value="aberto">Em aberto</option>
           <option value="isento">Isento</option>
         </select>
-        <button class="btn-icon" id="btn-rec-compartilhar" title="Compartilhar a tabela como imagem" style="margin-left:auto;font-size:0.82rem;padding:7px 14px;width:auto">📤 Compartilhar imagem</button>
-        <button class="btn-icon" id="btn-csv-rec" title="Baixar tabela em CSV (abre no Excel)" style="font-size:0.82rem;padding:7px 14px;width:auto">⬇️ Exportar CSV</button>
+        <button type="button" class="btn-icon" id="btn-rec-compartilhar" title="Compartilhar a tabela como imagem" style="margin-left:auto;font-size:0.82rem;padding:7px 14px;width:auto">📤 Compartilhar imagem</button>
+        <button type="button" class="btn-icon" id="btn-csv-rec" title="Baixar tabela em CSV (abre no Excel)" style="font-size:0.82rem;padding:7px 14px;width:auto">⬇️ Exportar CSV</button>
       </div>
       <div class="card">
         <div class="table-wrap">
@@ -312,7 +312,7 @@
           <option value="Pago">Pago</option>
           <option value="A pagar">A pagar</option>
         </select>
-        <button class="btn-icon" id="btn-csv-desp" title="Baixar tabela em CSV (abre no Excel)" style="margin-left:auto;font-size:0.82rem;padding:7px 14px;width:auto">⬇️ Exportar CSV</button>
+        <button type="button" class="btn-icon" id="btn-csv-desp" title="Baixar tabela em CSV (abre no Excel)" style="margin-left:auto;font-size:0.82rem;padding:7px 14px;width:auto">⬇️ Exportar CSV</button>
         <a href="https://drive.google.com/drive/folders/1CEIAvGasjOmXtM9hhUfhE8Fg7R-3CgQI?usp=drive_link" target="_blank" rel="noopener noreferrer" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);background:var(--surface);color:var(--text-muted);border-radius:8px;padding:7px 14px;font-size:0.82rem;cursor:pointer;transition:all 0.2s;white-space:nowrap" onmouseover="this.style.borderColor='var(--primary)';this.style.color='var(--primary)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-muted)'" title="Ver comprovantes no Google Drive">🧾 Comprovantes</a>
       </div>
       <div class="card">
@@ -375,8 +375,8 @@
         <div class="card-title">Insights automáticos <span>gerados a partir dos dados</span></div>
         <div id="an-insights" class="insights-list"><div class="insight insight-info"><span class="insight-ico">⏳</span><p>Analisando…</p></div></div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
-          <button class="btn-icon resumo-btn" id="btn-insights-compartilhar">📤 Compartilhar</button>
-          <button class="btn-icon resumo-btn" id="btn-insights-baixar">⬇️ Baixar imagem</button>
+          <button type="button" class="btn-icon resumo-btn" id="btn-insights-compartilhar">📤 Compartilhar</button>
+          <button type="button" class="btn-icon resumo-btn" id="btn-insights-baixar">⬇️ Baixar imagem</button>
         </div>
       </div>
       <div class="card" style="margin-bottom:16px">
@@ -384,8 +384,8 @@
         <div id="an-anomalias" class="insights-list"></div>
         <p class="hm-nota">Aparece quando uma categoria (ou o mês todo) gasta bem mais que a média dos meses anteriores. Gasto alto nem sempre é problema (pode ser uma obra planejada): serve só para chamar atenção e facilitar a conversa.</p>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
-          <button class="btn-icon resumo-btn" id="btn-fora-compartilhar">📤 Compartilhar</button>
-          <button class="btn-icon resumo-btn" id="btn-fora-baixar">⬇️ Baixar imagem</button>
+          <button type="button" class="btn-icon resumo-btn" id="btn-fora-compartilhar">📤 Compartilhar</button>
+          <button type="button" class="btn-icon resumo-btn" id="btn-fora-baixar">⬇️ Baixar imagem</button>
         </div>
       </div>
       <div class="card" style="margin-bottom:16px">
@@ -394,8 +394,8 @@
         <p id="an-cat-vazio" class="hm-nota" style="display:none">Ainda não há despesas lançadas nos últimos 12 meses.</p>
         <p class="hm-nota">A linha tracejada no final é o mês em andamento (ainda pode subir). Mostra as 5 maiores categorias; as demais ficam juntas em "Outras".</p>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
-          <button class="btn-icon resumo-btn" id="btn-cat-compartilhar">📤 Compartilhar</button>
-          <button class="btn-icon resumo-btn" id="btn-cat-baixar">⬇️ Baixar imagem</button>
+          <button type="button" class="btn-icon resumo-btn" id="btn-cat-compartilhar">📤 Compartilhar</button>
+          <button type="button" class="btn-icon resumo-btn" id="btn-cat-baixar">⬇️ Baixar imagem</button>
         </div>
       </div>
       <div class="card" style="margin-bottom:16px">
@@ -404,8 +404,8 @@
         <div class="hm-legend" aria-hidden="true"><span>0%</span><span class="hm-legend-bar"></span><span>100%</span></div>
         <p class="hm-nota">Cada quadradinho é um mês: quanto mais verde, mais gente pagou em dia; quanto mais vermelho, mais atrasos. "–" significa que o mês ainda não venceu ou não há lançamentos. O prazo é o dia 10 do mês seguinte. Unidades isentas não entram na conta.</p>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
-          <button class="btn-icon resumo-btn" id="btn-heatmap-compartilhar">📤 Compartilhar</button>
-          <button class="btn-icon resumo-btn" id="btn-heatmap-baixar">⬇️ Baixar imagem</button>
+          <button type="button" class="btn-icon resumo-btn" id="btn-heatmap-compartilhar">📤 Compartilhar</button>
+          <button type="button" class="btn-icon resumo-btn" id="btn-heatmap-baixar">⬇️ Baixar imagem</button>
         </div>
       </div>
       <div class="card">
@@ -414,15 +414,15 @@
           <canvas id="an-resumo-canvas" width="1080" height="1350" aria-label="Prévia do resumo do mês"></canvas>
           <div class="resumo-side">
             <p class="hm-nota" style="margin-top:0">A imagem acompanha o <strong>mês e o ano escolhidos no topo</strong> da página. Ela mostra só os números do condomínio (saldo, arrecadação, gastos, pagamentos em dia e categorias), sem identificar nenhuma unidade.</p>
-            <button class="btn-icon resumo-btn" id="btn-resumo-compartilhar">📤 Compartilhar</button>
-            <button class="btn-icon resumo-btn" id="btn-resumo-baixar">⬇️ Baixar imagem</button>
+            <button type="button" class="btn-icon resumo-btn" id="btn-resumo-compartilhar">📤 Compartilhar</button>
+            <button type="button" class="btn-icon resumo-btn" id="btn-resumo-baixar">⬇️ Baixar imagem</button>
             <p class="hm-nota">No celular, "Compartilhar" abre o WhatsApp e outros apps. No computador, a imagem é baixada para você enviar.</p>
             <div class="resumo-texto-box">
               <div class="resumo-texto-titulo">Ou prefira em texto</div>
               <textarea id="an-resumo-texto" class="resumo-texto" rows="15" readonly aria-label="Resumo do mês em texto"></textarea>
               <div class="resumo-texto-acoes">
-                <button class="btn-icon resumo-btn" id="btn-texto-copiar">📋 Copiar texto</button>
-                <button class="btn-icon resumo-btn" id="btn-texto-compartilhar">💬 Compartilhar texto</button>
+                <button type="button" class="btn-icon resumo-btn" id="btn-texto-copiar">📋 Copiar texto</button>
+                <button type="button" class="btn-icon resumo-btn" id="btn-texto-compartilhar">💬 Compartilhar texto</button>
               </div>
             </div>
           </div>
@@ -465,7 +465,7 @@
       <div class="card">
         <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;">
           <span>Resumo Mensal <span id="dre-ano-label">—</span></span>
-          <button class="btn-icon" id="btn-pdf-dre" title="Gerar PDF da DRE" style="font-size:1rem;padding:4px 8px;">📄 PDF</button>
+          <button type="button" class="btn-icon" id="btn-pdf-dre" title="Gerar PDF da DRE" style="font-size:1rem;padding:4px 8px;">📄 PDF</button>
         </div>
         <div class="table-wrap">
           <table id="dre-table">
@@ -499,11 +499,11 @@
           <div class="card-title">Parâmetros Financeiros</div>
           <div class="obras-form-rows">
             <div class="obras-form-row">
-              <label>Taxa mensal por unidade (R$)</label>
+              <label for="obras-taxa">Taxa mensal por unidade (R$)</label>
               <input type="number" id="obras-taxa" class="obras-num-input" min="0" step="0.01" placeholder="0,00">
             </div>
             <div class="obras-form-row">
-              <label>Nº de unidades pagantes</label>
+              <label for="obras-unidades">Nº de unidades pagantes</label>
               <input type="number" id="obras-unidades" class="obras-num-input" min="0" step="1" placeholder="0">
             </div>
             <div class="obras-form-row">
@@ -512,7 +512,7 @@
             </div>
             <hr style="border:none;border-top:1px solid var(--border);margin:4px 0">
             <div class="obras-form-row">
-              <label>Despesa média mensal (R$)</label>
+              <label for="obras-despesa">Despesa média mensal (R$)</label>
               <input type="number" id="obras-despesa" class="obras-num-input" min="0" step="0.01" placeholder="0,00">
             </div>
             <div class="obras-form-row">
@@ -521,7 +521,7 @@
             </div>
             <hr style="border:none;border-top:1px solid var(--border);margin:4px 0">
             <div class="obras-form-row">
-              <label>Reserva inicial — saldo em caixa (R$) <span style="font-size:0.68rem;color:var(--c-obras)">sugerido da DRE</span></label>
+              <label for="obras-reserva">Reserva inicial — saldo em caixa (R$) <span style="font-size:0.68rem;color:var(--c-obras)">sugerido da DRE</span></label>
               <input type="number" id="obras-reserva" class="obras-num-input" min="0" step="0.01" placeholder="0,00">
             </div>
           </div>
@@ -532,8 +532,8 @@
           <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
             <span>Obras a Simular</span>
             <div style="display:flex;gap:8px">
-              <button class="obras-add-btn" id="btn-limpar-obras" style="border-color:var(--c-inadimplencia);color:var(--c-inadimplencia);background:rgba(255,117,140,0.06)">🗑️ Limpar tudo</button>
-              <button class="obras-add-btn" id="btn-add-obra">+ Adicionar Obra</button>
+              <button type="button" class="obras-add-btn" id="btn-limpar-obras" style="border-color:var(--c-inadimplencia);color:var(--c-inadimplencia);background:rgba(255,117,140,0.06)">🗑️ Limpar tudo</button>
+              <button type="button" class="obras-add-btn" id="btn-add-obra">+ Adicionar Obra</button>
             </div>
           </div>
           <div class="table-wrap">
@@ -595,7 +595,7 @@
       <div class="card">
         <div class="card-title" style="display:flex;align-items:center;justify-content:space-between">
           <span>Evolução do Saldo Acumulado · Metas por Obra</span>
-          <button class="obras-add-btn" id="btn-pdf-obras" style="font-size:0.8rem">📄 Exportar PDF</button>
+          <button type="button" class="obras-add-btn" id="btn-pdf-obras" style="font-size:0.8rem">📄 Exportar PDF</button>
         </div>
         <canvas id="chart-obras" height="80"></canvas>
       </div>
@@ -607,15 +607,15 @@
           <canvas id="obras-rel-canvas" width="1080" height="1500" aria-label="Prévia do relatório das obras"></canvas>
           <div class="resumo-side">
             <p class="hm-nota" style="margin-top:0">O relatório mostra as <strong>obras cadastradas acima</strong>, com valor, prazo e data em que a verba estará disponível, além das premissas usadas no cálculo. Traz só números do condomínio, sem identificar nenhuma unidade.</p>
-            <button class="btn-icon resumo-btn" id="btn-obras-rel-compartilhar">📤 Compartilhar</button>
-            <button class="btn-icon resumo-btn" id="btn-obras-rel-baixar">⬇️ Baixar imagem</button>
+            <button type="button" class="btn-icon resumo-btn" id="btn-obras-rel-compartilhar">📤 Compartilhar</button>
+            <button type="button" class="btn-icon resumo-btn" id="btn-obras-rel-baixar">⬇️ Baixar imagem</button>
             <p class="hm-nota">No celular, "Compartilhar" abre o WhatsApp e outros apps. No computador, a imagem é baixada para você enviar.</p>
             <div class="resumo-texto-box">
               <div class="resumo-texto-titulo">Ou prefira em texto</div>
               <textarea id="obras-rel-texto" class="resumo-texto" rows="15" readonly aria-label="Relatório das obras em texto"></textarea>
               <div class="resumo-texto-acoes">
-                <button class="btn-icon resumo-btn" id="btn-obras-rel-copiar">📋 Copiar texto</button>
-                <button class="btn-icon resumo-btn" id="btn-obras-rel-texto">💬 Compartilhar texto</button>
+                <button type="button" class="btn-icon resumo-btn" id="btn-obras-rel-copiar">📋 Copiar texto</button>
+                <button type="button" class="btn-icon resumo-btn" id="btn-obras-rel-texto">💬 Compartilhar texto</button>
               </div>
             </div>
           </div>
@@ -632,7 +632,7 @@
               <span style="font-size:1.5rem">📜</span>
               <div style="font-size:1.1rem;font-weight:700;color:var(--text)">Regimento Interno</div>
             </div>
-            <button onclick="gerarPDFRegimento()" style="
+            <button type="button" onclick="gerarPDFRegimento()" style="
               display:flex;align-items:center;gap:6px;padding:8px 14px;
               background:var(--primary);color:#fff;border:none;border-radius:8px;
               font-size:0.82rem;font-weight:600;cursor:pointer
@@ -703,7 +703,7 @@
       </div>
       <div id="faq-lista" class="faq-lista"></div>
       <div id="faq-vazio" class="card" style="display:none;text-align:center;color:var(--text-muted)">Nenhuma pergunta encontrada. Tente outra palavra.</div>
-      <p class="hm-nota" style="text-align:center;margin-top:18px">Não achou sua dúvida? <button id="faq-ir-contatos" class="faq-link">Veja os contatos</button> e fale com a administração.</p>
+      <p class="hm-nota" style="text-align:center;margin-top:18px">Não achou sua dúvida? <button type="button" id="faq-ir-contatos" class="faq-link">Veja os contatos</button> e fale com a administração.</p>
     </div>
 
     <!-- ════ GESTÃO ANTERIOR ════ -->
@@ -796,9 +796,9 @@
 
   </main>
 
-  <script src="regimento.js"></script>
 </div>
 
+<script src="regimento.js"></script>
 <script src="app.js"></script>
 <script src="gestao-anterior.js"></script>
 <script src="analises.js"></script>

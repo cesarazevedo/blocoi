@@ -2388,10 +2388,7 @@ function gerarPDFRegimento() {
   const mg = 15, pw = 180;
   let y = 20;
 
-  // Cabeçalho
-  doc.setFillColor(102, 126, 234);
-  doc.rect(0, 0, 210, 14, 'F');
-  // Título
+  // Título (o cabeçalho com faixa roxa é desenhado em todas as páginas no final)
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(16);
   doc.setTextColor(30, 30, 30);
@@ -2404,7 +2401,7 @@ function gerarPDFRegimento() {
 
   REGIMENTO.forEach((secao, idx) => {
     // Verifica espaço para cabeçalho da seção
-    if (y > 265) { doc.addPage(); y = 20; }
+    if (y > 265) { doc.addPage(); y = 22; }
 
     // Número e título da seção
     const tituloLimpo = secao.titulo.replace(/[^\x20-\x7EÀ-ɏ]/g, '').trim();
@@ -2421,7 +2418,7 @@ function gerarPDFRegimento() {
 
     secao.itens.forEach((item, iIdx) => {
       const linhas = doc.splitTextToSize(`${idx + 1}.${iIdx + 1}. ${item}`, pw - 14);
-      if (y + linhas.length * 5 > 280) { doc.addPage(); y = 20; }
+      if (y + linhas.length * 5 > 278) { doc.addPage(); y = 22; }
       doc.text(linhas, mg + 4, y);
       y += linhas.length * 5 + 2;
     });
@@ -2434,14 +2431,29 @@ function gerarPDFRegimento() {
     y += 8;
   });
 
-  // Rodapé
+  // Cabeçalho e rodapé em todas as páginas
+  const nomeCondominio = 'Condomínio Parque dos Rios - Bloco I';
   const pages = doc.getNumberOfPages();
   for (let i = 1; i <= pages; i++) {
     doc.setPage(i);
+
+    // Cabeçalho: faixa roxa com nome do condomínio e título do documento
+    doc.setFillColor(102, 126, 234);
+    doc.rect(0, 0, 210, 14, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
+    doc.setTextColor(255, 255, 255);
+    doc.text(nomeCondominio, mg, 9);
+    doc.text('Regimento Interno', mg + pw, 9, { align: 'right' });
+
+    // Rodapé: linha, administração à esquerda e página à direita
+    doc.setDrawColor(220, 220, 220);
+    doc.line(mg, 284, mg + pw, 284);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(8);
-    doc.setTextColor(160, 160, 160);
-    doc.text(`Página ${i} de ${pages}`, 105, 290, { align: 'center' });
+    doc.setTextColor(140, 140, 140);
+    doc.text(`${nomeCondominio} — Administração`, mg, 289);
+    doc.text(`Página ${i} de ${pages}`, mg + pw, 289, { align: 'right' });
   }
 
   doc.save('regimento-interno.pdf');

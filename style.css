@@ -554,3 +554,20 @@
     .zap-botoes { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
     .zap-botoes button { padding: 8px 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text); cursor: pointer; font: inherit; font-size: .88rem; }
     .zap-botoes .zap-primario { background: #25d366; border-color: #25d366; color: #0b3d1e; font-weight: 700; }
+
+/* ── Botão Comprovantes ── */
+.btn-comprovantes {
+  text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+  border: 1px solid var(--border); background: var(--surface); color: var(--text-muted);
+  border-radius: 8px; padding: 7px 14px; font-size: 0.82rem; cursor: pointer;
+  transition: all 0.2s; white-space: nowrap;
+}
+.btn-comprovantes:hover { border-color: var(--primary); color: var(--primary); }
+
+/* ── Tabela de Contatos ── */
+.contatos-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.contatos-table thead tr { border-bottom: 2px solid var(--border); }
+.contatos-table th {
+  text-align: left; padding: 10px 12px; color: var(--text-muted); font-weight: 600;
+  font-size: 0.75rem; text-transform: uppercase; letter-spacing: .5px;
+}

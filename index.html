@@ -313,7 +313,7 @@
           <option value="A pagar">A pagar</option>
         </select>
         <button type="button" class="btn-icon" id="btn-csv-desp" title="Baixar tabela em CSV (abre no Excel)" style="margin-left:auto;font-size:0.82rem;padding:7px 14px;width:auto">⬇️ Exportar CSV</button>
-        <a href="https://drive.google.com/drive/folders/1CEIAvGasjOmXtM9hhUfhE8Fg7R-3CgQI?usp=drive_link" target="_blank" rel="noopener noreferrer" style="text-decoration:none;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);background:var(--surface);color:var(--text-muted);border-radius:8px;padding:7px 14px;font-size:0.82rem;cursor:pointer;transition:all 0.2s;white-space:nowrap" onmouseover="this.style.borderColor='var(--primary)';this.style.color='var(--primary)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text-muted)'" title="Ver comprovantes no Google Drive">🧾 Comprovantes</a>
+        <a href="https://drive.google.com/drive/folders/1CEIAvGasjOmXtM9hhUfhE8Fg7R-3CgQI?usp=drive_link" class="btn-comprovantes" target="_blank" rel="noopener noreferrer" title="Ver comprovantes no Google Drive">🧾 Comprovantes</a>
       </div>
       <div class="card">
         <div class="table-wrap">
@@ -668,16 +668,16 @@
       </div>
 
       <div class="card" style="overflow:auto">
-        <table style="width:100%;border-collapse:collapse;font-size:0.85rem" id="contatos-table">
+        <table class="contatos-table" id="contatos-table">
           <thead>
-            <tr style="border-bottom:2px solid var(--border)">
-              <th style="text-align:left;padding:10px 12px;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:.5px">Nome</th>
-              <th style="text-align:left;padding:10px 12px;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:.5px">Cargo / Especialidade</th>
-              <th style="text-align:left;padding:10px 12px;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:.5px">Categoria</th>
-              <th style="text-align:left;padding:10px 12px;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:.5px">Empresa</th>
-              <th style="text-align:left;padding:10px 12px;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:.5px">Telefone</th>
-              <th style="text-align:left;padding:10px 12px;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:.5px">E-mail</th>
-              <th style="text-align:left;padding:10px 12px;color:var(--text-muted);font-weight:600;font-size:0.75rem;text-transform:uppercase;letter-spacing:.5px">Obs.</th>
+            <tr>
+              <th>Nome</th>
+              <th>Cargo / Especialidade</th>
+              <th>Categoria</th>
+              <th>Empresa</th>
+              <th>Telefone</th>
+              <th>E-mail</th>
+              <th>Obs.</th>
             </tr>
           </thead>
           <tbody id="contatos-tbody"></tbody>

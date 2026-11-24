@@ -1,0 +1,23 @@
+# Configuração pronta para o Render (Blueprint): cria o site e o disco do banco.
+services:
+  - type: web
+    name: fc-ranking
+    runtime: node
+    plan: starter            # disco persistente exige plano pago
+    rootDir: fc-ranking
+    buildCommand: echo ok
+    startCommand: npm start
+    healthCheckPath: /api/me
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: DB_PATH
+        value: /var/data/fc.db
+      - key: COOKIE_SECURE
+        value: "1"
+      - key: ANTHROPIC_API_KEY   # opcional: liga a leitura de print
+        sync: false
+    disk:
+      name: fc-dados
+      mountPath: /var/data
+      sizeGB: 1

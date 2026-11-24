@@ -1,0 +1,12 @@
+{
+  "name": "fc-ranking",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Ranking de jogos de FC com Elo, histórico de partidas, recordes e medalhas",
+  "engines": { "node": ">=22.5" },
+  "scripts": {
+    "start": "node --no-warnings server.mjs",
+    "test": "node --test --no-warnings tests/*.test.mjs"
+  }
+}

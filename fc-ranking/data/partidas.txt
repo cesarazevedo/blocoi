@@ -1,0 +1,891 @@
+# data|tipo(A=Amistoso,C=Competição,T=Times Pré-def.)|jogador1|gols1|gols2|jogador2|pontos do jogador1
+# Ordem: mais recente primeiro (igual ao sistema antigo). O importador inverte sozinho.
+2026-11-23|A|Guilherme|2|1|Kariel|14
+2026-11-23|A|Guilherme|5|0|Yuri Geo|5
+2026-11-23|A|Yuri Geo|4|1|Kariel|31
+2026-11-17|A|Yuri|6|4|Kariel|29
+2026-11-17|A|Kariel|8|4|Yuri|12
+2026-11-16|A|Guilherme|2|1|Kariel|13
+2026-11-16|A|Rafael|4|1|Guilherme|19
+2026-11-16|A|Rafael|1|0|João Victor|14
+2026-11-16|A|Kariel|3|2|Rafael|27
+2026-11-12|A|João Victor|6|3|Guilherme|26
+2026-11-12|A|João Victor|1|0|Yuri Geo|7
+2026-11-12|A|Yuri Geo|3|3|Guilherme|14
+2026-11-12|A|Guilherme|3|1|Yuri Geo|5
+2026-11-12|A|João Victor|7|0|Augusto Rubim|7
+2026-11-12|A|Bruno|1|4|Yuri|-31
+2026-11-12|A|Bruno|5|4|Yuri|9
+2026-11-11|A|Lucas|2|3|Yuri|-29
+2026-11-11|A|Augusto Rubim|2|2|Yuri|1
+2026-11-11|A|Rafael|5|4|João Victor|12
+2026-11-11|A|Rafael|4|2|Yuri|5
+2026-11-11|A|João Victor|4|1|Yuri Geo|12
+2026-11-11|A|João Victor|3|0|Yuri|10
+2026-11-11|A|João Victor|1|1|Bruno|4
+2026-11-11|A|Yuri Geo|1|4|Yuri|-20
+2026-11-11|A|Bruno|5|1|Yuri|7
+2026-11-11|A|João Victor|3|1|Yuri Geo|9
+2026-11-11|A|João Victor|4|0|Lucas|17
+2026-11-10|A|Guilherme|9|1|Yuri|4
+2026-11-10|A|Kariel|3|3|Guilherme|9
+2026-11-10|A|Kariel|4|3|Yuri|9
+2026-11-10|A|Kariel|6|2|Yuri|8
+2026-11-05|A|Yuri Geo|2|4|Yuri|-21
+2026-11-05|A|Bruno|4|1|Yuri Geo|9
+2026-11-05|A|Bruno|4|1|Yuri Geo|8
+2026-11-05|A|Yuri Geo|6|3|Augusto Rubim|17
+2026-11-05|A|Bruno|4|2|Yuri|7
+2026-11-05|A|Bruno|3|1|Yuri Geo|8
+2026-11-04|A|Augusto Rubim|3|5|Yuri|-19
+2026-11-04|A|Augusto Rubim|3|3|Yuri|4
+2026-11-04|A|Bruno|6|1|Yuri|8
+2026-11-04|A|Bruno|2|0|Yuri|8
+2026-11-04|A|Bruno|4|1|Yuri|7
+2026-11-04|A|Rafael|6|0|Yuri|6
+2026-11-04|A|Rafael|3|0|Bruno|14
+2026-11-04|A|Rafael|6|2|Augusto Rubim|6
+2026-11-03|A|Kariel|3|4|Yuri|-28
+2026-11-03|A|Kariel|3|0|Yuri|9
+2026-11-03|A|Kariel|3|2|Yuri|8
+2026-11-03|A|Kariel|3|4|Yuri|-28
+2026-11-03|A|Kariel|6|2|Yuri|10
+2026-10-28|A|Yuri Geo|2|1|Bruno|19
+2026-10-28|A|Bruno|2|0|Yuri Geo|17
+2026-10-28|A|Bruno|5|3|Yuri Geo|15
+2026-10-28|A|Rafael|4|1|Yuri Geo|10
+2026-10-28|A|Roberto|4|2|Augusto Rubim|0
+2026-10-28|A|Yuri Geo|2|2|Augusto Rubim|-4
+2026-10-28|A|Bruno|4|1|Yuri Geo|13
+2026-10-28|A|Bruno|4|3|Yuri Geo|12
+2026-10-28|A|Bruno|4|1|Yuri Geo|11
+2026-10-28|A|Bruno|5|1|Yuri Geo|10
+2026-10-27|A|Bruno|3|0|Yuri|10
+2026-10-27|A|Bruno|4|2|Kariel|21
+2026-10-26|A|Kariel|3|2|Yuri|6
+2026-10-26|A|Kariel|2|2|Yuri Geo|-6
+2026-10-26|A|Kariel|1|1|Yuri Geo|-5
+2026-10-22|A|Bruno|5|0|Yuri|12
+2026-10-22|A|Bruno|3|0|Yuri|11
+2026-10-22|A|Bruno|2|2|Rafael|6
+2026-10-22|A|Rafael|2|1|Lucas|15
+2026-10-22|A|Rafael|1|0|João Victor|13
+2026-10-21|A|César|4|0|Guilherme|29
+2026-10-21|A|César|2|1|Rafael|29
+2026-10-21|A|César|7|2|Yuri|13
+2026-10-21|A|Yuri|4|3|César|27
+2026-10-21|A|Bruno|1|1|Yuri|-5
+2026-10-21|A|Yuri Geo|8|3|João Victor|22
+2026-10-21|A|Yuri Geo|1|6|Guilherme|-6
+2026-10-21|A|César|5|2|João Victor|24
+2026-10-21|A|César|4|1|Yuri|13
+2026-10-21|A|César|5|1|Augusto Rubim|10
+2026-10-21|A|César|1|0|João Victor|24
+2026-10-21|A|Augusto Rubim|2|2|Yuri|-3
+2026-10-21|A|Yuri Geo|5|0|Augusto Rubim|14
+2026-10-21|A|Yuri Geo|4|3|Yuri|11
+2026-10-21|A|Yuri Geo|5|5|Augusto Rubim|-4
+2026-10-21|A|Augusto Rubim|4|5|Yuri|-18
+2026-10-20|A|Kariel|6|1|Yuri|10
+2026-10-20|A|Kariel|4|2|Yuri|9
+2026-10-20|A|Kariel|2|2|Yuri Geo|-3
+2026-10-20|A|Kariel|3|1|Yuri Geo|13
+2026-10-20|A|Kariel|2|1|Yuri Geo|12
+2026-10-20|A|Kariel|6|0|Yuri Geo|11
+2026-10-20|A|Kariel|3|0|Yuri|7
+2026-10-20|A|Kariel|9|0|Yuri|7
+2026-10-19|A|Kariel|5|1|Guilherme|27
+2026-10-19|A|Kariel|4|1|Guilherme|25
+2026-10-16|A|Rafael|1|0|João Victor|15
+2026-10-16|A|Guilherme|2|1|Bruno|5
+2026-10-16|A|Guilherme|2|0|Lucas|8
+2026-10-15|A|Yuri Geo|2|1|Rafael|24
+2026-10-15|A|Yuri Geo|2|0|Lucas|23
+2026-10-15|A|Rafael|3|2|Yuri Geo|9
+2026-10-15|A|Rafael|6|1|Yuri Geo|9
+2026-10-15|A|Rafael|3|0|Yuri Geo|8
+2026-10-15|A|Yuri|2|1|Rafael|26
+2026-10-15|A|Rafael|4|3|Augusto Rubim|8
+2026-10-15|A|Yuri Geo|4|3|Rafael|23
+2026-10-15|A|Yuri Geo|3|2|Lucas|22
+2026-10-15|A|Rafael|2|2|Guilherme|7
+2026-10-15|A|João Victor|2|1|Bruno|15
+2026-10-15|A|João Victor|2|1|Bruno|14
+2026-10-15|A|João Victor|3|2|Bruno|13
+2026-10-15|A|João Victor|3|2|Bruno|12
+2026-10-14|A|Yuri Geo|3|0|Bruno|22
+2026-10-14|A|Yuri Geo|5|0|Yuri|15
+2026-10-14|A|Guilherme|5|1|João Victor|8
+2026-10-14|A|Guilherme|5|0|Augusto Rubim|4
+2026-10-14|A|Guilherme|3|2|João Victor|7
+2026-10-14|A|Guilherme|6|0|Yuri|3
+2026-10-14|A|Bruno|2|1|Yuri|10
+2026-10-14|A|Bruno|3|1|Yuri|9
+2026-10-08|A|Guilherme|4|0|Yuri Geo|3
+2026-10-08|A|Guilherme|2|0|João Victor|8
+2026-10-07|A|Guilherme|10|1|Kariel|7
+2026-10-07|A|Guilherme|6|2|Kariel|7
+2026-10-07|A|Kariel|4|2|Yuri|11
+2026-10-07|A|Kariel|1|1|Yuri|-5
+2026-10-07|A|Guilherme|3|2|Kariel|7
+2026-10-07|A|Guilherme|4|3|Kariel|6
+2026-10-07|A|Guilherme|5|2|Augusto Rubim|5
+2026-10-07|A|Guilherme|5|2|Augusto Rubim|4
+2026-10-07|A|Bruno|0|2|Yuri|-21
+2026-10-07|A|Augusto Rubim|4|3|Yuri|14
+2026-10-07|A|Bruno|2|1|Augusto Rubim|11
+2026-10-01|A|Yuri Geo|1|1|Yuri|-3
+2026-10-01|A|Yuri|2|1|Yuri Geo|16
+2026-10-01|A|Augusto Rubim|5|1|Yuri|10
+2026-10-01|A|Lucas|7|0|Yuri|5
+2026-10-01|A|João Victor|1|2|Lucas|-12
+2026-10-01|A|Guilherme|1|0|Kariel|8
+2026-10-01|A|Guilherme|3|2|Kariel|8
+2026-10-01|A|Guilherme|8|2|Kariel|7
+2026-10-01|A|Kariel|6|0|Yuri|8
+2026-10-01|A|Kariel|3|2|Yuri Geo|10
+2026-10-01|A|Rafael|4|1|Kariel|10
+2026-10-01|A|Rafael|7|1|Kariel|9
+2026-10-01|A|Guilherme|2|0|Rafael|12
+2026-10-01|A|Kariel|5|4|Yuri|8
+2026-10-01|A|Guilherme|1|0|Yuri Geo|4
+2026-10-01|A|Guilherme|5|1|Yuri Geo|4
+2026-10-01|A|Yuri|2|0|Yuri Geo|16
+2026-10-01|A|Yuri|2|0|Augusto Rubim|18
+2026-10-01|A|Yuri|7|3|Augusto Rubim|17
+2026-10-01|A|Yuri|1|1|Guilherme|10
+2026-10-01|A|Guilherme|2|1|Yuri|4
+2026-10-01|A|Guilherme|2|2|Yuri Geo|-10
+2026-09-25|A|Augusto Rubim|5|1|Yuri|10
+2026-09-25|A|Lucas|7|0|Yuri|5
+2026-09-25|A|Lucas|3|1|João Victor|12
+2026-09-25|A|Bruno|2|1|Lucas|17
+2026-09-24|A|João Victor|2|1|Rafael|16
+2026-09-24|A|Yuri Geo|2|1|Rafael|20
+2026-09-24|A|Rafael|5|1|Yuri Geo|7
+2026-09-24|A|Guilherme|2|2|João Victor|-3
+2026-09-24|A|Guilherme|1|0|João Victor|11
+2026-09-24|A|Lucas|2|1|Yuri Geo|8
+2026-09-24|A|Luciano|4|1|Yuri|13
+2026-09-24|A|Lucas|4|1|Yuri|5
+2026-09-24|A|Yuri Geo|1|1|Yuri|-3
+2026-09-24|A|Yuri|2|1|Yuri Geo|16
+2026-09-23|A|Guilherme|2|0|João Victor|10
+2026-09-23|A|João Victor|4|3|Bruno|12
+2026-09-23|A|Rafael|6|1|Yuri|4
+2026-09-22|A|Rafael|5|2|Guilherme|13
+2026-09-22|A|Guilherme|4|2|Rafael|14
+2026-09-18|A|Rafael|2|1|Guilherme|13
+2026-09-18|A|Rafael|1|1|Guilherme|0
+2026-09-18|A|Rafael|2|1|Guilherme|12
+2026-09-18|A|Rafael|1|1|Guilherme|-1
+2026-09-18|A|João Victor|2|1|Rafael|16
+2026-09-18|A|João Victor|1|1|Rafael|3
+2026-09-17|A|Guilherme|8|0|Yuri Geo|5
+2026-09-17|A|Guilherme|4|3|Yuri|4
+2026-09-17|A|Lucas|6|1|Yuri Geo|7
+2026-09-17|A|Lucas|7|2|Yuri Geo|7
+2026-09-17|A|Yuri Geo|2|1|Augusto Rubim|13
+2026-09-17|A|Augusto Rubim|5|3|Rafael|19
+2026-09-15|A|Kariel|5|3|Yuri|7
+2026-09-15|A|Rafael|8|2|Kariel|8
+2026-09-15|A|Kariel|2|2|Yuri|-5
+2026-09-15|A|Kariel|4|4|Rafael|5
+2026-09-14|A|Rafael|1|1|Guilherme|1
+2026-09-14|A|Guilherme|5|5|Kariel|-5
+2026-09-14|A|Rafael|4|3|Kariel|8
+2026-09-11|A|Guilherme|3|2|João Victor|8
+2026-09-11|A|Guilherme|3|2|João Victor|8
+2026-09-11|A|João Victor|0|0|Bruno|1
+2026-09-11|A|João Victor|1|1|Bruno|0
+2026-09-11|A|João Victor|5|1|Bruno|12
+2026-09-10|A|Rafael|2|2|Yuri|-8
+2026-09-10|A|Rafael|5|1|João Victor|8
+2026-09-10|A|Rafael|6|0|Yuri|4
+2026-09-10|A|João Victor|2|0|Rafael|15
+2026-09-10|A|Guilherme|3|2|João Victor|9
+2026-09-10|A|Guilherme|3|2|João Victor|9
+2026-09-10|A|João Victor|4|2|Augusto Rubim|8
+2026-09-10|A|Bruno|5|0|Yuri|6
+2026-09-09|A|João Victor|5|0|Yuri Geo|10
+2026-09-09|A|João Victor|7|1|Yuri Geo|9
+2026-09-09|A|João Victor|6|3|Yuri Geo|9
+2026-09-09|A|João Victor|6|1|Augusto Rubim|8
+2026-09-09|A|Augusto Rubim|5|1|Yuri|9
+2026-09-09|A|Augusto Rubim|5|5|Yuri|-3
+2026-09-08|A|Kariel|5|0|Yuri|7
+2026-09-04|A|João Victor|2|2|Rafael|4
+2026-09-04|A|João Victor|2|0|Bruno|12
+2026-09-04|A|João Victor|1|1|Bruno|1
+2026-09-04|A|Rafael|3|1|João Victor|7
+2026-09-04|A|João Victor|1|1|Bruno|1
+2026-09-03|A|Rafael|4|2|Yuri|5
+2026-09-03|A|Rafael|2|1|Augusto Rubim|6
+2026-09-03|A|Rafael|6|1|Augusto Rubim|6
+2026-09-03|A|Rafael|4|1|Yuri Geo|6
+2026-09-03|A|João Victor|3|3|Bruno|1
+2026-09-03|A|João Victor|2|1|Yuri|8
+2026-09-03|A|João Victor|3|0|Augusto Rubim|9
+2026-09-03|A|Guilherme|4|2|Augusto Rubim|6
+2026-09-03|A|Rafael|3|1|Guilherme|10
+2026-09-03|A|Bruno|3|1|Rafael|15
+2026-09-03|A|Bruno|5|0|Yuri Geo|9
+2026-09-03|A|Rafael|4|3|Yuri|4
+2026-09-03|A|Rafael|2|2|Guilherme|-1
+2026-09-03|A|Rafael|4|1|João Victor|7
+2026-09-03|A|Lucas|4|0|Augusto Rubim|7
+2026-09-03|A|Lucas|4|0|Augusto Rubim|7
+2026-09-03|A|Lucas|2|3|Augusto Rubim|-15
+2026-09-03|A|Lucas|3|1|Yuri|6
+2026-09-03|A|João Victor|1|0|Yuri|7
+2026-09-03|A|Lucas|4|0|João Victor|9
+2026-09-03|A|Bruno|4|1|Yuri|6
+2026-09-03|A|Guilherme|2|2|Rafael|1
+2026-09-02|A|Rafael|2|1|Yuri Geo|7
+2026-09-02|A|Rafael|3|3|Yuri|-6
+2026-09-02|A|Guilherme|3|1|Yuri|5
+2026-09-01|A|Kariel|2|2|Guilherme|3
+2026-09-01|A|Kariel|1|1|Guilherme|3
+2026-09-01|A|João Victor|2|1|Bruno|12
+2026-09-01|A|João Victor|1|2|Bruno|-10
+2026-09-01|A|Lucas|5|4|Bruno|10
+2026-09-01|A|Guilherme|3|3|Bruno|-3
+2026-09-01|A|Guilherme|2|1|Bruno|8
+2026-09-01|A|Yuri Geo|2|2|João Victor|11
+2026-08-27|A|Guilherme|10|0|Yuri Geo|7
+2026-08-27|A|Guilherme|3|0|João Victor|7
+2026-08-27|A|Lucas|3|1|Yuri|7
+2026-08-27|A|Lucas|3|1|Yuri|6
+2026-08-27|A|João Victor|2|1|Guilherme|13
+2026-08-27|A|Guilherme|5|0|João Victor|7
+2026-08-27|A|Guilherme|8|1|Yuri|5
+2026-08-27|A|Guilherme|5|1|Kariel|7
+2026-08-27|A|Guilherme|3|1|Kariel|7
+2026-08-27|A|Bruno|3|2|João Victor|9
+2026-08-27|A|Rafael|1|1|Bruno|-2
+2026-08-27|A|João Victor|6|4|Augusto Rubim|10
+2026-08-21|A|Lucas|5|3|Augusto Rubim|8
+2026-08-21|A|Lucas|10|3|Augusto Rubim|8
+2026-08-21|A|Augusto Rubim|1|3|Bruno|-8
+2026-08-21|A|Augusto Rubim|3|3|Bruno|2
+2026-08-21|A|Augusto Rubim|5|2|Yuri|8
+2026-08-21|A|João Victor|2|1|Yuri Geo|10
+2026-08-21|A|Guilherme|4|1|Yuri Geo|7
+2026-08-21|A|Guilherme|4|1|Yuri Geo|7
+2026-08-21|A|João Victor|3|3|Rafael|4
+2026-08-20|A|Augusto Rubim|4|2|Lucas|10
+2026-08-20|A|Augusto Rubim|1|2|Lucas|-8
+2026-08-20|A|Augusto Rubim|5|3|Yuri|8
+2026-08-20|A|Augusto Rubim|7|1|Yuri|8
+2026-08-20|A|João Victor|1|0|Guilherme|12
+2026-08-20|A|Guilherme|2|0|Bruno|8
+2026-08-20|A|Bruno|2|0|João Victor|8
+2026-08-19|A|Bruno|3|0|João Victor|8
+2026-08-19|A|Kariel|2|2|Rafael|3
+2026-08-19|A|João Victor|4|1|Augusto Rubim|10
+2026-08-19|A|Rafael|10|2|Yuri|5
+2026-08-19|A|Rafael|8|1|Yuri|5
+2026-08-18|A|Kariel|5|3|Yuri|8
+2026-08-18|A|Guilherme|3|0|Yuri|6
+2026-08-14|A|Rafael|10|4|Augusto Rubim|6
+2026-08-14|A|Bruno|7|1|Augusto Rubim|8
+2026-08-14|A|Bruno|1|3|Rafael|-6
+2026-08-13|A|Guilherme|2|1|João Victor|6
+2026-08-13|A|Guilherme|6|0|Yuri Geo|7
+2026-08-13|A|Yuri|4|3|João Victor|9
+2026-08-13|A|Augusto Rubim|5|4|Lucas|9
+2026-08-13|A|Rafael|7|2|Augusto Rubim|6
+2026-08-07|A|Rafael|10|2|Yuri|5
+2026-07-28|A|Guilherme|9|1|Bruno|6
+2026-07-28|A|Guilherme|1|0|João Victor|5
+2026-07-28|A|João Victor|2|2|Bruno|1
+2026-07-28|A|Bruno|0|0|João Victor|-1
+2026-07-24|A|João Victor|3|1|Roberto|0
+2026-07-24|A|João Victor|2|1|Roberto|0
+2026-07-24|A|João Victor|3|0|Roberto|0
+2026-07-22|A|Guilherme|2|1|Yuri|4
+2026-07-22|A|Guilherme|4|0|João Victor|5
+2026-07-22|A|Bruno|2|1|Roberto|0
+2026-07-22|A|Bruno|2|1|João Victor|5
+2026-07-21|A|Guilherme|4|1|Yuri|5
+2026-07-21|A|Guilherme|2|1|Yuri|5
+2026-07-17|A|Lucas|3|3|Rafael|1
+2026-07-17|A|Roberto|3|1|Bruno|0
+2026-07-17|A|Guilherme|7|0|Augusto Rubim|5
+2026-07-17|A|João Victor|2|2|Augusto Rubim|-13
+2026-07-16|A|Rafael|5|2|Yuri|3
+2026-07-16|A|Lucas|3|2|Augusto Rubim|5
+2026-07-16|A|Augusto Rubim|3|3|Guilherme|15
+2026-07-15|A|Rafael|9|2|Augusto Rubim|4
+2026-07-15|A|Rafael|3|2|Augusto Rubim|4
+2026-07-15|A|Rafael|4|2|Yuri|4
+2026-07-15|A|Augusto Rubim|4|0|Yuri|5
+2026-07-15|A|Augusto Rubim|4|2|Kariel|5
+2026-07-15|A|Rafael|3|1|Guilherme|4
+2026-07-15|A|Rafael|3|2|Guilherme|4
+2026-07-15|A|Lucas|4|0|Yuri|4
+2026-07-15|A|Lucas|4|1|Kariel|5
+2026-07-13|A|João Victor|3|2|Yuri|5
+2026-07-13|A|Rafael|5|2|João Victor|5
+2026-07-13|A|Rafael|8|4|Yuri|5
+2026-07-13|A|Rafael|5|1|Bruno|5
+2026-07-13|A|Guilherme|5|2|Augusto Rubim|5
+2026-07-13|A|Rafael|3|2|Guilherme|5
+2026-07-13|A|Rafael|9|3|Yuri|4
+2026-07-13|A|Rafael|4|1|Yuri|4
+2026-07-13|A|Bruno|4|1|Yuri|5
+2026-07-13|A|Rafael|4|3|Yuri|4
+2026-07-13|A|Rafael|5|2|Yuri|4
+2026-07-13|A|Guilherme|7|2|Augusto Rubim|5
+2026-07-13|A|Guilherme|4|1|João Victor|5
+2026-07-13|A|Rafael|10|1|João Victor|4
+2026-07-13|A|Rafael|4|2|Augusto Rubim|4
+2026-07-13|A|Rafael|6|1|Augusto Rubim|4
+2026-07-13|A|Guilherme|6|2|João Victor|4
+2026-07-13|A|João Victor|3|0|Bruno|5
+2026-07-13|A|Rafael|2|1|João Victor|4
+2026-07-13|A|Rafael|6|5|João Victor|4
+2026-07-13|A|Rafael|6|4|João Victor|4
+2026-07-13|A|Yuri|5|4|Rafael|6
+2026-07-13|A|Rafael|8|2|Augusto Rubim|4
+2026-07-13|A|Rafael|1|1|Guilherme|-1
+2026-07-13|A|Rafael|2|1|João Victor|4
+2026-07-13|A|Augusto Rubim|4|3|Kariel|5
+2026-07-13|A|Guilherme|2|1|Rafael|5
+2026-05-08|A|Augusto Rubim|3|3|César|10
+2026-05-08|A|João Victor|3|3|Augusto Rubim|-13
+2026-05-08|A|João Victor|3|2|Augusto Rubim|7
+2026-05-08|A|Augusto Rubim|3|3|César|10
+2026-05-08|A|João Victor|3|3|Augusto Rubim|-13
+2026-05-08|A|João Victor|3|2|Augusto Rubim|7
+2026-05-08|A|Rafael|2|1|João Paulo|0
+2026-05-08|A|Rafael|7|1|César|11
+2026-05-07|A|César|4|1|Yuri|13
+2026-05-07|A|César|8|2|Yuri|13
+2026-05-07|A|Rafael|5|0|Yuri|6
+2026-05-07|A|Rafael|8|2|Yuri|6
+2026-05-07|A|César|4|3|Yuri|13
+2026-05-07|A|César|3|2|Yuri|13
+2026-05-07|A|Rafael|7|0|César|11
+2026-05-07|A|Rafael|3|2|Rodrigo|0
+2026-05-07|A|Rafael|5|2|César|11
+2026-05-07|A|César|4|2|Rafael|29
+2026-05-07|A|João Victor|4|2|Bruno|20
+2026-05-07|A|Roberto|3|2|Bruno|0
+2026-05-06|A|Rafael|6|2|Kariel|11
+2026-05-06|A|César|3|3|Yuri|-7
+2026-05-06|A|César|5|1|Yuri|13
+2026-05-06|A|César|3|1|João Paulo|0
+2026-05-06|A|César|4|2|Yuri|13
+2026-05-06|A|César|2|3|Yuri|-27
+2026-04-30|A|Rafael|4|0|João Victor|15
+2026-04-30|A|Rafael|6|3|Yuri|6
+2026-04-30|A|Rafael|2|1|Augusto Rubim|5
+2026-04-30|A|Rafael|3|2|Augusto Rubim|5
+2026-04-30|A|César|1|0|Bruno|24
+2026-04-30|A|César|4|2|Guilherme|29
+2026-04-30|A|César|5|2|Bruno|24
+2026-04-30|A|Rafael|3|1|Bruno|15
+2026-04-30|A|Rafael|5|2|Yuri|6
+2026-04-30|A|César|4|3|Lucas|19
+2026-04-30|A|Rafael|3|1|João Victor|15
+2026-04-30|A|Rafael|8|0|João Victor|15
+2026-04-30|A|Rafael|4|1|João Victor|15
+2026-04-30|A|Rafael|7|1|João Victor|15
+2026-04-30|A|Rafael|5|1|João Victor|15
+2026-04-30|A|Rafael|9|1|João Victor|15
+2026-04-29|A|Rafael|1|0|João Victor|15
+2026-04-29|A|Rafael|6|4|César|11
+2026-04-29|A|César|3|1|Guilherme|29
+2026-04-29|A|Guilherme|3|1|Rafael|20
+2026-04-28|A|Kariel|3|1|César|20
+2026-04-28|A|Kariel|8|4|César|20
+2026-04-28|A|César|2|1|Guilherme|29
+2026-04-28|A|César|5|2|Kariel|20
+2026-04-28|A|Guilherme|2|1|César|11
+2026-04-28|A|Yuri|3|3|César|7
+2026-04-28|A|César|6|3|Kariel|20
+2026-04-28|A|César|5|2|Kariel|20
+2026-04-28|A|Kariel|4|2|César|20
+2026-04-28|A|Kariel|5|3|César|20
+2026-04-28|A|Kariel|5|1|Yuri|13
+2026-04-28|A|Kariel|2|2|Yuri|-7
+2026-04-27|A|Kariel|3|3|Guilherme|9
+2026-04-27|A|Kariel|4|1|Guilherme|29
+2026-04-24|A|César|9|2|Augusto Rubim|10
+2026-04-24|A|César|11|4|Augusto Rubim|10
+2026-04-23|A|Rafael|2|2|César|-9
+2026-04-23|A|Guilherme|6|2|César|11
+2026-04-23|A|Rafael|5|2|Bruno|15
+2026-04-23|A|Guilherme|4|3|Rafael|20
+2026-04-23|A|Rafael|6|0|Augusto Rubim|5
+2026-04-22|A|Rafael|4|3|Kariel|11
+2026-04-22|A|Rafael|4|1|Kariel|11
+2026-04-22|A|Kariel|4|3|César|20
+2026-04-22|A|Guilherme|3|1|César|11
+2026-04-22|A|Guilherme|3|2|Rafael|20
+2026-04-22|A|Guilherme|13|0|Augusto Rubim|5
+2026-04-22|A|Augusto Rubim|5|5|Yuri|4
+2026-04-22|A|César|6|3|Kariel|20
+2026-04-22|A|Yuri|3|1|César|27
+2026-04-22|A|Kariel|9|3|César|20
+2026-04-22|A|Kariel|11|1|Yuri|13
+2026-04-22|A|Rafael|7|5|César|11
+2026-04-17|A|Rafael|5|3|João Victor|15
+2026-04-17|A|Rafael|2|1|César|11
+2026-04-17|A|Rafael|9|1|João Victor|15
+2026-04-17|A|César|4|1|João Victor|24
+2026-04-17|A|César|4|2|Rafael|29
+2026-04-17|A|João Victor|5|5|César|-4
+2026-04-17|A|Guilherme|2|1|César|11
+2026-04-17|A|César|5|3|Rafael|29
+2026-04-16|A|César|4|2|Rafael|29
+2026-04-16|A|César|7|2|Guilherme|29
+2026-04-16|A|Guilherme|4|3|César|11
+2026-04-16|A|Rafael|4|2|César|11
+2026-04-16|A|César|1|1|João Victor|4
+2026-04-15|A|Kariel|4|2|Yuri|13
+2026-04-15|A|Guilherme|4|2|João Victor|15
+2026-04-15|A|Guilherme|10|0|João Victor|15
+2026-04-15|A|Kariel|4|6|Yuri|-27
+2026-04-15|A|Lucas|5|1|Yuri|14
+2026-04-15|A|Lucas|4|3|Yuri|14
+2026-04-15|A|César|4|4|Yuri|-7
+2026-04-15|A|César|6|6|Lucas|-1
+2026-04-10|A|Rafael|6|2|Augusto Rubim|5
+2026-04-10|A|Rafael|4|2|Augusto Rubim|5
+2026-04-10|A|Rafael|6|4|Augusto Rubim|5
+2026-04-10|A|Lucas|3|2|César|21
+2026-04-10|A|Rafael|2|2|César|-9
+2026-04-10|A|Guilherme|6|2|João Victor|15
+2026-04-10|A|Lucas|5|1|Rafael|29
+2026-04-09|A|Yuri|4|1|César|27
+2026-04-09|A|Rafael|4|3|César|11
+2026-04-09|A|César|4|1|João Victor|24
+2026-04-09|A|César|3|0|João Victor|24
+2026-04-09|A|César|9|2|Bruno|24
+2026-04-09|A|Rafael|4|1|João Victor|15
+2026-04-09|A|César|7|6|Lucas|19
+2026-04-09|A|César|7|4|Augusto Rubim|10
+2026-04-09|A|César|6|1|João Victor|24
+2026-04-09|A|César|8|3|Lucas|19
+2026-03-19|A|César|2|2|Rafael|9
+2026-03-19|A|César|7|3|Augusto Rubim|10
+2026-03-19|A|Rafael|6|3|Augusto Rubim|5
+2026-03-19|A|César|7|2|Augusto Rubim|10
+2026-03-19|A|César|5|3|Rafael|29
+2026-03-19|A|César|11|1|Ariela|0
+2026-03-19|A|Guilherme|6|6|César|-9
+2026-03-19|A|Lucas|8|2|Augusto Rubim|11
+2026-03-19|A|Augusto Rubim|6|5|Lucas|29
+2026-03-19|A|Lucas|8|0|Augusto Rubim|11
+2026-03-19|A|Augusto Rubim|5|4|César|30
+2026-03-18|A|Guilherme|4|2|Rafael|20
+2026-03-18|A|Rafael|5|3|Kariel|11
+2026-03-17|A|Kariel|9|2|Yuri|13
+2026-03-17|A|Kariel|5|4|Yuri|13
+2026-03-17|A|Kariel|3|0|Yuri|13
+2026-03-17|A|Kariel|6|6|Yuri|-7
+2026-03-17|A|Kariel|13|2|Yuri|13
+2026-03-16|A|Kariel|6|2|César|20
+2026-03-16|A|César|5|3|Kariel|20
+2026-03-16|A|Kariel|7|3|César|20
+2026-03-16|A|César|7|6|Kariel|20
+2026-03-13|A|César|6|4|Rafael|29
+2026-03-12|A|Augusto Rubim|6|5|César|30
+2026-03-12|A|César|3|2|Rafael|29
+2026-03-12|A|César|2|1|Rafael|29
+2026-03-11|A|Rafael|6|2|Yuri|6
+2026-03-11|A|Lucas|3|2|César|21
+2026-03-11|A|Kariel|8|2|Augusto Rubim|10
+2026-03-11|A|César|5|1|Yuri|13
+2026-03-11|A|César|2|1|Guilherme|29
+2026-03-11|A|César|5|2|Rafael|29
+2026-03-10|A|Rafael|3|1|Kariel|11
+2026-03-10|A|Kariel|8|3|Augusto Rubim|10
+2026-03-10|A|Guilherme|8|4|César|11
+2026-03-10|A|César|5|1|Yuri|13
+2026-02-12|A|César|5|3|Kariel|20
+2026-02-12|A|César|5|3|Yuri|13
+2026-02-12|A|Humberto|4|1|César|20
+2026-02-12|A|Kariel|4|3|Yuri|13
+2026-02-12|A|Kariel|5|3|César|20
+2026-02-12|A|Humberto|5|3|Kariel|20
+2026-02-12|A|Humberto|5|1|Yuri|13
+2026-02-12|A|Guilherme|2|1|César|11
+2026-02-12|A|Humberto|4|2|Guilherme|29
+2026-02-12|A|Guilherme|6|4|Yuri|6
+2026-02-12|A|Guilherme|5|3|Yuri|6
+2026-02-12|A|Kariel|5|2|Yuri|13
+2026-02-12|A|Kariel|4|3|Yuri|13
+2026-02-11|A|César|4|4|Kariel|0
+2026-02-11|A|Humberto|4|3|Kariel|20
+2026-02-11|A|Kariel|6|5|César|20
+2026-02-11|A|César|4|1|Kariel|20
+2026-02-11|A|César|4|3|Guilherme|29
+2026-02-11|A|César|5|2|Luciano|20
+2026-02-11|A|Luciano|3|2|Guilherme|29
+2026-02-11|A|Kariel|4|1|César|20
+2026-02-11|A|César|2|1|Luciano|20
+2026-02-11|A|Kariel|2|2|Luciano|0
+2026-02-11|A|Kariel|4|2|Luciano|20
+2026-02-10|A|Kariel|4|4|Luciano|0
+2026-02-10|A|Kariel|6|6|Luciano|0
+2026-02-10|A|Guilherme|4|3|Luciano|11
+2026-02-10|A|Guilherme|2|2|Luciano|-9
+2026-02-09|A|Luciano|3|1|Guilherme|29
+2026-02-09|A|Guilherme|5|1|Rafael|20
+2026-02-06|A|César|3|2|Humberto|20
+2026-02-06|A|César|2|2|Humberto|0
+2026-02-05|A|César|2|2|Lucas|-1
+2026-02-05|A|Lucas|3|2|César|21
+2026-02-05|A|César|5|0|Lucas|19
+2026-02-05|A|Humberto|2|1|César|20
+2026-02-05|A|Humberto|4|1|Lucas|19
+2026-02-05|A|Kariel|5|0|Lucas|20
+2026-02-05|A|Kariel|5|4|César|20
+2026-02-04|A|Kariel|6|2|César|20
+2026-02-04|A|Humberto|5|3|Kariel|20
+2026-02-04|A|Humberto|4|3|Kariel|20
+2026-02-04|A|Kariel|0|0|Rafael|9
+2026-02-04|A|César|5|1|Lucas|19
+2026-02-04|A|César|7|0|Lula|20
+2026-02-04|A|Humberto|3|3|Rafael|9
+2026-02-04|A|Rafael|7|1|Lula|11
+2026-02-04|A|César|2|1|Humberto|20
+2026-02-04|A|Kariel|14|1|Yuri|13
+2026-02-04|A|Kariel|3|1|Rafael|29
+2026-02-04|A|Rafael|3|2|César|11
+2026-02-04|A|Humberto|8|2|César|20
+2026-02-04|A|César|8|3|Yuri|13
+2026-02-04|A|Guilherme|1|0|Rafael|20
+2026-02-04|A|Rafael|2|1|Guilherme|20
+2026-02-04|A|Rafael|3|2|Yuri|6
+2026-02-04|A|Luciano|6|0|Yuri|13
+2026-02-04|A|César|4|0|Luciano|20
+2026-02-03|A|Lula|5|3|Yuri|13
+2026-02-03|A|Lula|3|2|Yuri|13
+2026-02-03|A|Rafael|5|1|Yuri|6
+2026-02-03|A|Rafael|9|1|Yuri|6
+2026-02-03|A|Rafael|5|3|Lula|11
+2026-02-03|A|Rafael|9|2|Lula|11
+2026-02-03|A|Rafael|3|1|Yuri|6
+2026-02-03|A|Guilherme|2|0|Yuri|6
+2026-02-03|A|Luciano|3|2|Rafael|29
+2026-02-03|A|Luciano|6|0|Guilherme|29
+2026-01-30|A|César|1|0|Guilherme|29
+2026-01-30|A|César|4|2|Guilherme|29
+2026-01-30|A|Humberto|5|0|César|20
+2026-01-29|A|César|1|1|Humberto|0
+2026-01-29|A|César|0|0|Humberto|0
+2026-01-29|A|Humberto|3|0|César|20
+2026-01-29|A|Humberto|4|1|César|20
+2026-01-29|A|César|1|1|Humberto|0
+2026-01-29|A|Humberto|5|2|César|20
+2026-01-29|A|Humberto|5|2|Lula|20
+2026-01-29|A|César|2|2|Lucas|-1
+2026-01-29|A|César|3|2|Humberto|20
+2026-01-29|A|Guilherme|9|0|César|11
+2026-01-29|A|Kariel|13|1|César|20
+2026-01-29|A|Humberto|3|2|Kariel|20
+2026-01-28|A|Humberto|5|2|César|20
+2026-01-28|A|Humberto|3|2|César|20
+2026-01-28|A|Kariel|5|2|César|20
+2026-01-28|A|César|5|3|Kariel|20
+2026-01-28|A|Kariel|4|3|César|20
+2026-01-28|A|Kariel|4|3|César|20
+2026-01-28|A|César|5|4|Kariel|20
+2026-01-28|A|Lula|6|5|Yuri|13
+2026-01-28|A|Lula|4|3|César|20
+2026-01-28|A|César|5|3|Yuri|13
+2026-01-28|A|Humberto|4|3|Kariel|20
+2026-01-28|A|Humberto|5|2|Kariel|20
+2026-01-28|A|Milton|1|7|Luciano|-20
+2026-01-27|A|Milton|5|4|Lula|20
+2026-01-27|A|Yuri|1|3|Lula|-13
+2026-01-27|A|Yuri|2|4|Lula|-13
+2026-01-27|A|Yuri|3|2|Lula|27
+2026-01-27|A|Lula|0|14|Luciano|-20
+2026-01-27|A|Guilherme|0|2|Luciano|-29
+2026-01-27|A|Guilherme|2|2|Luciano|-9
+2026-01-27|A|Rafael|8|0|Lula|11
+2026-01-27|A|Rafael|5|3|Lula|11
+2026-01-23|A|Augusto Rubim|7|4|Guilherme|35
+2026-01-23|A|Augusto Rubim|4|2|César|30
+2026-01-23|A|César|8|0|Milton|20
+2026-01-23|A|Kariel|3|3|César|0
+2026-01-23|A|Humberto|2|1|César|20
+2026-01-23|A|Kariel|6|5|César|20
+2026-01-23|A|César|5|1|Kariel|20
+2026-01-22|A|Humberto|7|4|César|20
+2026-01-22|A|Kariel|5|3|César|20
+2026-01-22|A|Kariel|3|1|César|20
+2026-01-22|A|César|4|1|Kariel|20
+2026-01-22|A|Humberto|4|3|César|20
+2026-01-22|A|César|7|3|Lula|20
+2026-01-22|A|César|8|3|Lula|20
+2026-01-22|A|César|5|4|Humberto|20
+2026-01-22|A|César|1|0|Lucas|19
+2026-01-22|A|César|3|2|Kariel|20
+2026-01-22|A|César|7|1|Milton|20
+2026-01-21|A|César|8|2|Rafael|29
+2026-01-21|A|Humberto|2|0|Rafael|29
+2026-01-21|A|César|3|2|Rafael|29
+2026-01-20|A|Rafael|5|2|Yuri|6
+2026-01-20|A|Rafael|4|1|Kariel|11
+2026-01-20|A|Lula|2|2|Rafael|9
+2025-12-23|A|Guilherme|3|2|Kariel|11
+2025-12-23|A|Kariel|7|4|Yuri|13
+2025-12-23|A|Kariel|10|3|Lula|20
+2025-12-23|A|Kariel|9|4|Yuri|13
+2025-12-22|A|Kariel|5|3|Luciano|20
+2025-12-22|A|Guilherme|1|1|Luciano|-9
+2025-12-22|A|Guilherme|3|1|Luciano|11
+2025-12-19|A|Kariel|3|1|Yuri|13
+2025-12-19|A|César|3|0|Milton|20
+2025-12-19|A|Guilherme|4|2|César|11
+2025-12-19|A|César|3|3|Kariel|0
+2025-12-19|A|Milton|0|4|Yuri|-27
+2025-12-19|A|Milton|4|3|Yuri|13
+2025-12-19|A|Milton|4|7|Yuri|-27
+2025-12-19|A|César|4|2|Kariel|20
+2025-12-19|A|César|3|2|Yuri|13
+2025-12-19|A|César|8|3|Milton|20
+2025-12-18|A|Kariel|3|2|Yuri|13
+2025-12-18|A|Kariel|6|1|Yuri|13
+2025-12-18|A|César|1|1|Kariel|0
+2025-12-18|A|César|3|3|Kariel|0
+2025-12-18|A|César|9|5|Yuri|13
+2025-12-18|A|Yuri|4|4|Kariel|7
+2025-12-18|A|César|3|2|Kariel|20
+2025-12-18|A|César|5|2|Augusto Rubim|10
+2025-12-18|A|César|5|2|Yuri|13
+2025-12-18|A|Lucas|4|3|César|21
+2025-12-18|A|Lucas|2|0|Augusto Rubim|11
+2025-12-18|A|Milton|5|3|Yuri|13
+2025-12-18|A|Yuri|7|6|Kariel|27
+2025-12-18|A|Yuri|5|2|César|27
+2025-12-18|A|César|4|1|Lula|20
+2025-12-18|A|Humberto|5|2|César|20
+2025-12-18|A|Guilherme|2|1|Lucas|11
+2025-12-18|A|Lucas|6|1|César|21
+2025-12-18|A|Augusto Rubim|9|0|Milton|30
+2025-12-17|A|Kariel|5|4|César|20
+2025-12-17|A|César|13|0|Yuri|13
+2025-12-17|A|Humberto|10|0|César|20
+2025-12-17|A|Lucas|3|0|Kariel|20
+2025-12-17|A|Kariel|2|1|César|20
+2025-12-17|A|Yuri|5|4|Milton|27
+2025-12-17|A|Augusto Rubim|5|3|Yuri|24
+2025-12-17|A|Kariel|8|3|Yuri|13
+2025-12-17|A|Humberto|8|1|Augusto Rubim|10
+2025-12-17|A|Humberto|8|1|César|20
+2025-12-17|A|Kariel|7|3|Yuri|13
+2025-12-17|A|César|7|3|Humberto|20
+2025-12-17|A|Humberto|6|1|Guilherme|29
+2025-12-17|A|Humberto|7|3|César|20
+2025-12-17|A|Kariel|5|4|Yuri|13
+2025-12-17|A|Kariel|4|3|César|20
+2025-12-17|A|Luciano|5|1|Yuri|13
+2025-12-17|A|César|4|2|Yuri|13
+2025-12-15|A|Guilherme|5|4|Luciano|11
+2025-12-12|A|César|4|1|Ellen|0
+2025-12-12|A|César|5|2|Milton|20
+2025-12-12|A|Kariel|6|5|Augusto Rubim|10
+2025-12-12|A|Augusto Rubim|2|1|Lucas|29
+2025-12-12|A|Leo|3|2|César|20
+2025-12-12|A|Kariel|3|2|César|20
+2025-12-12|A|Kariel|10|2|Lula|20
+2025-12-12|A|Leo|4|1|Kariel|20
+2025-12-11|A|César|7|2|Milton|20
+2025-12-11|A|César|4|2|Milton|20
+2025-12-11|A|César|10|0|Milton|20
+2025-12-11|A|César|3|0|Kariel|20
+2025-12-11|A|Lucas|3|2|Kariel|20
+2025-12-11|A|Lucas|5|3|Augusto Rubim|11
+2025-12-11|A|Kariel|6|5|César|20
+2025-12-11|A|César|3|2|Humberto|20
+2025-12-11|A|Kariel|4|2|César|20
+2025-12-11|A|Kariel|9|6|Augusto Rubim|10
+2025-12-11|A|Lucas|2|0|Ellen|0
+2025-12-11|A|Lucas|3|2|Augusto Rubim|11
+2025-12-11|A|Lucas|4|1|Augusto Rubim|11
+2025-12-11|A|Augusto Rubim|2|1|César|30
+2025-12-11|A|Augusto Rubim|2|1|Lucas|29
+2025-12-11|A|Humberto|11|3|Kariel|20
+2025-12-11|A|Kariel|2|1|César|20
+2025-12-10|A|Kariel|4|3|César|20
+2025-12-10|A|César|6|3|Kariel|20
+2025-12-10|A|Humberto|2|2|César|0
+2025-12-10|A|Humberto|3|2|César|20
+2025-12-10|A|César|4|2|Kariel|20
+2025-12-10|A|Kariel|6|4|César|20
+2025-12-10|A|Kariel|5|4|César|20
+2025-12-10|A|Humberto|2|1|César|20
+2025-12-10|A|Humberto|7|2|Augusto Rubim|10
+2025-12-10|A|Humberto|6|1|Lula|20
+2025-12-10|A|Kariel|3|3|César|0
+2025-12-10|A|Humberto|5|4|César|20
+2025-12-10|A|Leo|8|0|Yuri|13
+2025-12-10|A|Leo|4|2|Augusto Rubim|10
+2025-12-10|A|Leo|1|0|Humberto|20
+2025-12-10|A|Leo|3|2|César|20
+2025-12-10|A|Leo|4|2|Luciano|20
+2025-12-10|A|César|2|2|Guilherme|9
+2025-12-10|A|Humberto|5|0|Luciano|20
+2025-12-10|A|Humberto|8|1|Lula|20
+2025-12-10|A|César|8|1|Luciano|20
+2025-12-10|A|César|1|4|Luciano|-20
+2025-12-10|A|César|2|1|Luciano|20
+2025-12-09|A|Yuri|6|1|Lula|27
+2025-12-09|A|Yuri|3|1|Lula|27
+2025-12-09|A|Guilherme|3|1|Lula|11
+2025-12-09|A|Luciano|8|3|Lula|20
+2025-12-04|A|César|5|3|Kariel|20
+2025-12-04|A|César|7|4|Kariel|20
+2025-12-04|A|Humberto|5|2|César|20
+2025-12-04|A|Humberto|7|2|Kariel|20
+2025-12-04|A|Kariel|6|2|César|20
+2025-12-04|A|César|3|1|Milton|20
+2025-12-04|A|César|5|2|Kariel|20
+2025-12-04|A|Humberto|2|2|César|0
+2025-12-04|A|Humberto|6|3|Kariel|20
+2025-12-04|A|Humberto|5|2|Kariel|20
+2025-12-04|A|Kariel|3|2|Yuri|13
+2025-12-04|A|Humberto|13|0|Yuri|13
+2025-12-04|A|Lula|3|5|Yuri|-27
+2025-12-04|A|Lula|6|5|César|20
+2025-12-04|A|Kariel|7|0|Lula|20
+2025-12-04|A|Kariel|6|4|Yuri|13
+2025-12-04|A|Kariel|2|1|César|20
+2025-12-04|A|César|4|2|Lucas|19
+2025-12-04|A|César|3|1|Lucas|19
+2025-12-04|A|Kariel|1|5|César|-20
+2025-12-03|A|Humberto|6|2|César|20
+2025-12-03|A|Humberto|4|2|Kariel|20
+2025-12-03|A|Lucas|5|2|César|21
+2025-12-03|A|Humberto|7|4|Kariel|20
+2025-12-03|A|Kariel|6|3|Yuri|13
+2025-12-03|A|Lula|3|2|Yuri|13
+2025-12-03|A|Augusto Rubim|6|5|César|30
+2025-12-03|A|César|15|2|Yuri|13
+2025-12-03|A|Humberto|4|3|César|20
+2025-12-02|A|Luciano|6|1|Lula|20
+2025-11-28|A|César|8|1|Kariel|20
+2025-11-28|A|César|5|4|Augusto Rubim|10
+2025-11-28|A|César|5|3|Augusto Rubim|10
+2025-11-27|A|Humberto|7|2|Augusto Rubim|10
+2025-11-27|A|César|4|0|Humberto|20
+2025-11-27|A|Humberto|4|1|César|20
+2025-11-27|A|Kariel|3|2|César|20
+2025-11-27|A|Humberto|3|3|Kariel|0
+2025-11-27|A|Humberto|11|3|César|20
+2025-11-27|A|César|2|2|Kariel|0
+2025-11-27|A|Humberto|4|3|César|20
+2025-11-27|A|Humberto|1|0|Kariel|20
+2025-11-27|A|Kariel|8|3|Yuri|13
+2025-11-27|A|César|1|1|Guilherme|9
+2025-11-27|A|Augusto Rubim|5|2|Yuri|24
+2025-11-27|A|Augusto Rubim|6|2|Yuri|24
+2025-11-26|A|César|11|3|Yuri|13
+2025-11-26|A|César|4|3|Yuri|13
+2025-11-26|A|Kariel|4|2|César|20
+2025-11-26|A|Humberto|3|1|César|20
+2025-11-26|A|Humberto|6|3|Kariel|20
+2025-11-26|A|Humberto|6|2|Kariel|20
+2025-11-26|A|Yuri|3|3|Augusto Rubim|-4
+2025-11-26|A|César|4|1|Yuri|13
+2025-11-26|A|César|5|1|Augusto Rubim|10
+2025-11-26|A|Augusto Rubim|3|2|Yuri|24
+2025-11-26|A|César|2|2|Yuri|-7
+2025-11-26|A|Kariel|4|3|César|20
+2025-11-26|A|Kariel|9|5|Yuri|13
+2025-11-26|A|César|3|3|Lucas|-1
+2025-11-26|A|César|9|1|Augusto Rubim|10
+2025-11-26|A|César|4|3|Kariel|20
+2025-11-26|A|César|4|2|Guilherme|29
+2025-11-25|A|Luciano|1|0|Guilherme|29
+2025-11-24|A|Luciano|2|1|Guilherme|29
+2025-11-19|A|Leo|7|0|Lula|20
+2025-11-19|A|Leo|4|1|Humberto|20
+2025-11-19|A|Humberto|4|2|Augusto Rubim|10
+2025-11-19|A|Augusto Rubim|4|3|Milton|30
+2025-11-19|A|Leo|6|1|Augusto Rubim|10
+2025-11-19|A|Leo|8|1|Lula|20
+2025-11-19|A|Leo|5|1|Yuri|13
+2025-11-19|A|Leo|7|0|Milton|20
+2025-11-18|A|Luciano|5|3|Yuri|13
+2025-11-18|A|Guilherme|2|1|Luciano|11
+2025-11-17|A|Guilherme|2|2|Luciano|-9
+2025-11-14|A|Leo|3|1|Kariel|20
+2025-11-14|A|Humberto|7|3|César|20
+2025-11-13|A|Augusto Rubim|6|6|Humberto|10
+2025-11-13|A|César|8|3|Lucas|19
+2025-11-13|A|Lucas|3|0|Augusto Rubim|11
+2025-11-13|A|César|2|1|Milton|20
+2025-11-13|A|César|4|4|Humberto|0
+2025-11-13|A|César|5|3|Augusto Rubim|10
+2025-11-13|T|Leo|3|2|Humberto|60
+2025-11-13|A|Augusto Rubim|0|3|César|-10
+2025-11-13|A|Kariel|15|1|Augusto Rubim|10
+2025-11-13|A|Leo|1|1|César|0
+2025-11-13|A|César|6|4|Kariel|20
+2025-11-13|A|Kariel|5|2|Milton|20
+2025-11-13|A|Yuri|3|3|César|7
+2025-11-13|A|César|7|4|Kariel|20
+2025-11-12|A|Kariel|9|4|Yuri|13
+2025-11-12|A|Leo|10|0|Kariel|20
+2025-11-12|A|Leo|4|0|César|20
+2025-11-12|A|Leo|8|2|Yuri|13
+2025-11-12|A|César|4|3|Milton|20
+2025-11-12|A|Kariel|5|3|César|20
+2025-11-12|A|Kariel|3|0|Yuri|13
+2025-11-12|A|Kariel|9|6|César|20
+2025-11-11|A|Kariel|5|5|César|0
+2025-11-11|A|Humberto|12|1|Kariel|20
+2025-11-11|A|Yuri|8|2|César|27
+2025-11-11|A|Yuri|4|4|César|-7
+2025-11-11|A|Humberto|2|3|César|-20
+2025-11-11|A|Humberto|9|0|Yuri|13
+2025-11-11|A|César|7|2|Kariel|20
+2025-11-11|A|Kariel|8|5|Lula|20
+2025-11-11|A|César|6|6|Yuri|-7
+2025-11-11|A|Leo|4|2|Gilson|0
+2025-11-11|A|Leo|8|0|Lula|20
+2025-11-11|A|Leo|8|0|Yuri|13
+2025-11-11|A|Humberto|6|2|Augusto Rubim|10
+2025-11-11|A|Luciano|2|2|Milton|0
+2025-11-06|A|César|4|3|Kariel|20
+2025-10-14|T|Humberto|3|0|Guilherme|87
+2025-10-14|T|Lula|3|5|Guilherme|-33
+2025-10-14|T|Kariel|2|3|César|-59
+2025-10-14|T|Kariel|3|2|César|61
+2025-10-14|T|Guilherme|5|3|Augusto Rubim|14
+2025-10-14|T|Luciano|3|4|Lula|-60
+2025-10-14|T|César|8|3|Augusto Rubim|30
+2025-10-14|T|Leo|13|1|Lula|60
+2025-10-14|T|César|1|1|Guilherme|27
+2025-10-14|T|Leo|4|1|Luciano|60
+2025-10-14|T|Yuri|4|7|Kariel|-40
+2025-10-14|T|Humberto|2|0|Kariel|59
+2025-10-14|T|Humberto|5|1|Yuri|40
+2025-09-14|C|Humberto|4|1|Luciano|80
+2025-09-14|C|César|1|2|Leo|-80
+2025-09-14|C|Leo|1|0|Humberto|80
+2025-08-14|C|Humberto|5|4|Yuri|53
+2025-08-14|C|Guilherme|2|4|César|-116
+2025-08-14|C|Yuri|7|5|Lula|107
+2025-08-14|C|Guilherme|1|4|Leo|-116
+2025-08-14|C|Luciano|3|3|Humberto|0
+2025-08-14|C|Luciano|7|2|César|80
+2025-08-14|C|Luciano|7|1|Yuri|53
+2025-08-14|C|César|9|1|Lula|80
+2025-08-14|C|Luciano|6|3|Guilherme|116
+2025-08-14|C|Yuri|3|7|César|-53
+2025-08-14|C|Leo|0|0|Luciano|0
+2025-08-14|C|Lula|1|6|Humberto|-80
+2025-08-14|C|Yuri|1|4|Guilherme|-25
+2025-08-14|C|Yuri|1|4|Leo|-53
+2025-08-14|C|Yuri|3|7|César|-53
+2025-08-14|C|Leo|5|0|César|80
+2025-08-14|C|César|3|7|Humberto|-80

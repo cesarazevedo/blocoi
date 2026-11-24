@@ -618,6 +618,53 @@ function renderBarChart() {
   });
 }
 
+// Monta uma imagem do gráfico "Receitas vs Despesas" (com fundo, título e rodapé)
+async function barChartBlob() {
+  if (!barChart) return null;
+  const src = barChart.canvas;
+  const escuro = isDark();
+  const bg = escuro ? '#1a1d2e' : '#ffffff';
+  const fg = escuro ? '#e2e8f0' : '#2d3748';
+  const mudo = escuro ? '#a0aec0' : '#718096';
+  const pad = 32, topo = 70, rodape = 44;
+  const cv = document.createElement('canvas');
+  cv.width = src.width + pad * 2;
+  cv.height = src.height + topo + rodape;
+  const c = cv.getContext('2d');
+  c.fillStyle = bg; c.fillRect(0, 0, cv.width, cv.height);
+  c.fillStyle = fg; c.font = 'bold 28px sans-serif'; c.textBaseline = 'middle';
+  c.fillText(`Receitas vs Despesas · ${anoSel}`, pad, 36);
+  c.drawImage(src, pad, topo);
+  c.fillStyle = mudo; c.font = '18px sans-serif';
+  c.fillText('Controle Condominial', pad, cv.height - 22);
+  return new Promise(res => cv.toBlob(res, 'image/png'));
+}
+
+function barChartBaixar(blob) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `receitas-vs-despesas-${anoSel}.png`;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+
+async function barChartCompartilhar() {
+  const blob = await barChartBlob();
+  if (!blob) return;
+  const file = new File([blob], `receitas-vs-despesas-${anoSel}.png`, { type: 'image/png' });
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file], title: `Receitas vs Despesas ${anoSel}` }); return; }
+    catch (e) { if (e.name === 'AbortError') return; }
+  }
+  barChartBaixar(blob);
+}
+
+document.getElementById('btn-bar-compartilhar')?.addEventListener('click', barChartCompartilhar);
+document.getElementById('btn-bar-baixar')?.addEventListener('click', async () => {
+  const blob = await barChartBlob();
+  if (blob) barChartBaixar(blob);
+});
+
 function renderDoughnut(despMes) {
   const ctx = document.getElementById('chart-doughnut');
   if (!ctx) return;

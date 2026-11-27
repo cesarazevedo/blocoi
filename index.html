@@ -93,6 +93,7 @@
     <button type="button" class="nav-btn" data-tab="obras"><span>🏗️</span> Simulação de Obras</button>
     <button type="button" class="nav-btn" data-tab="regimento"><span>📜</span> Regimento</button>
     <button type="button" class="nav-btn" data-tab="contatos"><span>📇</span> Contatos</button>
+    <button type="button" class="nav-btn" data-tab="manutencoes"><span>🔧</span> Manutenções <span class="nav-badge" id="badge-manut" style="display:none"></span></button>
     <button type="button" class="nav-btn" data-tab="faq"><span>❓</span> Perguntas Frequentes</button>
     <div class="sidebar-sep"></div>
     <span class="sidebar-label">Gestão anterior</span>
@@ -682,6 +683,14 @@
     </div>
 
     <!-- ════ PERGUNTAS FREQUENTES ════ -->
+    <div class="tab-pane" id="tab-manutencoes">
+      <div class="page-title">
+        <h2>🔧 Manutenções Preventivas</h2>
+        <p>Calculado automaticamente a partir das despesas lançadas · 🟢 em dia · 🟡 vence em até 30 dias · 🔴 atrasado</p>
+      </div>
+      <div id="manut-lista" class="manut-lista"></div>
+    </div>
+
     <div class="tab-pane" id="tab-faq">
       <div class="page-title">
         <h2 style="color:#dd6b20">❓ Perguntas Frequentes</h2>
@@ -798,5 +807,6 @@
 <script defer src="obras-relatorio.js"></script>
 <script defer src="carta-cobranca.js"></script>
 <script defer src="faq.js"></script>
+<script defer src="manutencoes.js"></script>
 </body>
 </html>

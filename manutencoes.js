@@ -5,10 +5,11 @@
 //   🟢 em dia (mais de 30 dias)  🟡 vence em até 30 dias  🔴 atrasado  ⚪ sem registro
 //
 // Para incluir um serviço, adicione uma linha em MANUT_REGRAS:
-//   nome, icone, meses (de quanto em quanto tempo repete), termos (palavras a procurar, sem acento)
+//   nome, icone, meses (de quanto em quanto tempo repete), termos (basta UMA aparecer, sem acento)
+//   e, se quiser, exige (TODAS precisam aparecer; serve para não confundir com outros serviços)
 
 const MANUT_REGRAS = [
-  { nome: 'Recarga de extintores', icone: '🧯', meses: 12, termos: ['extintor'] },
+  { nome: 'Recarga de extintores', icone: '🧯', meses: 12, termos: ['recarga'], exige: ['extintor'] },
   { nome: 'Desinsetização',        icone: '🐜', meses: 6,  termos: ['desinsetiz', 'dedetiz'] }
 ];
 const MANUT_AVISO_DIAS = 30;
@@ -38,6 +39,7 @@ function calcularManutencoes() {
     (dadosDespesas || []).forEach(d => {
       const txt = manutNorm(`${d.categoria} ${d.descricao} ${d.fornecedor}`);
       if (!regra.termos.some(t => txt.includes(t))) return;
+      if (regra.exige && !regra.exige.every(t => txt.includes(t))) return;
       const dt = manutData(d);
       if (dt && dt <= hoje && (!ult || dt > ult)) { ult = dt; desp = d; }
     });

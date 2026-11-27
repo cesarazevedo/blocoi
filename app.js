@@ -1594,8 +1594,15 @@ function mostrarIndicadorCache(sheets) {
     el.textContent = `dados de ${dia} ${hhmm}`;
     el.title = 'Dados em cache. Clique em Atualizar para recarregar.';
     el.style.display = 'inline';
+    const card = document.getElementById('caixa-consulta');
+    if (card) {
+      card.textContent = `🕒 Planilha consultada em ${dia} às ${hhmm}`;
+      card.style.display = 'block';
+    }
   } else {
     el.style.display = 'none';
+    const card = document.getElementById('caixa-consulta');
+    if (card) card.style.display = 'none';
   }
 }
 

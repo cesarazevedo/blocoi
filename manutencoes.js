@@ -9,8 +9,7 @@
 
 const MANUT_REGRAS = [
   { nome: 'Recarga de extintores', icone: '🧯', meses: 12, termos: ['extintor'] },
-  { nome: 'Desinsetização',        icone: '🐜', meses: 6,  termos: ['desinsetiz', 'dedetiz'] },
-  { nome: 'Reparo de telhado',     icone: '🏠', meses: 12, termos: ['telhado', 'telha'] }
+  { nome: 'Desinsetização',        icone: '🐜', meses: 6,  termos: ['desinsetiz', 'dedetiz'] }
 ];
 const MANUT_AVISO_DIAS = 30;
 

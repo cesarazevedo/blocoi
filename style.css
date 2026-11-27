@@ -210,7 +210,7 @@
     }
     .obras-num-input:focus { border-color: var(--c-obras); box-shadow: 0 0 0 3px rgba(162,155,254,.15); }
     .obras-calc-val { font-size: 0.95rem; font-weight: 700; width: 150px; text-align: right; }
-    .obras-sobra-label { font-weight: 600; color: var(--text); }
+    .obras-sobra-label { font-size: 0.82rem; flex: 1; font-weight: 600; color: var(--text); }
     .obras-sobra-val { font-size: 1.05rem; font-weight: 700; }
     .obras-tanks { display: flex; flex-wrap: wrap; gap: 20px; padding: 4px 0; }
     .obra-tank { display: flex; flex-direction: column; align-items: center; gap: 5px; min-width: 90px; }

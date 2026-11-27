@@ -29,7 +29,7 @@
   <p id="print-sub"></p>
 </div>
 <header class="top-header">
-  <button type="button" class="btn-menu" id="btn-menu" title="Menu">☰</button>
+  <button type="button" class="btn-menu" id="btn-menu" title="Menu" aria-label="Abrir menu">☰</button>
   <a class="brand" href="#">
     <div class="brand-icon">🏢</div>
     <div>
@@ -250,7 +250,7 @@
         </div>
       </div>
       <div class="filter-bar">
-        <select class="filter-select" id="fil-rec-mes">
+        <select class="filter-select" id="fil-rec-mes" aria-label="Filtrar receitas por mês">
           <option value="-1">Todos os meses</option>
           <option value="0">Janeiro</option><option value="1">Fevereiro</option>
           <option value="2">Março</option><option value="3">Abril</option>
@@ -259,7 +259,7 @@
           <option value="8">Setembro</option><option value="9">Outubro</option>
           <option value="10">Novembro</option><option value="11">Dezembro</option>
         </select>
-        <select class="filter-select" id="fil-rec-status">
+        <select class="filter-select" id="fil-rec-status" aria-label="Filtrar receitas por status">
           <option value="">Todos os status</option>
           <option value="pago">Pago</option>
           <option value="aberto">Em aberto</option>
@@ -308,7 +308,7 @@
         </div>
       </div>
       <div class="filter-bar">
-        <select class="filter-select" id="fil-desp-cat">
+        <select class="filter-select" id="fil-desp-cat" aria-label="Filtrar despesas por categoria">
           <option value="">Todas as categorias</option>
         </select>
         <select class="filter-select" id="fil-desp-status">
@@ -511,7 +511,7 @@
               <input type="number" id="obras-unidades" class="obras-num-input" min="0" step="1" placeholder="0">
             </div>
             <div class="obras-form-row">
-              <label style="color:var(--text-muted)">Receita mensal total</label>
+              <span style="font-size:0.82rem;color:var(--text-muted);flex:1">Receita mensal total</span>
               <span class="obras-calc-val trend-up" id="obras-receita-calc">R$ 0,00</span>
             </div>
             <hr style="border:none;border-top:1px solid var(--border);margin:4px 0">
@@ -520,7 +520,7 @@
               <input type="number" id="obras-despesa" class="obras-num-input" min="0" step="0.01" placeholder="0,00">
             </div>
             <div class="obras-form-row">
-              <label class="obras-sobra-label">Sobra mensal</label>
+              <span class="obras-sobra-label">Sobra mensal</span>
               <span class="obras-calc-val obras-sobra-val" id="obras-sobra-calc">R$ 0,00</span>
             </div>
             <hr style="border:none;border-top:1px solid var(--border);margin:4px 0">
@@ -634,7 +634,7 @@
           <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
             <div style="display:flex;align-items:center;gap:12px">
               <span style="font-size:1.5rem">📜</span>
-              <div style="font-size:1.1rem;font-weight:700;color:var(--text)">Regimento Interno</div>
+              <h2 style="font-size:1.1rem;font-weight:700;color:var(--text);margin:0">Regimento Interno</h2>
             </div>
             <button type="button" id="btn-regimento-pdf" class="btn-regimento-pdf">📄 Baixar versão em PDF</button>
           </div>
@@ -654,7 +654,7 @@
       <div class="card" style="margin-bottom:20px">
         <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
           <input id="contatos-busca" class="contatos-filtro" type="text" placeholder="Buscar por nome, cargo, empresa...">
-          <select id="contatos-cat" class="contatos-filtro contatos-filtro-cat">
+          <select id="contatos-cat" class="contatos-filtro contatos-filtro-cat" aria-label="Filtrar contatos por categoria">
             <option value="">Todas as categorias</option>
           </select>
         </div>
@@ -791,12 +791,12 @@
 
 </div>
 
-<script src="regimento.js"></script>
-<script src="app.js"></script>
-<script src="gestao-anterior.js"></script>
-<script src="analises.js"></script>
-<script src="obras-relatorio.js"></script>
-<script src="carta-cobranca.js"></script>
-<script src="faq.js"></script>
+<script defer src="regimento.js"></script>
+<script defer src="app.js"></script>
+<script defer src="gestao-anterior.js"></script>
+<script defer src="analises.js"></script>
+<script defer src="obras-relatorio.js"></script>
+<script defer src="carta-cobranca.js"></script>
+<script defer src="faq.js"></script>
 </body>
 </html>

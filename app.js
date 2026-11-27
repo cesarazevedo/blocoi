@@ -1509,6 +1509,7 @@ function renderTudo() {
   renderContatos();
   if (typeof renderResumoCompartilhar === 'function') renderResumoCompartilhar();
   if (typeof renderFaq === 'function') renderFaq();
+  if (typeof renderManutencoes === 'function') renderManutencoes();
 }
 
 // ── Saldo anterior (ano precedente completo) ──────────────────

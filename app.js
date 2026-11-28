@@ -1573,12 +1573,12 @@ function cacheSet(sheet, rows) {
   } catch(e) {}
 }
 
-function cacheGet(sheet) {
+function cacheGet(sheet, ignorarValidade = false) {
   try {
     const item = localStorage.getItem(cacheKey(sheet));
     if (!item) return null;
     const { ts, rows } = JSON.parse(item);
-    if (Date.now() - ts > CACHE_TTL) return null;
+    if (!ignorarValidade && Date.now() - ts > CACHE_TTL) return null;
     return rows;
   } catch(e) { return null; }
 }
@@ -1591,12 +1591,23 @@ function cacheTimestamp(sheet) {
   } catch(e) { return null; }
 }
 
+// Ao abrir o site, a primeira carga busca tudo direto na planilha (dados sempre atuais).
+// Depois disso, a cópia guardada vale por CACHE_TTL. Se a internet falhar, usa a última
+// cópia guardada, mesmo que antiga, para o site não ficar vazio.
+let primeiraCarga = true;
+
 async function fetchSheetCached(sheetName) {
-  const cached = cacheGet(sheetName);
+  const cached = primeiraCarga ? null : cacheGet(sheetName);
   if (cached) return cached;
-  const rows = await fetchSheet(sheetName);
-  cacheSet(sheetName, rows);
-  return rows;
+  try {
+    const rows = await fetchSheet(sheetName);
+    cacheSet(sheetName, rows);
+    return rows;
+  } catch (e) {
+    const antiga = cacheGet(sheetName, true);
+    if (antiga) return antiga;
+    throw e;
+  }
 }
 
 function mostrarIndicadorCache(sheets) {
@@ -1718,6 +1729,7 @@ async function carregar(forcarAtualizacao = false) {
     alert('Erro ao carregar dados: ' + e.message);
     console.error(e);
   }
+  primeiraCarga = false;
   document.getElementById('loading').classList.add('hidden');
 }
 

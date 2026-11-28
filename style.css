@@ -322,6 +322,9 @@
     .rec-grid .rg-tot { text-align: right; font-weight: 700; color: var(--c-receitas); font-variant-numeric: tabular-nums; padding: 8px 10px; }
     .rec-grid .rg-un { position: sticky; left: 0; z-index: 1; background: var(--surface); min-width: 64px; }
     .rec-grid tfoot td { background: var(--surface); }
+    .rec-grid .rg-aberto { background: rgba(229,62,62,.16); color: #e53e3e; font-weight: 700; }
+    .inad-grid .rg-c { min-width: 54px; }
+    .inad-grid .rg-pago { color: #38a169; font-weight: 700; }
 
     /* ── Pills ── */
     .pill { display: inline-flex; align-items: center; gap: 4px; font-size: 0.7rem; font-weight: 600; border-radius: 50px; padding: 2px 8px; }

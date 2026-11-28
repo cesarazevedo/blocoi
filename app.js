@@ -1563,7 +1563,7 @@ async function carregarAnosAnteriores(ano, forcar) {
 }
 
 // ── Cache localStorage ────────────────────────────────────────
-const CACHE_TTL = 30 * 60 * 1000; // 30 minutos
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutos (igual ao auto-refresh do topo)
 
 function cacheKey(sheet) { return `condo_cache_v3_${SHEET_ID}_${sheet}`; }
 

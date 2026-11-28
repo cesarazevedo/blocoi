@@ -67,6 +67,26 @@ function filtrarFaq() {
     </details>`).join('');
 }
 
+// Abre/fecha a resposta deslizando (o <details> sozinho só "pisca")
+document.getElementById('faq-lista')?.addEventListener('click', e => {
+  const sum = e.target.closest('.faq-item > summary');
+  if (!sum) return;
+  const item = sum.parentElement;
+  const resp = item.querySelector('.faq-a');
+  if (!resp || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  e.preventDefault();
+  if (item.dataset.animando) return;
+  item.dataset.animando = '1';
+  const abrir = !item.open;
+  if (abrir) item.open = true;
+  const altura = resp.scrollHeight;
+  const anim = resp.animate(
+    [{ height: abrir ? '0px' : altura + 'px', opacity: abrir ? 0 : 1 },
+     { height: abrir ? altura + 'px' : '0px', opacity: abrir ? 1 : 0 }],
+    { duration: 250, easing: 'ease-out' });
+  anim.onfinish = () => { if (!abrir) item.open = false; delete item.dataset.animando; };
+});
+
 document.getElementById('faq-ir-contatos')?.addEventListener('click', () => {
   document.querySelector('[data-tab="contatos"]')?.click();
 });

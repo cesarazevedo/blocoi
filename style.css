@@ -599,3 +599,11 @@
     .manut-status { font-size: 0.88rem; }
     .manut-datas { margin-top: 6px; font-size: 0.85rem; color: var(--text-muted); }
     .manut-origem { margin-top: 4px; font-size: 0.78rem; color: var(--text-muted); }
+    .pend-titulo { margin: 18px 0 4px; font-size: 1.05rem; color: var(--text); }
+    .pend-sub { margin: 0 0 10px; }
+    .pend-suspenso { border-left-color: #e53e3e; }
+    .pend-andamento { border-left-color: #d69e2e; }
+    .pend-resolvido { border-left-color: #38a169; opacity: 0.85; }
+    .pend-resolvidas { max-width: 800px; }
+    .pend-resolvidas summary { cursor: pointer; font-size: 0.88rem; color: var(--text-muted); margin-bottom: 10px; }
+    .pend-resolvidas .manut-card { margin-bottom: 12px; }

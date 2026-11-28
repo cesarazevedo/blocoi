@@ -470,17 +470,34 @@ function renderInadimplencia() {
   set('kpi-inad-ok-sub', `em dia até ${MESES[mesSel]}`);
   set('badge-inad', inadimpl.length);
 
+  // Grade Unidade × Mês (como em Receitas): ✓ pago · "aberto" vencido e não pago · isento · vazio = ainda não venceu
   const tb = document.getElementById('tbody-inad');
+  const thead = document.getElementById('thead-inad');
+  const temAntigos = inadimpl.some(r => r.mesesAbertos.some(m => m.mes.includes('/')));
+  const colspan = 15 + (temAntigos ? 1 : 0);
+  thead.innerHTML = `<tr><th class="rg-un">Unidade</th>${temAntigos ? '<th class="rg-c" title="Meses em aberto de anos anteriores">Anos ant.</th>' : ''}${MESES.map((m, i) =>
+    `<th class="rg-c${i === mesSel ? ' rg-atual' : ''}">${m}</th>`).join('')}<th class="rg-c">Nº meses</th><th>Carta</th></tr>`;
   if (inadimpl.length === 0) {
-    tb.innerHTML = `<tr class="empty-row"><td colspan="4">Nenhuma unidade inadimplente neste período 🎉</td></tr>`;
+    tb.innerHTML = `<tr class="empty-row"><td colspan="${colspan}">Nenhuma unidade inadimplente neste período 🎉</td></tr>`;
     return;
   }
   tb.innerHTML = inadimpl.map(r => {
-    const n = r.mesesAbertos.length;
+    const rec = dadosReceitas.find(x => x.unidade === r.unidade);
+    const abertos = new Set(r.mesesAbertos.filter(m => !m.mes.includes('/')).map(m => m.idx));
+    const antigos = r.mesesAbertos.filter(m => m.mes.includes('/')).map(m => m.mes);
+    const colAnt = temAntigos
+      ? `<td class="rg-c${antigos.length ? ' rg-aberto' : ''}" title="${escHtml(antigos.join(', '))}">${antigos.length ? antigos.length + (antigos.length > 1 ? ' meses' : ' mês') : ''}</td>`
+      : '';
+    const cels = MESES.map((m, mi) => {
+      const atual = mi === mesSel ? ' rg-atual' : '';
+      if (abertos.has(mi)) return `<td class="rg-c rg-aberto${atual}" title="${m}: em aberto">aberto</td>`;
+      if (mi > mesSel || !mesVencido(mi, anoSel)) return `<td class="rg-c${atual}"></td>`;
+      if (rec && rec.isentos && rec.isentos[mi]) return `<td class="rg-c rg-isento${atual}" title="Isento">isento</td>`;
+      return `<td class="rg-c rg-pago${atual}" title="${m}: pago">✓</td>`;
+    }).join('');
     return `<tr>
-      <td><strong>${nomUnidade(r.unidade)}</strong></td>
-      <td>${r.mesesAbertos.map(m=>m.mes).join(', ')}</td>
-      <td>${n}</td>
+      <td class="rg-un"><strong>${nomUnidade(r.unidade)}</strong></td>${colAnt}${cels}
+      <td class="rg-c"><strong>${r.mesesAbertos.length}</strong></td>
       <td><button class="btn-icon" type="button" data-carta="${r.unidade}" title="Gerar carta de cobrança em PDF" style="width:auto;padding:4px 10px;font-size:.8rem">📄 Gerar carta</button></td>
     </tr>`;
   }).join('');

@@ -14,6 +14,46 @@ const MANUT_REGRAS = [
 ];
 const MANUT_AVISO_DIAS = 30;
 
+// ── Pendências (aba "Pendencias" da planilha) ─────────────────
+// Colunas: Data | Serviço | Situação | Motivo | Próximo passo | Previsão
+// Situação: Suspenso, Em andamento ou Resolvido. Resolvidos ficam como histórico.
+let dadosPendencias = [];
+
+function parsePendencias(rows) {
+  return (rows || []).slice(1).filter(r => (r[1] || '').trim()).map(r => {
+    const sit = manutNorm(r[2]).trim();
+    const status = sit.startsWith('resolv') ? 'resolvido' : sit.startsWith('em and') ? 'andamento' : 'suspenso';
+    const p = String(r[0] || '').trim().split('/');
+    const dt = p.length === 3 ? new Date(+p[2], +p[1] - 1, +p[0]) : null;
+    return { data: (r[0] || '').trim(), dt: dt && !isNaN(dt) ? dt : null, servico: r[1].trim(), situacao: (r[2] || '').trim(),
+             motivo: (r[3] || '').trim(), passo: (r[4] || '').trim(), previsao: (r[5] || '').trim(), status };
+  });
+}
+
+function renderPendencias() {
+  const box = document.getElementById('pend-lista');
+  if (!box) return 0;
+  const hoje = new Date(); hoje.setHours(0, 0, 0, 0);
+  const ordem = { suspenso: 0, andamento: 1, resolvido: 2 };
+  const itens = [...dadosPendencias].sort((a, b) => ordem[a.status] - ordem[b.status] || (a.dt || 0) - (b.dt || 0));
+  const abertas = itens.filter(i => i.status !== 'resolvido');
+  const resolvidas = itens.filter(i => i.status === 'resolvido');
+  const selo = { suspenso: '🔴 Suspenso', andamento: '🟡 Em andamento', resolvido: '✅ Resolvido' };
+  const card = i => {
+    const dias = i.dt ? Math.max(0, Math.round((hoje - i.dt) / 86400000)) : null;
+    const reg = i.data ? `Registrado em ${escHtml(i.data)}${dias !== null && i.status !== 'resolvido' ? ` (há ${dias} dia${dias === 1 ? '' : 's'})` : ''}` : '';
+    const extra = [i.passo && `Próximo passo: ${escHtml(i.passo)}`, i.previsao && `Previsão: ${escHtml(i.previsao)}`].filter(Boolean).join(' &nbsp;|&nbsp; ');
+    return `<div class="card manut-card pend-${i.status}">
+      <div class="manut-topo"><span class="manut-nome">${escHtml(i.servico)}</span><span class="manut-status">${selo[i.status]}</span></div>
+      ${i.motivo ? `<div class="manut-datas">Motivo: ${escHtml(i.motivo)}</div>` : ''}
+      ${extra ? `<div class="manut-datas">${extra}</div>` : ''}
+      ${reg ? `<div class="manut-origem">${reg}</div>` : ''}</div>`;
+  };
+  box.innerHTML = (abertas.length ? abertas.map(card).join('') : '<p class="manut-origem">Nenhuma pendência no momento. 👍</p>') +
+    (resolvidas.length ? `<details class="pend-resolvidas"><summary>Já resolvidas (${resolvidas.length})</summary>${resolvidas.map(card).join('')}</details>` : '');
+  return abertas.length;
+}
+
 const manutNorm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
 
 function manutData(d) {
@@ -74,7 +114,7 @@ function renderManutencoes() {
         <span class="manut-status">${bolinha} ${texto}</span></div>
       <div class="manut-datas">${datas} &nbsp;|&nbsp; Repete a cada ${i.regra.meses} meses</div>${origem}</div>`;
   }).join('');
-  const aten = itens.filter(i => i.status === 'atrasado' || i.status === 'breve').length;
+  const aten = itens.filter(i => i.status === 'atrasado' || i.status === 'breve').length + renderPendencias();
   set('badge-manut', aten || '');
   const b = document.getElementById('badge-manut');
   if (b) b.style.display = aten ? '' : 'none';

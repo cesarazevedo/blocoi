@@ -1670,18 +1670,19 @@ function filtrarContatos() {
 }
 
 async function carregar(forcarAtualizacao = false) {
-  const sheets = [`Receitas ${anoSel}`, 'Despesas', 'Config', 'Comunicados', 'Contatos', 'FAQ'];
+  const sheets = [`Receitas ${anoSel}`, 'Despesas', 'Config', 'Comunicados', 'Contatos', 'FAQ', 'Pendencias'];
   if (forcarAtualizacao) sheets.forEach(s => localStorage.removeItem(cacheKey(s)));
 
   document.getElementById('loading').classList.remove('hidden');
   try {
-    const [rowsR, rowsD, rowsC, rowsComm, rowsCont, rowsFaq] = await Promise.all([
+    const [rowsR, rowsD, rowsC, rowsComm, rowsCont, rowsFaq, rowsPend] = await Promise.all([
       fetchSheetCached(`Receitas ${anoSel}`),
       fetchSheetCached('Despesas'),
       fetchSheetCached('Config').catch(() => []),
       fetchSheetCached('Comunicados').catch(() => []),
       fetchSheetCached('Contatos').catch(() => []),
-      fetchSheetCached('FAQ').catch(() => [])
+      fetchSheetCached('FAQ').catch(() => []),
+      fetchSheetCached('Pendencias').catch(() => [])
     ]);
     const isentosMap = parseConfig(rowsC);
     dadosReceitas = parseReceitas(rowsR, isentosMap);
@@ -1689,6 +1690,7 @@ async function carregar(forcarAtualizacao = false) {
     dadosComunicados = parseComunicados(rowsComm);
     dadosContatos = parseContatos(rowsCont);
     if (typeof parseFaq === 'function') dadosFaq = parseFaq(rowsFaq);
+    if (typeof parsePendencias === 'function') dadosPendencias = parsePendencias(rowsPend);
     await calcularSaldoAnterior(anoSel);
     await carregarAnosAnteriores(anoSel, forcarAtualizacao);
     buildMapaUnidades();

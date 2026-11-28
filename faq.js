@@ -79,12 +79,14 @@ document.getElementById('faq-lista')?.addEventListener('click', e => {
   item.dataset.animando = '1';
   const abrir = !item.open;
   if (abrir) item.open = true;
-  const altura = resp.scrollHeight;
-  const anim = resp.animate(
-    [{ height: abrir ? '0px' : altura + 'px', opacity: abrir ? 0 : 1 },
-     { height: abrir ? altura + 'px' : '0px', opacity: abrir ? 1 : 0 }],
-    { duration: 250, easing: 'ease-out' });
-  anim.onfinish = () => { if (!abrir) item.open = false; delete item.dataset.animando; };
+  // Anima altura E espaço interno juntos: com só a altura, o padding segura a
+  // caixa parada no começo (parece uma "travada").
+  const cs = getComputedStyle(resp);
+  const aberto = { height: resp.scrollHeight + 'px', paddingTop: cs.paddingTop, paddingBottom: cs.paddingBottom, opacity: 1 };
+  const fechado = { height: '0px', paddingTop: '0px', paddingBottom: '0px', opacity: 0 };
+  const anim = resp.animate(abrir ? [fechado, aberto] : [aberto, fechado],
+    { duration: 300, easing: 'cubic-bezier(.25, .8, .25, 1)', fill: 'forwards' });
+  anim.onfinish = () => { if (!abrir) item.open = false; anim.cancel(); delete item.dataset.animando; };
 });
 
 document.getElementById('faq-ir-contatos')?.addEventListener('click', () => {

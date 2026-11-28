@@ -195,8 +195,7 @@
     .faq-item summary:focus-visible { outline-offset: -3px; border-radius: var(--radius); }
     .faq-item summary::after { content: '＋'; color: #dd6b20; font-weight: 700; flex-shrink: 0; order: 3; transition: transform .25s ease; }
     .faq-item[open] summary::after { transform: rotate(45deg); }
-    .faq-item[open] summary { border-bottom: 1px solid var(--border); }
-    .faq-a { overflow: hidden; }
+    .faq-a { overflow: hidden; border-top: 1px solid var(--border); }
     @media (prefers-reduced-motion: reduce) { .faq-item summary::after { transition: none; } }
     .faq-q { font-weight: 600; font-size: 0.92rem; color: var(--text); flex: 1; }
     .faq-cat { font-size: 0.7rem; font-weight: 600; padding: 2px 9px; border-radius: 20px; background: rgba(221,107,32,.12); color: #dd6b20; white-space: nowrap; }
